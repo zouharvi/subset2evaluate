@@ -1,6 +1,7 @@
 # added by zouharvi
 data/
-figures/
+figures-v1
+figures-v2
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

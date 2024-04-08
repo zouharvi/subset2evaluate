@@ -58,6 +58,6 @@ ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y)
 ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y))) 
 
 plt.tight_layout(pad=0.1)
-plt.savefig("figures/metric_magnitude.png", dpi=200)
-plt.savefig("figures/metric_magnitude.pdf")
+plt.savefig("figures-v1metric_magnitude.png", dpi=200)
+plt.savefig("figures-v1metric_magnitude.pdf")
 plt.show()
