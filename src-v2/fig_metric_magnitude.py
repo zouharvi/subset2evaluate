@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import tqdm
 
-data_old = utils.load_data(langs="cs-uk")
+data_old = utils.load_data(langs="de-en")
 
 utils.matplotlib_default()
 plt.figure(figsize=(3, 2))
@@ -19,7 +19,7 @@ data_old.sort(key=lambda line: np.average([sys_v["COMET"] for sys_v in line["met
 #     )[0,1]
 # )
 
-for prop in tqdm.tqdm(np.linspace(0.01, 1, 50)):
+for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
 
     # taking lines with the lowest metric score
@@ -29,11 +29,11 @@ plt.scatter(
     points_x, points_y,
     marker="o", s=10, label="From lowest"
 )
-print(f"Average from lowest  {np.average(points_y):.0%}")
+print(f"Average from lowest  {np.average(points_y):.2%}")
 
 points_x = []
 points_y = []
-for prop in tqdm.tqdm(np.linspace(0.01, 1, 100)):
+for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
 
     if prop == 0.0:
@@ -46,7 +46,7 @@ plt.scatter(
     points_x, points_y,
     marker="o", s=10, label="From highest"
 )
-print(f"Average from highest {np.average(points_y):.0%}")
+print(f"Average from highest {np.average(points_y):.2%}")
 
 
 plt.ylabel("Sys. rank accuracy" + " "*5, labelpad=-5)

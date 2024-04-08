@@ -1,3 +1,5 @@
+PROPS = [x/100 for x in range(10, 100, 10)]
+
 def load_data(year="wmt23", langs="en-de"):
     import glob
     import collections
@@ -28,18 +30,21 @@ def load_data(year="wmt23", langs="en-de"):
 
     # putting it all together
     data = []
+    line_id_true = 0
     for line_i, (line_src, line_ref) in enumerate(zip(line_src, line_ref)):
         # filter None on the whole row
         if any([line_score[sys][line_i]["score"] == "None" for sys in systems]):
             continue
 
         data.append({
+            "i": line_id_true,
             "src": line_src.strip(),
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
             "score": {sys: float(line_score[sys][line_i].pop("score")) for sys in systems},
             "metrics": {sys: line_score[sys][line_i] for sys in systems},
         })
+        line_id_true += 1
 
     print("Loaded", len(data), "lines of", len(systems), "systems")
     return data
