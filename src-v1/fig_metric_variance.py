@@ -14,7 +14,7 @@ points_y = []
 # higher density at the beginning because there are higher changes in y
 PROPS = np.concatenate([np.linspace(0, 0.04, 35), np.linspace(0.04, 1, 65)])
 
-data_old.sort(key=lambda line: np.corrcoef([sys_v["metrics"]["metric_COMET"] for sys_v in line.values()], [sys_v["metrics"]["metric_SacreBLEU_bleu"] for sys_v in line.values()])[0,1])
+data_old.sort(key=lambda line: np.var([sys_v["metrics"]["metric_COMET"] for sys_v in line.values()]))
 for prop in tqdm.tqdm(PROPS):
     points_x.append(prop)
 
@@ -49,7 +49,7 @@ plt.scatter(
 plt.ylabel("Sys. rank accuracy" + " "*5, labelpad=-5)
 plt.xlabel("Proportion of original data", labelpad=-2)
 
-plt.legend(frameon=False)
+plt.legend(frameon=False);
 
 ax = plt.gca()
 ax.spines[['top', 'right']].set_visible(False)
@@ -57,6 +57,6 @@ ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y)
 ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y))) 
 
 plt.tight_layout(pad=0.1)
-plt.savefig("figures/metric_disagree.png", dpi=200)
-plt.savefig("figures/metric_disagree.pdf")
+plt.savefig("figures-v1metric_variance.png", dpi=200)
+plt.savefig("figures-v1metric_variance.pdf")
 plt.show()
