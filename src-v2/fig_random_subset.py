@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import tqdm
 
-data_old = utils.load_data(langs="de-en")
+data_old = utils.load_data(langs="cs-uk")
 
 utils.matplotlib_default()
 plt.figure(figsize=(3, 2))
@@ -22,7 +22,7 @@ for prop in tqdm.tqdm(utils.PROPS):
         points_y_local.append(utils.eval_data_pairs(data_new, data_old))
 
     points_y.append(np.average(points_y_local))
-
+    
 print(f"Average  {np.average(points_y):.2%}")
 
 
