@@ -10,12 +10,12 @@ from sklearn.preprocessing import StandardScaler
 def featurize(line):
     return np.array(
         [
-            # np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]),
-            np.average([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]),
-            # np.var([sys_v["COMET"] for sys_v in line["metrics"].values()]),
+            np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]),
+            # np.average([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]),
+            np.var([sys_v["COMET"] for sys_v in line["metrics"].values()]),
             # np.var([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]),
-            # len(line["src"]),
-            # len(line["ref"]),
+            len(line["src"]),
+            len(line["ref"]),
         ]
     )
 
@@ -24,7 +24,7 @@ def l2_dist(a, b):
     return np.linalg.norm(a - b)
 
 
-data_old = utils.load_data(langs="de-en")
+data_old = utils.load_data()
 data_old_vec = StandardScaler().fit_transform([featurize(line) for line in data_old])
 for line, line_feat in zip(data_old, data_old_vec):
     line["feat"] = line_feat

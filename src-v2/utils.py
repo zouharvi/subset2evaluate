@@ -1,6 +1,6 @@
-PROPS = [x/100 for x in range(10, 100, 10)]
+PROPS = [x/100 for x in range(10, 80+1, 10)]
 
-def load_data(year="wmt23", langs="en-de"):
+def load_data(year="wmt23", langs="en-cs"):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
@@ -61,7 +61,7 @@ def matplotlib_default():
     import matplotlib.pyplot as plt
     mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=COLORS)
 
-def get_ordering(data_new: list, metric="score"):
+def get_sys_absolute(data_new, metric="score"):
     import collections
     import numpy as np
 
@@ -81,39 +81,33 @@ def get_ordering(data_new: list, metric="score"):
         sys: np.average(scores_new[sys])
         for sys in systems
     }
-    scores_new = list(scores_new.items())
-    scores_new.sort(key=lambda x: x[1], reverse=True)
-    out = {}
-    for sys_i, (sys, sys_v) in enumerate(scores_new):
-        out[sys] = sys_i
+
+    return scores_new
+
+def get_sys_ordering(data_new: list, metric="score"):
+    scores_new = get_sys_absolute(data_new, metric)
     
-    return out
+    # sort to get ordering
+    scores_new = list(scores_new.items())
+    # sort from highest
+    scores_new.sort(key=lambda x: x[1], reverse=True)
+    
+    sys_ord = {
+        sys: sys_i
+        for sys_i, (sys, sys_v) in enumerate(scores_new)
+    }
+
+    return sys_ord
 
 
 def eval_data_pairs(data_new: list, data_old: list):
     import itertools
-    import collections
     import numpy as np
-
-    scores_old = collections.defaultdict(list)
-    scores_new = collections.defaultdict(list)
-    for line in data_old:
-        for sys, sys_v in line["score"].items():
-            scores_old[sys].append(sys_v)
-    for line in data_new:
-        for sys, sys_v in line["score"].items():
-            scores_new[sys].append(sys_v)
-
+    
     systems = list(data_old[0]["score"].keys())
 
-    scores_old = {
-        sys: np.average(scores_old[sys])
-        for sys in systems
-    }
-    scores_new = {
-        sys: np.average(scores_new[sys])
-        for sys in systems
-    }
+    scores_old = get_sys_absolute(data_old)
+    scores_new = get_sys_absolute(data_new)
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):

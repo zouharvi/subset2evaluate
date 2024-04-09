@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import tqdm
 
-data_old = utils.load_data(langs="cs-uk")
+data_old = utils.load_data()
 for line in data_old:
     # TODO: also try with oracle?
-    line["ord"] = utils.get_ordering([line], metric="MetricX-23")
+    line["ord"] = utils.get_sys_ordering([line], metric="MetricX-23-c")
 
 def ord_distance(ord_a: dict, ord_b: dict):
     return np.average([
-        np.abs(ord_a[sys]-ord_b[sys])
-        # np.square(ord_a[sys]-ord_b[sys])
+        # np.abs(ord_a[sys]-ord_b[sys])
+        np.square(ord_a[sys]-ord_b[sys])
         for sys in ord_a.keys()
     ])
 
@@ -35,8 +35,10 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_old_local = [x for x in data_old_local if x["i"] not in data_new_set_i]
 
         while len(data_new) < int(len(data_old)*prop):
-            cur_ord = utils.get_ordering(data_new, metric="score")
-            # print(cur_ord)
+            # this is for purely active learning
+            # cur_ord = utils.get_sys_ordering(data_new, metric="score")
+            # this is true apriori subset selection
+            cur_ord = utils.get_sys_ordering(data_new, metric="COMET")
 
             # TODO: min doesn't make sense here, right?
             # TODO: try both min and max
