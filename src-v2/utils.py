@@ -85,6 +85,29 @@ def get_sys_absolute(data_new, metric="score"):
 
     return scores_new
 
+def get_sys_absolute_but_rank(data_new, metric="score"):
+    raise Exception("Deprecated")
+    import collections
+    import numpy as np
+
+    scores_new = collections.defaultdict(list)
+
+    systems = list(data_new[0]["score"].keys())
+    if metric == "score":
+        for line in data_new:
+            scores = sorted(list(line["score"].items()), key=lambda x: x[1])
+            for sys_rank, (sys, sys_v) in enumerate(scores):
+                scores_new[sys].append(sys_rank)
+    else:
+        raise NotImplementedError()
+
+    scores_new = {
+        sys: np.average(scores_new[sys])
+        for sys in systems
+    }
+
+    return scores_new
+
 def get_sys_ordering(data_new: list, metric="score"):
     scores_new = get_sys_absolute(data_new, metric)
     
