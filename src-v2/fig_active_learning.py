@@ -13,8 +13,8 @@ for line in data_old:
 
 def ord_distance(ord_a: dict, ord_b: dict):
     return np.average([
-        # np.abs(ord_a[sys]-ord_b[sys])
-        np.square(ord_a[sys]-ord_b[sys])
+        np.abs(ord_a[sys]-ord_b[sys])
+        # np.square(ord_a[sys]-ord_b[sys])
         for sys in ord_a.keys()
     ])
 

@@ -1,4 +1,4 @@
-PROPS = [x/100 for x in range(10, 80+1, 10)]
+PROPS = [x/100 for x in range(10, 90+1, 10)]
 
 def load_data(year="wmt23", langs="en-cs"):
     import glob
