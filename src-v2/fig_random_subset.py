@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import tqdm
 
-data_old = utils.load_data(langs="cs-uk")
+data_old = utils.load_data()
 
 utils.matplotlib_default()
 plt.figure(figsize=(3, 2))
@@ -17,7 +17,7 @@ for prop in tqdm.tqdm(utils.PROPS):
 
     points_y_local = []
     # repeat each sampling 10 times to smooth it out
-    for _ in range(10):
+    for _ in range(100):
         data_new = random.sample(data_old, k=int(len(data_old)*prop))
         points_y_local.append(utils.eval_data_pairs(data_new, data_old))
 

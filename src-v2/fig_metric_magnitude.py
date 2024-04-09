@@ -4,18 +4,24 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import tqdm
 
-data_old = utils.load_data(langs="de-en")
+data_old = utils.load_data()
 
 utils.matplotlib_default()
 plt.figure(figsize=(3, 2))
 points_x = []
 points_y = []
 
-# np.max is ok?
-data_old.sort(key=lambda line: np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]))
+# mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
+
+# np.max is also good
+data_old.sort(key=lambda line: np.average([sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]))
+# data_old.sort(key=lambda line: np.std([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]))
+# data_old.sort(key=lambda line: np.average(list(line["score"].values())))
+# data_old.sort(key=lambda line: np.std(list(line["score"].values())))
+# data_old.sort(key=lambda line: max(line["score"].values())-min(line["score"].values()))
 # data_old.sort(key=lambda line: np.corrcoef(
 #     [sys_v["COMET"] for sys_v in line["metrics"].values()],
-#     [sys_v["MetricX-23"] for sys_v in line["metrics"].values()]
+#     [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
 #     )[0,1]
 # )
 
@@ -36,11 +42,8 @@ points_y = []
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
 
-    if prop == 0.0:
-        points_y.append(0.5)
-    else:
-        # taking lines with the highest metric score
-        points_y.append(utils.eval_data_pairs(data_old[-int(len(data_old)*prop):], data_old))
+    # taking lines with the highest metric score
+    points_y.append(utils.eval_data_pairs(data_old[-int(len(data_old)*prop):], data_old))
 
 plt.scatter(
     points_x, points_y,

@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 def featurize(line):
     return np.array(
         [
-            # np.max([sys_v["COMET"] for sys_v in line["metrics"].values()]),
+            np.max([sys_v["COMET"] for sys_v in line["metrics"].values()]),
             # np.corrcoef(
             #     [sys_v["COMET"] for sys_v in line["metrics"].values()],
             #     [sys_v["MetricX-23"] for sys_v in line["metrics"].values()]
@@ -25,12 +25,11 @@ def featurize(line):
         ]
     )
 
-
 def l2_dist(a, b):
     return np.linalg.norm(a - b)
 
 
-data_old = utils.load_data(langs="de-en")
+data_old = utils.load_data()
 data_old_vec = StandardScaler().fit_transform([featurize(line) for line in data_old])
 for line, line_feat in zip(data_old, data_old_vec):
     line["feat"] = line_feat
@@ -49,14 +48,14 @@ for prop in tqdm.tqdm(utils.PROPS):
     points_y_local = []
     # repeat each sampling 10 times to smooth it out
     for _ in range(10):
-        cluster_prototypes = random.sample(data_old, k=int(len(data_old) * prop))
+        data_prototypes = random.sample(data_old, k=int(len(data_old) * prop))
 
         data_new = []
-        for cluster_prototype in cluster_prototypes:
-            # find cluster prototypical example
+        for line in data_old:
+            # find nearest prototypical example
             data_new.append(
                 min(
-                    data_old, key=lambda x: l2_dist(cluster_prototype["feat"], x["feat"])
+                    data_prototypes, key=lambda x: l2_dist(line["feat"], x["feat"])
                 )
             )
 
