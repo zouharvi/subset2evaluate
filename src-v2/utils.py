@@ -33,7 +33,8 @@ def load_data(year="wmt23", langs="en-cs"):
     line_id_true = 0
     for line_i, (line_src, line_ref) in enumerate(zip(line_src, line_ref)):
         # filter None on the whole row
-        if any([line_score[sys][line_i]["score"] == "None" for sys in systems]):
+        # if any([line_score[sys][line_i]["score"] in {"None", "0"} for sys in systems]):
+        if any([line_score[sys][line_i]["score"] in {"None"} for sys in systems]):
             continue
 
         data.append({
