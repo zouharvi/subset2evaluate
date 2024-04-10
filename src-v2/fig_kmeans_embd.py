@@ -1,7 +1,5 @@
 import utils
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import tqdm
 import random
 from sentence_transformers import SentenceTransformer
@@ -21,9 +19,6 @@ for line in tqdm.tqdm(data_old):
 # for line in tqdm.tqdm(data_old):
 #     line["feat"] = np.average(model.encode(list(line["tgt"].values())), axis=0)
 
-
-utils.matplotlib_default()
-plt.figure(figsize=(3, 2))
 points_x = []
 points_y = []
 
@@ -51,24 +46,4 @@ for prop in tqdm.tqdm(utils.PROPS):
 
 print(f"Average  {np.average(points_y):.2%}")
 
-
-plt.scatter(
-    points_x,
-    points_y,
-    marker="o",
-    s=10,
-    color="black",
-)
-plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
-plt.xlabel("Proportion of original data", labelpad=-2)
-
-ax = plt.gca()
-ax.spines[['top', 'right']].set_visible(False)
-ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-
-plt.ylim(0.7, 1)
-plt.tight_layout(pad=0.1)
-plt.savefig("figures-v2/kmeans_fake.png", dpi=200)
-plt.savefig("figures-v2/kmeans_fake.pdf")
-plt.show()
+utils.plot_single(points_x, points_y, "kmeans_embd")

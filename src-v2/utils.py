@@ -4,6 +4,7 @@ def load_data(year="wmt23", langs="en-cs"):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
+    line_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
     line_ref = open(f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt", "r").readlines()
     line_sys = {}
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
@@ -31,17 +32,20 @@ def load_data(year="wmt23", langs="en-cs"):
     # putting it all together
     data = []
     line_id_true = 0
-    for line_i, (line_src, line_ref) in enumerate(zip(line_src, line_ref)):
+    for line_i, (line_src, line_ref, line_doc) in enumerate(zip(line_src, line_ref, line_doc)):
         # filter None on the whole row
-        # if any([line_score[sys][line_i]["score"] in {"None", "0"} for sys in systems]):
-        if any([line_score[sys][line_i]["score"] in {"None"} for sys in systems]):
+        if any([line_score[sys][line_i]["score"] in {"None", "0"} for sys in systems]):
+        # if any([line_score[sys][line_i]["score"] in {"None"} for sys in systems]):
             continue
+
+        line_domain, line_doc = line_doc.strip().split("\t")
 
         data.append({
             "i": line_id_true,
             "src": line_src.strip(),
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
+            "domain": line_domain,
             "score": {sys: float(line_score[sys][line_i].pop("score")) for sys in systems},
             "metrics": {sys: line_score[sys][line_i] for sys in systems},
         })
@@ -61,6 +65,33 @@ def matplotlib_default():
     import matplotlib as mpl
     import matplotlib.pyplot as plt
     mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=COLORS)
+
+def plot_single(points_x, points_y, name):
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as mtick
+    matplotlib_default()
+    plt.figure(figsize=(3, 2))
+
+    plt.scatter(
+        points_x,
+        points_y,
+        marker="o",
+        s=10,
+        color="black",
+    )
+    plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
+    plt.xlabel("Proportion of original data", labelpad=-2)
+
+    ax = plt.gca()
+    ax.spines[['top', 'right']].set_visible(False)
+    ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+    plt.ylim(0.7, 1)
+    plt.tight_layout(pad=0.1)
+    plt.savefig(f"figures-v2/{name}.png", dpi=200)
+    plt.savefig(f"figures-v2/{name}.pdf")
+    plt.show()
 
 def get_sys_absolute(data_new, metric="score"):
     import collections

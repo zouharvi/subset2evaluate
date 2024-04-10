@@ -1,16 +1,11 @@
 import utils
 import random
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import tqdm
 import collections
-import typing
 
 data_old = utils.load_data()
 
-utils.matplotlib_default()
-plt.figure(figsize=(3, 2))
 points_x = []
 points_y = []
 
@@ -42,21 +37,4 @@ for prop in tqdm.tqdm(utils.PROPS):
     
 print(f"Average  {np.average(points_y):.2%}")
 
-
-plt.scatter(
-    points_x, points_y,
-    marker="o", s=10, color="black",
-)
-plt.ylabel("Sys. rank accuracy" + " "*5, labelpad=-5)
-plt.xlabel("Proportion of original data", labelpad=-2)
-
-ax = plt.gca()
-ax.spines[['top', 'right']].set_visible(False)
-ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y))) 
-ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: '{:.0%}'.format(y))) 
-
-plt.ylim(0.7, 1)
-plt.tight_layout(pad=0.1)
-plt.savefig("figures-v2/stable_subset.png", dpi=200)
-plt.savefig("figures-v2/stable_subset.pdf")
-plt.show()
+utils.plot_single(points_x, points_y, "stable_subset")

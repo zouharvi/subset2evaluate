@@ -2,32 +2,9 @@ import utils
 import numpy as np
 import tqdm
 import random
-from sklearn.preprocessing import StandardScaler
-
-
-def featurize(line):
-    # human oracle
-    # scores = np.array(list(line["score"].values()))
-    # val_median = np.median(scores)
-    # return np.abs(scores-val_median)
-    
-    return np.array(
-        [
-            np.max([sys_v["COMET"] for sys_v in line["metrics"].values()]),
-            len(line["src"]),
-            len(line["ref"]),
-        ]
-    )
-
-def l2_dist(a, b):
-    return np.linalg.norm(a - b)
 
 
 data_old = utils.load_data()
-data_old_vec = StandardScaler().fit_transform([featurize(line) for line in data_old])
-for line, line_feat in zip(data_old, data_old_vec):
-    line["feat"] = line_feat
-del data_old_vec
 
 points_x = []
 points_y = []
@@ -56,5 +33,4 @@ for prop in tqdm.tqdm(utils.PROPS):
     points_y.append(np.average(points_y_local))
 
 print(f"Average  {np.average(points_y):.2%}")
-
-utils.plot_single(points_x, points_y, "kmeans")
+utils.plot_single(points_x, points_y, "domain")

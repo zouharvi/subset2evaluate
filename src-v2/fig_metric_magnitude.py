@@ -20,11 +20,11 @@ data_old.sort(key=lambda line: np.average([sys_v["MetricX-23-c"] for sys_v in li
 # data_old.sort(key=lambda line: np.std(list(line["score"].values())))
 # data_old.sort(key=lambda line: max([sys["COMET"] for sys in line["metrics"].values()])-min([sys["COMET"] for sys in line["metrics"].values()]))
 # data_old.sort(key=lambda line: max([x for x in line["score"].values() if x!=0])-min([x for x in line["score"].values() if x!=0]))
-data_old.sort(key=lambda line: np.corrcoef(
-    [sys_v["COMET"] for sys_v in line["metrics"].values()],
-    [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
-    )[0,1]
-)
+# data_old.sort(key=lambda line: np.corrcoef(
+#     [sys_v["COMET"] for sys_v in line["metrics"].values()],
+#     [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+#     )[0,1]
+# )
 
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
