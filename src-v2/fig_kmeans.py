@@ -1,4 +1,5 @@
 import utils
+import figutils
 import numpy as np
 import tqdm
 import random
@@ -10,12 +11,12 @@ def featurize(line):
     # scores = np.array(list(line["score"].values()))
     # val_median = np.median(scores)
     # return np.abs(scores-val_median)
-    
     return np.array(
         [
+            np.max([sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]),
             np.max([sys_v["COMET"] for sys_v in line["metrics"].values()]),
             len(line["src"]),
-            len(line["ref"]),
+            # len(line["ref"]),
         ]
     )
 
@@ -38,7 +39,7 @@ for prop in tqdm.tqdm(utils.PROPS):
 
     points_y_local = []
     # repeat each sampling 10 times to smooth it out
-    for _ in range(10):
+    for _ in range(2):
         data_prototypes = random.sample(data_old, k=int(len(data_old) * prop))
 
         data_new = []
@@ -57,4 +58,4 @@ for prop in tqdm.tqdm(utils.PROPS):
 
 print(f"Average  {np.average(points_y):.2%}")
 
-utils.plot_single(points_x, points_y, "kmeans")
+figutils.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "kmeans")

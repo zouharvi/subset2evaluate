@@ -1,4 +1,5 @@
 import utils
+import figutils
 import random
 import numpy as np
 import tqdm
@@ -21,4 +22,4 @@ for prop in tqdm.tqdm(utils.PROPS):
     
 print(f"Average  {np.average(points_y):.2%}")
 
-utils.plot_single(points_x, points_y, "random_subset")
+figutils.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "random_subset")
