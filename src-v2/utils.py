@@ -54,44 +54,6 @@ def load_data(year="wmt23", langs="en-cs"):
     print("Loaded", len(data), "lines of", len(systems), "systems")
     return data
 
-COLORS = [
-    "#bc272d", # red
-    "#50ad9f", # green
-    "#0000a2", # blue
-    "#e9c716", # yellow
-]
-
-def matplotlib_default():
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=COLORS)
-
-def plot_single(points_x, points_y, name):
-    import matplotlib.pyplot as plt
-    import matplotlib.ticker as mtick
-    matplotlib_default()
-    plt.figure(figsize=(3, 2))
-
-    plt.scatter(
-        points_x,
-        points_y,
-        marker="o",
-        s=10,
-        color="black",
-    )
-    plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
-    plt.xlabel("Proportion of original data", labelpad=-2)
-
-    ax = plt.gca()
-    ax.spines[['top', 'right']].set_visible(False)
-    ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-
-    plt.ylim(0.7, 1)
-    plt.tight_layout(pad=0.1)
-    plt.savefig(f"figures-v2/{name}.png", dpi=200)
-    plt.savefig(f"figures-v2/{name}.pdf")
-    plt.show()
 
 def get_sys_absolute(data_new, metric="score"):
     import collections
