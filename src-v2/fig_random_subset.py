@@ -1,5 +1,5 @@
 import utils
-import figutils
+import utilsfig
 import random
 import numpy as np
 import tqdm
@@ -22,4 +22,4 @@ for prop in tqdm.tqdm(utils.PROPS):
     
 print(f"Average  {np.average(points_y):.2%}")
 
-figutils.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "random_subset")
+utilsfig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "random_subset")

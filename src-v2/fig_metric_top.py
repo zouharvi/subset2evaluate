@@ -1,5 +1,5 @@
 import utils
-import figutils
+import utilsfig
 import numpy as np
 import tqdm
 import scipy.stats
@@ -40,14 +40,18 @@ def heuristic_corr(line):
         [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
     )[0]
     
-
 def heuristic_score_abs(line):
     return np.average(list(line["score"].values()))
 
 def heuristic_score_std(line):
     return np.std(list(line["score"].values()))
 
-data_old.sort(key=heuristic_abs)
+def heuristic_translation_var(line):
+    import sacrebleu
+    metric = sacrebleu.metrics.chrf.CHRF()
+    return metric.corpus_score(*zip(*itertools.product(line["tgt"].values(), repeat=2))).score
+
+data_old.sort(key=heuristic_translation_var)
 
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
@@ -64,7 +68,7 @@ print(f"Average from lowest  {np.average(points_y_lo):.2%}")
 print(f"Average from highest {np.average(points_y_hi):.2%}")
 
 
-figutils.plot_subsetacc(
+utilsfig.plot_subsetacc(
     [
         (points_x, points_y_lo, f"From lowest {np.average(points_y_lo):.2%}"),
         (points_x, points_y_hi, f"From highest {np.average(points_y_hi):.2%}"),

@@ -1,5 +1,5 @@
 import utils
-import figutils
+import utilsfig
 import json
 import numpy as np
 
@@ -25,7 +25,7 @@ points_y_hi = []
 for prop in utils.PROPS:
     points_x.append(prop)
 
-    data_old.sort(key=lambda x: data_itr["items"][x["i"]][0])
+    data_old.sort(key=lambda x: data_itr["items"][x["i"]][1])
     
     points_y_lo.append(utils.eval_data_pairs(data_old[:int(len(data_old)*prop)], data_old))
     points_y_hi.append(utils.eval_data_pairs(data_old[-int(len(data_old)*prop):], data_old))
@@ -33,10 +33,10 @@ for prop in utils.PROPS:
 print(f"Average from lowest  {np.average(points_y_lo):.2%}")
 print(f"Average from highest {np.average(points_y_hi):.2%}")
 
-figutils.plot_subsetacc(
+utilsfig.plot_subsetacc(
     [
         (points_x, points_y_lo, f"From lowest {np.average(points_y_lo):.2%}"),
         (points_x, points_y_hi, f"From highest {np.average(points_y_hi):.2%}"),
     ],
-    "itr",
+    "irt",
 )
