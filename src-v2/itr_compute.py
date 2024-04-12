@@ -65,6 +65,8 @@ class ITRModel(L.LightningModule):
 
 
 model = ITRModel(len(data_old), len(data_old[0]["score"].keys()))
+# TODO: better rescaling so that it's normally distributed?
+# HUMAN
 # rescale everything from 0 to 1 for now
 # data_loader = torch.utils.data.DataLoader(
 #     [
@@ -75,6 +77,9 @@ model = ITRModel(len(data_old), len(data_old[0]["score"].keys()))
 #     batch_size=256,
 #     num_workers=24,
 # )
+
+# TODO: better rescaling so that it's normally distributed?
+# METRIC
 # rescale everything from 0 to 1 for now
 systems = list(data_old[0]["score"].keys())
 data_loader = torch.utils.data.DataLoader(
