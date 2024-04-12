@@ -2,6 +2,8 @@
 data/
 figures-v1
 figures-v2
+lightning_logs
+computed
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
