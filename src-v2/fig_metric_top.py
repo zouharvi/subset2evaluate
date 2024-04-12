@@ -13,12 +13,17 @@ points_y_hi = []
 # mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
 
 # np.max is also good
-data_old.sort(
-    key=lambda line: np.average(
-        [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
-    )
-)
+# data_old.sort(
+#     key=lambda line: np.average(
+#         [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+#     )
+# )
 # data_old.sort(key=lambda line: np.std([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]))
+# data_old.sort(key=lambda line: np.average([
+#     abs(sys_a_v["MetricX-23"]-sys_b_v["MetricX-23"])**3
+#     for sys_a_v in line["metrics"].values()
+#     for sys_b_v in line["metrics"].values()
+# ]))
 # data_old.sort(key=lambda line: np.average(list(line["score"].values())))
 # data_old.sort(key=lambda line: np.std(list(line["score"].values())))
 # data_old.sort(key=lambda line: max([sys["COMET"] for sys in line["metrics"].values()])-min([sys["COMET"] for sys in line["metrics"].values()]))

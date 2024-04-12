@@ -131,3 +131,16 @@ def eval_data_pairs(data_new: list, data_old: list):
         result.append((scores_old[sys1]<scores_old[sys2])==(scores_new[sys1]<scores_new[sys2]))
 
     return np.average(result)
+
+
+def get_ord_accuracy(ord1, ord2):
+    import itertools
+    import numpy as np
+
+    systems = list(ord1.keys())
+    result = []
+
+    for sys1, sys2 in itertools.combinations(systems, 2):
+        result.append((ord2[sys1]<ord2[sys2])==(ord1[sys1]<ord1[sys2]))
+
+    return np.average(result)
