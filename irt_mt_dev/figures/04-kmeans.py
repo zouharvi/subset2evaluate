@@ -58,4 +58,4 @@ for prop in tqdm.tqdm(utils.PROPS):
 
 print(f"Average  {np.average(points_y):.2%}")
 
-utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "kmeans")
+utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "04-kmeans")
