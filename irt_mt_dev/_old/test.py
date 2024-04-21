@@ -1,4 +1,4 @@
-import utils
+import irt_mt_dev.utils as utils
 import numpy as np
 
 data_old = utils.load_data()

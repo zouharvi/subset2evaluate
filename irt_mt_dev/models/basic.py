@@ -1,4 +1,4 @@
-import utils
+import irt_mt_dev.utils as utils
 import torch
 import torch.utils
 import lightning as L

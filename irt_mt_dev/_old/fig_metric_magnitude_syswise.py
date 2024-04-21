@@ -1,5 +1,5 @@
 import collections
-import utils
+import irt_mt_dev.utils as utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick

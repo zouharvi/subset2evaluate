@@ -26,14 +26,15 @@ def plot_subsetacc(points, filename=None):
         colors = COLORS
 
     for (points_x, points_y, label), color in zip(points, colors):
-        plt.scatter(
+        plt.plot(
             points_x,
             points_y,
             marker="o",
-            s=10,
+            markersize=5,
             color=color,
             label=label,
             clip_on=False,
+            linewidth=2,
         )
 
     plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
@@ -46,7 +47,7 @@ def plot_subsetacc(points, filename=None):
 
     plt.legend(
         loc="lower right",
-        handletextpad=-0.05,
+        handletextpad=0.2,
         handlelength=1,
         labelspacing=0.2,
         facecolor="#ccc",
@@ -60,6 +61,5 @@ def plot_subsetacc(points, filename=None):
     plt.ylim(0.7, 1)
     plt.tight_layout(pad=0.1)
     if filename:
-        plt.savefig(f"figures/{filename}.png", dpi=200)
-        plt.savefig(f"figures/{filename}.pdf")
+        plt.savefig(f"figures/{filename}.svg")
     plt.show()
