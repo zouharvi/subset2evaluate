@@ -1,3 +1,6 @@
+from typing import Dict
+
+
 PROPS = [x/100 for x in range(10, 90+1, 10)]
 
 def load_data(year="wmt23", langs="en-cs"):
@@ -55,7 +58,7 @@ def load_data(year="wmt23", langs="en-cs"):
     return data
 
 
-def get_sys_absolute(data_new, metric="score"):
+def get_sys_absolute(data_new, metric="score") -> Dict[str, float]:
     import collections
     import numpy as np
 

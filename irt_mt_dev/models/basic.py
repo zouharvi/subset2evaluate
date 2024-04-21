@@ -8,7 +8,7 @@ data_old = utils.load_data()
 
 
 # define the LightningModule
-class ITRModel(L.LightningModule):
+class IRTModel(L.LightningModule):
     def __init__(self, len_item, len_mt):
         super().__init__()
 
@@ -64,7 +64,7 @@ class ITRModel(L.LightningModule):
             )
 
 
-model = ITRModel(len(data_old), len(data_old[0]["score"].keys()))
+model = IRTModel(len(data_old), len(data_old[0]["score"].keys()))
 # TODO: better rescaling so that it's normally distributed?
 # HUMAN
 # rescale everything from 0 to 1 for now

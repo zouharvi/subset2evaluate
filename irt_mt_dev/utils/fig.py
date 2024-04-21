@@ -60,6 +60,6 @@ def plot_subsetacc(points, filename=None):
     plt.ylim(0.7, 1)
     plt.tight_layout(pad=0.1)
     if filename:
-        plt.savefig(f"figures-v2/{filename}.png", dpi=200)
-        plt.savefig(f"figures-v2/{filename}.pdf")
+        plt.savefig(f"figures/{filename}.png", dpi=200)
+        plt.savefig(f"figures/{filename}.pdf")
     plt.show()
