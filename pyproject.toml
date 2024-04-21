@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools >= 65.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["irt_mt_dev"]
+
+[project]
+name = "irt-mt-dev"
+version = "0.0.0"
+dependencies = [
+  "numpy",
+  "torch",
+  "pytorch-lightning",
+]
+requires-python = ">=3.8"
+authors = [
+  {name = "Vilém Zouhar", email = "vilem.zouhar@gmail.com"},
+]
