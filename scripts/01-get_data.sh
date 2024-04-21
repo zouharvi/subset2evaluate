@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-mkdir -p data figures-v1 figures-v2
+mkdir -p data figures
 cd data
 git clone --depth 1 https://github.com/MicrosoftTranslator/ToShipOrNotToShip.git
 cd ToShipOrNotToShip/
