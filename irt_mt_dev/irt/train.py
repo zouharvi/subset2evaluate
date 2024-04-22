@@ -7,9 +7,11 @@ import argparse
 from basic import IRTModel
 
 data_wmt = utils.load_data(normalize=True)
+data_wmt = utils.get_nice_subset(data_wmt, target_size=200, metric="score")
+print(len(data_wmt), "nice lines")
 
 args = argparse.ArgumentParser()
-args.add_argument("--score", default="metric", choices=["human", "metric"])
+args.add_argument("--score", default="human", choices=["human", "metric"])
 args = args.parse_args()
 
 
@@ -18,15 +20,15 @@ model = IRTModel(len(data_wmt), systems)
 
 if args.score == "human":
     data_loader = [
-        ((sent["i"], sys_i), sent["score"][sys])
-        for sent in data_wmt
+        ((sent_i, sys_i), sent["score"][sys]>0.9)
+        for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]
 elif args.score == "metric":
     data_loader = [
         # special indexing
-        ((sent["i"], sys_i), sent["metrics"][sys]["MetricX-23-c"])
-        for sent in data_wmt
+        ((sent_i, sys_i), sent["metrics"][sys]["MetricX-23-c"])
+        for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]
 

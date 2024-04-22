@@ -3,6 +3,7 @@ import torch.utils
 import lightning as L
 import json
 
+
 class IRTModel(L.LightningModule):
     def __init__(self, len_items, systems):
         super().__init__()
@@ -21,14 +22,15 @@ class IRTModel(L.LightningModule):
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
         self.systems = systems
 
+        # self.loss_fn = torch.nn.L1Loss()
+        self.loss_fn = torch.nn.BCELoss()
+
     def forward(self, i_item, i_system):
-        return self.param_c[i_item] + (1 - self.param_c[i_item]) / (
-            1
-            + torch.exp(
-                -self.param_a[i_item] *
-                (self.param_theta[i_system] - self.param_b[i_item])
-            )
-        )
+        a = self.param_a[i_item]
+        b = self.param_b[i_item]
+        c = torch.clamp(self.param_c[i_item], 0, 1)
+        theta = self.param_theta[i_system]
+        return c + (1 - c) / (1 + torch.exp(-a * (theta - b)))
 
     def training_step(self, batch, batch_idx):
         # training_step defines the train loop.
@@ -38,7 +40,7 @@ class IRTModel(L.LightningModule):
 
         # cast from f64 to f32
         y = y.float()
-        loss = torch.nn.functional.l1_loss(y_hat, y)
+        loss = self.loss_fn(y_hat, y)
 
         # force zero mean and unit variance
         theta_std, theta_mean = torch.std_mean(self.param_theta)

@@ -5,6 +5,8 @@ import numpy as np
 import json
 
 data_wmt = utils.load_data(normalize=True)
+data_wmt = utils.get_nice_subset(data_wmt, target_size=200, metric="score")
+
 # NOTE: no guarantee that this is the same dataset
 data_irt = json.load(open("computed/itr_human.json", "r"))
 systems = list(data_irt["systems"].keys())
@@ -23,14 +25,12 @@ def predict_item(item, theta):
     )
 
 
-I = 10
-
 # plot empirical
 plt.scatter(
     x=list(data_irt["systems"].values()),
     y=[np.average([
-        x["score"][sys]
-        for x in data_wmt[I:I+1]
+        x["score"][sys] > 0.9
+        for x in data_wmt
     ])
         for sys in systems
     ]
@@ -51,8 +51,10 @@ print("system average", system_scores)
 plt.plot(
     points_x,
     [
-        np.average([predict_item(item, theta)
-                   for item in data_irt["items"][I:I+1]])
+        np.average([
+            predict_item(item, theta)
+                   for item in data_irt["items"]
+                   ])
         for theta in points_x
     ],
     color="black"
