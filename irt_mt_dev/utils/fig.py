@@ -33,7 +33,7 @@ def plot_subsetacc(points, filename=None):
             markersize=5,
             color=color,
             label=label,
-            clip_on=False,
+            clip_on=False if min(points_y) > 0.65 else True,
             linewidth=2,
         )
 

@@ -1,5 +1,5 @@
-import utils
-import utils.fig
+import irt_mt_dev.utils as utils
+import irt_mt_dev.utils.fig
 import numpy as np
 import tqdm
 import random
@@ -13,8 +13,8 @@ def featurize(line):
     # return np.abs(scores-val_median)
     return np.array(
         [
-            np.max([sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]),
-            np.max([sys_v["COMET"] for sys_v in line["metrics"].values()]),
+            np.average([sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]),
+            np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]),
             len(line["src"]),
             # len(line["ref"]),
         ]
@@ -58,4 +58,4 @@ for prop in tqdm.tqdm(utils.PROPS):
 
 print(f"Average  {np.average(points_y):.2%}")
 
-utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "04-kmeans")
+irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "04-kmeans")
