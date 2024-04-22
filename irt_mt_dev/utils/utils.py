@@ -3,7 +3,7 @@ from typing import Dict
 
 PROPS = [x/100 for x in range(10, 90+1, 10)]
 
-def load_data(year="wmt23", langs="en-cs", normalize=False):
+def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
@@ -16,7 +16,11 @@ def load_data(year="wmt23", langs="en-cs", normalize=False):
                 continue
 
         line_sys[sys] = open(f, "r").readlines()
-    systems = list(line_sys.keys())
+
+    if systems is None:
+        systems = list(line_sys.keys())
+    else:
+        assert type(systems) == list
 
     line_score = collections.defaultdict(list)
     for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score", "r").readlines():

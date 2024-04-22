@@ -7,8 +7,8 @@ class IRTModel(L.LightningModule):
     def __init__(self, len_items, systems):
         super().__init__()
 
-        # make space for thresholded items
-        len_items = len_items*10
+        # # make space for thresholded items
+        # len_items = len_items*10
 
         # normally distribute at the beginning
         # discrimination
