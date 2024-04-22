@@ -6,7 +6,7 @@ import lightning as L
 import argparse
 from basic import IRTModel
 
-data_wmt = utils.load_data()
+data_wmt = utils.load_data(normalize=True)
 
 args = argparse.ArgumentParser()
 args.add_argument("--score", default="metric", choices=["human", "metric"])
@@ -44,6 +44,6 @@ data_loader = torch.utils.data.DataLoader(
     persistent_workers=True,
 )
 
-trainer = L.Trainer(max_epochs=1000, log_every_n_steps=1)
+trainer = L.Trainer(max_epochs=100, log_every_n_steps=1)
 trainer.fit(model=model, train_dataloaders=data_loader)
 model.save_irt(f"computed/itr_{args.score}.json")
