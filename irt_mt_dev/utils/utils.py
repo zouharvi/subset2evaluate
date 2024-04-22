@@ -176,3 +176,11 @@ def get_ord_accuracy(ord1, ord2):
         result.append((ord2[sys1]<ord2[sys2])==(ord1[sys1]<ord1[sys2]))
 
     return np.average(result)
+
+def get_nice_subset(data_old, target_size=100, step_size=10, metric="score"):
+    while len(data_old) > target_size:
+        order_full = get_sys_ordering(data_old, metric=metric)
+        data_old.sort(key=lambda line: get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)))
+        data_old = data_old[step_size:]
+
+    return data_old

@@ -11,7 +11,7 @@ version = "0.0.0"
 dependencies = [
   "numpy",
   "torch",
-  "pytorch-lightning",
+  "lightning",
 ]
 requires-python = ">=3.8"
 authors = [
