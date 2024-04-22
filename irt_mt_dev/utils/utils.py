@@ -3,7 +3,7 @@ from typing import Dict
 
 PROPS = [x/100 for x in range(10, 90+1, 10)]
 
-def load_data(year="wmt23", langs="en-cs"):
+def load_data(year="wmt23", langs="en-cs", normalize=False):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
@@ -54,9 +54,34 @@ def load_data(year="wmt23", langs="en-cs"):
         })
         line_id_true += 1
 
+    if normalize:
+        import collections
+        data_flat = collections.defaultdict(list)
+        for line in data:
+            for met_all in line["metrics"].values():
+                for met_k, met_v in met_all.items():
+                    data_flat[met_k].append(met_v)
+
+            data_flat["score"] += list(line["score"].values())
+
+        # normalize
+        data_flat = {
+            k: (min(v), max(v))
+            for k,v in data_flat.items()
+        }
+
+        for line in data:
+            for sys, met_all in line["metrics"].items():
+                for met_k, met_v in met_all.items():
+                    # (x-min)/(max-min) normalize
+                    line["metrics"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
+
+            for sys, sys_v in line["score"].items():
+                line["score"][sys]= (sys_v-data_flat["score"][0])/(data_flat["score"][1]-data_flat["score"][0])
+
+
     print("Loaded", len(data), "lines of", len(systems), "systems")
     return data
-
 
 def get_sys_absolute(data_new, metric="score") -> Dict[str, float]:
     import collections

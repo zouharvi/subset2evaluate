@@ -1,5 +1,5 @@
-import utils
-import utils.fig
+import irt_mt_dev.utils as utils
+import irt_mt_dev.utils.fig
 import json
 import numpy as np
 
@@ -33,7 +33,7 @@ for prop in utils.PROPS:
 print(f"Average from lowest  {np.average(points_y_lo):.2%}")
 print(f"Average from highest {np.average(points_y_hi):.2%}")
 
-utils.fig.plot_subsetacc(
+irt_mt_dev.utils.fig.plot_subsetacc(
     [
         (points_x, points_y_lo, f"From lowest {np.average(points_y_lo):.2%}"),
         (points_x, points_y_hi, f"From highest {np.average(points_y_hi):.2%}"),

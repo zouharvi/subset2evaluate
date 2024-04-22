@@ -11,7 +11,16 @@ def matplotlib_default():
     import matplotlib.pyplot as plt
 
     mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=COLORS)
+    mpl.rcParams["legend.fancybox"] = False
+    mpl.rcParams["legend.edgecolor"] = "None"
+    mpl.rcParams["legend.fontsize"] = 9
+    mpl.rcParams["legend.borderpad"] = 0.1
 
+def turn_off_spines(which=['top', 'right']):
+    import matplotlib.pyplot as plt
+
+    ax = plt.gca()
+    ax.spines[which].set_visible(False)
 
 def plot_subsetacc(points, filename=None):
     import matplotlib.pyplot as plt
@@ -51,11 +60,7 @@ def plot_subsetacc(points, filename=None):
         handlelength=1,
         labelspacing=0.2,
         facecolor="#ccc",
-        fancybox=False,
-        edgecolor=None,
-        borderpad=0.1,
         scatteryoffsets=[0.5]*len(points),
-        fontsize=9
     )
 
     plt.ylim(0.7, 1)
