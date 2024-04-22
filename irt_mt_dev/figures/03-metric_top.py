@@ -46,12 +46,27 @@ def heuristic_score_abs(line):
 def heuristic_score_std(line):
     return np.std(list(line["score"].values()))
 
-def heuristic_translation_var(line):
+def heuristic_translation_dist_chrf(line):
     import sacrebleu
     metric = sacrebleu.metrics.chrf.CHRF()
-    return metric.corpus_score(*zip(*itertools.product(line["tgt"].values(), repeat=2))).score
+    out = []
+    for text_a, text_b in itertools.product(line["tgt"].values(), repeat=2):
+        out.append(metric.sentence_score(hypothesis=text_a, references=[text_b]).score)
+    return np.average(out)
 
-data_old.sort(key=heuristic_abs)
+def heuristic_translation_dist_unigram(line):
+    import collections
+    out = []
+    for text_a, text_b in itertools.product(line["tgt"].values(), repeat=2):
+        text_a = collections.Counter(text_a.split())
+        text_b = collections.Counter(text_b.split())
+        out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
+    return np.average(out)
+
+# sort by the heuristic
+data_old = [(line, heuristic_abs(line)) for line in tqdm.tqdm(data_old)]
+data_old.sort(key=lambda x: x[1])
+data_old = [x[0] for x in data_old]
 
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
