@@ -1,5 +1,5 @@
-import utils
-import utils.fig
+import irt_mt_dev.utils as utils
+import irt_mt_dev.utils.fig
 import numpy as np
 import tqdm
 import random
@@ -47,4 +47,4 @@ for prop in tqdm.tqdm(utils.PROPS):
 
 print(f"Average  {np.average(points_y):.2%}")
 
-utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "kmeans_embd")
+irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "kmeans_embd")
