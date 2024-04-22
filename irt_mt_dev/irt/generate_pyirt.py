@@ -6,7 +6,7 @@ data_wmt = utils.load_data(normalize=True)
 
 systems = list(data_wmt[0]["score"].keys())
 median = np.median([
-    line["metrics"][sys]["MetricX-23-c"]
+    line["score"][sys]
     for line in data_wmt
     for sys in systems
 ])
@@ -15,7 +15,7 @@ data_out = [
     {
         "subject_id": sys,
         "responses": {
-            f"{line_i}": (line["metrics"][sys]["MetricX-23-c"] >= median)*1.0
+            f"{line_i}": (line["score"][sys] >= median)*1.0
             for line_i, line in enumerate(data_wmt)
         }
     }
