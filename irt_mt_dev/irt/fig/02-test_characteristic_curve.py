@@ -5,7 +5,8 @@ import numpy as np
 import json
 
 data_wmt = utils.load_data(normalize=True)
-data_wmt = utils.get_nice_subset(data_wmt, target_size=200, metric="score")
+# data_wmt = utils.get_nice_subset(data_wmt, target_size=100, step_size=50, metric="score")
+
 
 # NOTE: no guarantee that this is the same dataset
 data_irt = json.load(open("computed/itr_human.json", "r"))
@@ -16,7 +17,7 @@ plt.figure(figsize=(3, 2))
 
 theta_min = min(data_irt["systems"].values())
 theta_max = max(data_irt["systems"].values())
-points_x = np.linspace(theta_min-5, theta_max+5, 100)
+points_x = np.linspace(theta_min, theta_max, 100)
 
 
 def predict_item(item, theta):
@@ -64,6 +65,8 @@ plt.xticks(
     list([x for x in data_irt["systems"].values()]),
     [""]*len(systems),
 )
+plt.xlabel(r"$\theta$ (systems)")
+plt.ylabel("Expected performance")
 
 irt_mt_dev.utils.fig.turn_off_spines()
 plt.tight_layout(pad=0.1)

@@ -7,8 +7,8 @@ import argparse
 from basic import IRTModel
 
 data_wmt = utils.load_data(normalize=True)
-data_wmt = utils.get_nice_subset(data_wmt, target_size=200, metric="score")
-print(len(data_wmt), "nice lines")
+# data_wmt = utils.get_nice_subset(data_wmt, target_size=100, step_size=50, metric="score")
+# print(len(data_wmt), "nice lines")
 
 args = argparse.ArgumentParser()
 args.add_argument("--score", default="human", choices=["human", "metric"])

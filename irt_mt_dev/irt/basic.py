@@ -22,8 +22,8 @@ class IRTModel(L.LightningModule):
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
         self.systems = systems
 
-        # self.loss_fn = torch.nn.L1Loss()
-        self.loss_fn = torch.nn.BCELoss()
+        self.loss_fn = torch.nn.L1Loss()
+        # self.loss_fn = torch.nn.BCELoss()
 
     def forward(self, i_item, i_system):
         a = self.param_a[i_item]
@@ -47,7 +47,7 @@ class IRTModel(L.LightningModule):
         # force std to 1
         loss += torch.abs(theta_std-1)
         # force mean to 0
-        loss += torch.abs(theta_mean)
+        loss += torch.abs(theta_mean-0)
 
         # Logging to TensorBoard (if installed) by default
         self.log("train_loss", loss)
