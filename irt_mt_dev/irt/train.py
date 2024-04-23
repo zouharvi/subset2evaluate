@@ -26,7 +26,6 @@ if args.score == "human":
     ]
 elif args.score == "metric":
     data_loader = [
-        # special indexing
         ((sent_i, sys_i), sent["metrics"][sys]["MetricX-23-c"])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)

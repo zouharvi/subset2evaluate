@@ -21,6 +21,7 @@ points_x = np.linspace(theta_min, theta_max, 100)
 
 
 def predict_item(item, theta):
+    return item["a"] * theta
     return item["c"] + (1 - item["c"]) / (
         1 + np.exp(-item["a"] * (theta - item["b"]))
     )
@@ -30,8 +31,9 @@ def predict_item(item, theta):
 plt.scatter(
     x=list(data_irt["systems"].values()),
     y=[np.average([
-        x["score"][sys] > 0.9
-        for x in data_wmt
+        x["score"][sys]
+        for x_i, x in enumerate(data_wmt)
+        # if data_irt["items"][x_i]["a"] >0
     ])
         for sys in systems
     ]
@@ -54,8 +56,9 @@ plt.plot(
     [
         np.average([
             predict_item(item, theta)
-                   for item in data_irt["items"]
-                   ])
+            for item in data_irt["items"]
+            # if item["a"] >0
+        ])
         for theta in points_x
     ],
     color="black"
