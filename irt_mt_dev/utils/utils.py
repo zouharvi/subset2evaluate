@@ -12,7 +12,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
     line_sys = {}
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
         sys = f.split("/")[-1].removesuffix(".txt")
-        if sys in {"synthetic_ref", "refA"}:
+        if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
                 continue
 
         line_sys[sys] = open(f, "r").readlines()
@@ -24,6 +24,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
 
     line_score = collections.defaultdict(list)
     for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score", "r").readlines():
+    # for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score", "r").readlines():
         sys, score = line_raw.strip().split("\t")
         line_score[sys].append({"score": score})
 
@@ -31,7 +32,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
         metric = f.split("/")[-1].removesuffix("-refA.seg.score")
         for line_i, line_raw in enumerate(open(f, "r").readlines()):
             sys, score = line_raw.strip().split("\t")
-            if sys in {"synthetic_ref", "refA"}:
+            if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
                 continue
             # NOTE: there's no guarantee that this indexing is correct
             line_score[sys][line_i % len(line_src)][metric] = float(score)
@@ -57,6 +58,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
             "metrics": {sys: line_score[sys][line_i] for sys in systems},
         })
         line_id_true += 1
+    
 
     if normalize:
         import collections
@@ -178,9 +180,15 @@ def get_ord_accuracy(ord1, ord2):
     return np.average(result)
 
 def get_nice_subset(data_old, target_size=100, step_size=10, metric="score"):
+    import numpy as np
+    order_full = get_sys_ordering(data_old, metric=metric)
+
+    print(f"Previous average accuracy: {np.average([get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
+
     while len(data_old) > target_size:
         order_full = get_sys_ordering(data_old, metric=metric)
         data_old.sort(key=lambda line: get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)))
         data_old = data_old[step_size:]
 
+    print(f"New average accuracy: {np.average([get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
     return data_old

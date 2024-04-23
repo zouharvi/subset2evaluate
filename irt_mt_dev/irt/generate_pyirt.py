@@ -5,17 +5,11 @@ import numpy as np
 data_wmt = utils.load_data(normalize=True)
 
 systems = list(data_wmt[0]["score"].keys())
-median = np.median([
-    line["score"][sys]
-    for line in data_wmt
-    for sys in systems
-])
-print("Median", median)
 data_out = [
     {
         "subject_id": sys,
         "responses": {
-            f"{line_i}": (line["score"][sys] >= median)*1.0
+            f"{line_i}": (line["score"][sys] >= 0.9)*1.0
             for line_i, line in enumerate(data_wmt)
         }
     }
