@@ -11,7 +11,7 @@ data_wmt = utils.load_data(normalize=True)
 # print(len(data_wmt), "nice lines")
 
 args = argparse.ArgumentParser()
-args.add_argument("--score", default="human", choices=["human", "metric"])
+args.add_argument("--score", default="metric", choices=["human", "metric"])
 args = args.parse_args()
 
 
@@ -30,10 +30,15 @@ elif args.score == "metric":
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]
+    _median = np.median([y for x, y in data_loader])
+    data_loader = [
+        (x, 1*(y>_median))
+        for x, y in data_loader
+    ]
 
 data_loader = torch.utils.data.DataLoader(
     data_loader,
-    batch_size=len(data_wmt),
+    batch_size=len(data_wmt)*len(systems),
     num_workers=24,
     shuffle=True,
     # fully move to GPU
