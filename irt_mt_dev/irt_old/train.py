@@ -7,8 +7,6 @@ import argparse
 from basic import IRTModel
 
 data_wmt = utils.load_data(normalize=True)
-# data_wmt = utils.get_nice_subset(data_wmt, target_size=100, step_size=50, metric="score")
-# print(len(data_wmt), "nice lines")
 
 args = argparse.ArgumentParser()
 args.add_argument("--score", default="metric", choices=["human", "metric"])
@@ -20,7 +18,7 @@ model = IRTModel(len(data_wmt), systems)
 
 if args.score == "human":
     data_loader = [
-        ((sent_i, sys_i), sent["score"][sys]>0.9)
+        ((sent_i, sys_i), sent["score"][sys])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]
@@ -29,11 +27,6 @@ elif args.score == "metric":
         ((sent_i, sys_i), sent["metrics"][sys]["MetricX-23-c"])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
-    ]
-    _median = np.median([y for x, y in data_loader])
-    data_loader = [
-        (x, 1*(y>_median))
-        for x, y in data_loader
     ]
 
 data_loader = torch.utils.data.DataLoader(
@@ -49,4 +42,4 @@ data_loader = torch.utils.data.DataLoader(
 
 trainer = L.Trainer(max_epochs=1000, log_every_n_steps=1)
 trainer.fit(model=model, train_dataloaders=data_loader)
-model.save_irt(f"computed/itr_{args.score}.json")
+model.save_irt(f"computed/irt_{args.score}.json")

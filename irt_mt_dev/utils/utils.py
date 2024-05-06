@@ -3,7 +3,7 @@ from typing import Dict
 
 PROPS = [x/100 for x in range(10, 90+1, 10)]
 
-def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
+def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, systems=None):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
@@ -84,6 +84,31 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, systems=None):
 
             for sys, sys_v in line["score"].items():
                 line["score"][sys]= (sys_v-data_flat["score"][0])/(data_flat["score"][1]-data_flat["score"][0])
+
+    if binarize:
+        import collections
+        import numpy as np
+        data_flat = collections.defaultdict(list)
+        for line in data:
+            for met_all in line["metrics"].values():
+                for met_k, met_v in met_all.items():
+                    data_flat[met_k].append(met_v)
+
+            data_flat["score"] += list(line["score"].values())
+
+        # normalize
+        data_flat = {
+            k: np.median(v)
+            for k,v in data_flat.items()
+        }
+
+        for line in data:
+            for sys, met_all in line["metrics"].items():
+                for met_k, met_v in met_all.items():
+                    line["metrics"][sys][met_k] = 1*(met_v >= data_flat[met_k])
+
+            for sys, sys_v in line["score"].items():
+                line["score"][sys]= 1*(sys_v >= data_flat["score"])
 
 
     print("Loaded", len(data), "lines of", len(systems), "systems")

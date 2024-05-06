@@ -5,11 +5,9 @@ import numpy as np
 import json
 
 data_wmt = utils.load_data(normalize=True)
-# data_wmt = utils.get_nice_subset(data_wmt, target_size=100, step_size=50, metric="score")
-
 
 # NOTE: no guarantee that this is the same dataset
-data_irt = json.load(open("computed/itr_human.json", "r"))
+data_irt = json.load(open("computed/irt_metric.json", "r"))
 systems = list(data_irt["systems"].keys())
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
@@ -17,39 +15,41 @@ plt.figure(figsize=(3, 2))
 
 theta_min = min(data_irt["systems"].values())
 theta_max = max(data_irt["systems"].values())
-points_x = np.linspace(theta_min, theta_max, 100)
+points_x = np.linspace(theta_min-0.2, theta_max+0.2, 100)
 
 
 def predict_item(item, theta):
-    return item["a"] * theta
-    return item["c"] + (1 - item["c"]) / (
-        1 + np.exp(-item["a"] * (theta - item["b"]))
-    )
+    return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
 
+
+_median = np.median([
+    line["metrics"][sys]["MetricX-23-c"]
+    for line in data_wmt
+    for sys in systems
+])
+
+points_y_true = [
+    np.average([
+        x["metrics"][sys]["MetricX-23-c"]
+        # x["metrics"][sys]["MetricX-23-c"] > _median
+        for x in data_wmt
+    ])
+    for sys in systems
+]
+points_y_pred = [
+    np.average([
+        predict_item(item, data_irt["systems"][sys])
+        for item in data_irt["items"]
+    ])
+    for sys in systems
+]
+print(f"Correlation: {np.corrcoef(points_y_true, points_y_pred)[0,1]:.2%}")
 
 # plot empirical
 plt.scatter(
     x=list(data_irt["systems"].values()),
-    y=[np.average([
-        x["score"][sys]
-        for x_i, x in enumerate(data_wmt)
-        # if data_irt["items"][x_i]["a"] >0
-    ])
-        for sys in systems
-    ]
+    y=points_y_true
 )
-
-system_scores = [
-    (
-        sys,
-        np.average([
-            line["score"][sys]
-            for line in data_wmt
-        ]))
-    for sys in systems
-]
-system_scores.sort(key=lambda x: x[1])
-print("system average", system_scores)
 
 plt.plot(
     points_x,
@@ -57,7 +57,6 @@ plt.plot(
         np.average([
             predict_item(item, theta)
             for item in data_irt["items"]
-            # if item["a"] >0
         ])
         for theta in points_x
     ],
