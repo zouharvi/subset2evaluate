@@ -60,7 +60,8 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
         line_id_true += 1
     
 
-    if normalize:
+    if normalize and not binarize:
+        # if we are binarizing, none of this matters
         import collections
         data_flat = collections.defaultdict(list)
         for line in data:
