@@ -8,15 +8,12 @@ class IRTModel(L.LightningModule):
     def __init__(self, len_items, systems):
         super().__init__()
 
-        # # make space for thresholded items
-        # len_items = len_items*10
-
         # normally distribute at the beginning
         # discrimination
         self.param_a = torch.nn.Parameter(torch.randn(len_items))
         # difficulty
         self.param_b = torch.nn.Parameter(torch.randn(len_items))
-        # mt perf
+        # mt ability
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
         self.systems = systems
 
@@ -25,7 +22,7 @@ class IRTModel(L.LightningModule):
         # self.loss_fn = torch.nn.BCELoss()
 
     def forward(self, i_item, i_system):
-        a = self.param_a[i_item]
+        a = torch.nn.functional.softplus(self.param_a[i_item])
         b = self.param_b[i_item]
         theta = self.param_theta[i_system]
         return 1 / (1 + torch.exp(-a * (theta - b)))
@@ -60,7 +57,7 @@ class IRTModel(L.LightningModule):
                     "items": [
                         {"a": a, "b": b}
                         for a, b in zip(
-                            self.param_a.tolist(),
+                            torch.nn.functional.softplus(self.param_a).tolist(),
                             self.param_b.tolist(),
                         )
                     ],

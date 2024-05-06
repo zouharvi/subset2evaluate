@@ -23,10 +23,10 @@ def get_line_score(line, system):
         return line["metrics"][system][args.metric]
     
 # make sure half are positive and half are negative
-threshold = np.median([get_line_score(line, system) for line in data for system in systems])
+_median = np.median([get_line_score(line, system) for line in data for system in systems])
 
 def get_line_class(line, system):
-    return bool(get_line_score(line, system) >= threshold)
+    return bool(get_line_score(line, system) >= _median)
 
 py_irt.io.write_jsonlines(
     "/tmp/irt_dataset.jsonl",
@@ -41,7 +41,7 @@ py_irt.io.write_jsonlines(
 
 dataset = py_irt.dataset.Dataset.from_jsonlines("/tmp/irt_dataset.jsonl")
 
-config = py_irt.config.IrtConfig(model_type='2pl', log_every=500, dropout=.2)
+config = py_irt.config.IrtConfig(model_type='2pl', log_every=500, dropout=0)
 trainer = py_irt.training.IrtModelTrainer(config=config, data_path=None, dataset=dataset)
 trainer.train(epochs=5_000, device='cuda')
 
