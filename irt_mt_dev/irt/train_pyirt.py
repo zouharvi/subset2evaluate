@@ -13,7 +13,7 @@ args = argparse.ArgumentParser()
 args.add_argument("--metric", default="score")
 args = args.parse_args()
 
-data = utils.load_data(normalize=True)
+data = utils.load_data(normalize=True, binarize=True)
 systems = list(data[0]["metrics"].keys())
 
 def get_line_score(line, system):
@@ -21,12 +21,9 @@ def get_line_score(line, system):
         return line["score"][system]
     else:
         return line["metrics"][system][args.metric]
-    
-# make sure half are positive and half are negative
-_median = np.median([get_line_score(line, system) for line in data for system in systems])
 
 def get_line_class(line, system):
-    return bool(get_line_score(line, system) >= _median)
+    return bool(get_line_score(line, system))
 
 py_irt.io.write_jsonlines(
     "/tmp/irt_dataset.jsonl",
@@ -50,5 +47,3 @@ json.dump({
     "a": trainer.last_params["disc"],
     "b": trainer.last_params["diff"],
 }, open(f"computed/2pl_{args.metric}.json", "w"))
-
-trainer.export
