@@ -58,19 +58,19 @@ plt.plot(
     linewidth=3
 )
 
-plt.ylim(0.6, 1.0)
-plt.xlim(0.6, 1.0)
+plt.ylim(0.65, 1.0)
+plt.xlim(0.65, 1.0)
 plt.ylabel("Metric score\n(easy set)", labelpad=-2)
 plt.xlabel("Metric score (hard set)" + " " * 5)
-plt.xticks([0.6, 0.7, 0.8, 0.9, 1.0])
+plt.xticks([0.7, 0.8, 0.9, 1.0])
 
-plt.hlines(y=0.884, xmin=0.6, xmax=0.7, zorder=-1)
-plt.vlines(x=0.7, ymin=0.6, ymax=0.884, zorder=-1)
+plt.hlines(y=0.89, xmin=0.6, xmax=0.7, zorder=-1)
+plt.vlines(x=0.7, ymin=0.6, ymax=0.89, zorder=-1)
 plt.text(
     x=0.87, y=0.7,
-    s="70 on hard set\n=\n88 on easy set",
+    s="70 on hard set\n=\n89 on easy set",
     ha="center",
-    fontsize=8.7,
+    fontsize=9,
     color=irt_mt_dev.utils.fig.COLORS[0]
 )
 
