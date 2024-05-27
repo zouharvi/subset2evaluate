@@ -1,0 +1,88 @@
+import irt_mt_dev.utils as utils
+import irt_mt_dev.utils.fig
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.ticker as mtick
+import json
+import argparse
+
+
+data_irt_d0 = json.load(open(f"computed/irt_score_d0.json", "r"))
+data_irt_d1 = json.load(open(f"computed/irt_score_d1.json", "r"))
+systems = list(data_irt_d0["systems"].keys())
+irt_mt_dev.utils.fig.matplotlib_default()
+plt.figure(figsize=(2.0, 1.7))
+
+
+theta_min = min(min(data_irt_d0["systems"].values()), min(data_irt_d1["systems"].values()))
+theta_max = max(max(data_irt_d0["systems"].values()), max(data_irt_d1["systems"].values()))
+points_x = np.linspace(theta_min-0.4, theta_max+0.4, 100)
+
+
+def predict_item(item, theta):
+    return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
+
+
+points_y_pred_d0 = [
+    np.average([
+        predict_item(item, data_irt_d0["systems"][sys])
+        for item in data_irt_d0["items"]
+    ])
+    for sys in systems
+]
+points_y_pred_d1 = [
+    np.average([
+        predict_item(item, data_irt_d1["systems"][sys])
+        for item in data_irt_d1["items"]
+    ])
+    for sys in systems
+]
+
+
+plt.plot(
+    [
+        np.average([
+            predict_item(item, theta)
+            for item in data_irt_d0["items"]
+        ])
+        for theta in points_x
+    ],
+    [
+        np.average([
+            predict_item(item, theta)
+            for item in data_irt_d1["items"]
+        ])
+        for theta in points_x
+    ],
+    color="black",
+    linewidth=3
+)
+
+plt.ylim(0.6, 1.0)
+plt.xlim(0.6, 1.0)
+plt.ylabel("Metric score\n(easy set)", labelpad=-2)
+plt.xlabel("Metric score (hard set)" + " " * 5)
+plt.xticks([0.6, 0.7, 0.8, 0.9, 1.0])
+
+plt.hlines(y=0.884, xmin=0.6, xmax=0.7, zorder=-1)
+plt.vlines(x=0.7, ymin=0.6, ymax=0.884, zorder=-1)
+plt.text(
+    x=0.87, y=0.7,
+    s="70 on hard set\n=\n88 on easy set",
+    ha="center",
+    fontsize=8.7,
+    color=irt_mt_dev.utils.fig.COLORS[0]
+)
+
+
+plt.gca().xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
+plt.gca().yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
+# plt.xticks([1, 3], [1, 3])
+# plt.yticks([0.5, 1.0], ["50", "100"])
+# plt.xlabel(" " * 5 +r"$\theta$ (system ability)", labelpad=-10)
+# plt.ylabel("Metric score", labelpad=-15)
+
+irt_mt_dev.utils.fig.turn_off_spines()
+plt.tight_layout(pad=0)
+plt.savefig(f"figures/comparable_theta_joint.pdf")
+plt.show()
