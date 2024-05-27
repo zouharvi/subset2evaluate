@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 
 
@@ -23,7 +24,13 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
         assert type(systems) == list
 
     line_score = collections.defaultdict(list)
-    for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score", "r").readlines():
+    fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score"
+    if not os.path.exists(fname):
+        fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score"
+    if not os.path.exists(fname):
+        fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score"
+    
+    for line_raw in open(fname, "r").readlines():
     # for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score", "r").readlines():
         sys, score = line_raw.strip().split("\t")
         line_score[sys].append({"score": score})
