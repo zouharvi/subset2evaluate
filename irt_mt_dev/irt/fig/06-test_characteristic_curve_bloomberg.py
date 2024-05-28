@@ -51,7 +51,7 @@ plt.xlim(0, 3)
 plt.xticks([0, 3], [0, 3])
 plt.yticks([0.7, 1.0], ["70", "100"])
 plt.xlabel(r"$\theta$ (ability)", labelpad=-10)
-plt.ylabel("Metric score\n" + {"d0": "(easy set)", "d1": "(hard set)"}[args.suffix], labelpad=-15)
+plt.ylabel("Metric score\n" + {"d0": "(hard set)", "d1": "(easy set)"}[args.suffix], labelpad=-15)
 
 irt_mt_dev.utils.fig.turn_off_spines()
 plt.tight_layout(pad=0.0)
