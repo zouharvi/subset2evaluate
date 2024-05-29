@@ -71,7 +71,7 @@ plt.text(
     s="70 on hard set\n=\n89 on easy set",
     ha="center",
     fontsize=9,
-    color=irt_mt_dev.utils.fig.COLORS[0]
+    color="#582f7a"
 )
 
 
