@@ -34,10 +34,6 @@ for sys_i in range(len(data_old[0]["score"].keys())):
             for line in data[domain]
         ]
 
-    def signature_distance(line_a, line_b):
-        return np.sum(np.abs(line_a - line_b))
-
-    # match
     data_a = data["social"]
     data_b = data["news"]
 
