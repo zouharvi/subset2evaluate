@@ -39,7 +39,7 @@ if args.train_size == 1.0:
     data_train= data_loader
     data_test = []
 else:
-    data_train, data_test = train_test_split(data_loader, train_size=args.train_size)
+    data_train, data_test = train_test_split(data_loader, random_state=0, train_size=args.train_size)
 
 data_train = torch.utils.data.DataLoader(
     data_train,
@@ -63,7 +63,7 @@ data_test = torch.utils.data.DataLoader(
 )
 
 trainer = L.Trainer(
-    max_epochs=1000,
+    max_epochs=2000,
     log_every_n_steps=1,
     check_val_every_n_epoch=500,
     enable_checkpointing=not args.no_save,

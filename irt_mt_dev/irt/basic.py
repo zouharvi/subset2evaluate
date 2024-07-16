@@ -61,10 +61,10 @@ class IRTModel(L.LightningModule):
             y_true
         )
 
-        self.log("val_loss", loss_pred-loss_const)
+        self.log("val_loss_vs_constant", loss_pred-loss_const)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.1)
+        return torch.optim.Adam(self.parameters(), lr=0.01)
 
     def save_irt(self, filename):
         with open(filename, "w") as f:
