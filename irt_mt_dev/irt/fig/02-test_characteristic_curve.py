@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
-data_wmt = utils.load_data(normalize=True)
+data_wmt = utils.load_data(normalize=True, binarize=False)
 
 # NOTE: no guarantee that this is the same dataset
-data_irt = json.load(open("computed/irt_metric.json", "r"))
+data_irt = json.load(open("computed/irt_score_0.json", "r"))
 systems = list(data_irt["systems"].keys())
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
@@ -21,17 +21,9 @@ points_x = np.linspace(theta_min-0.2, theta_max+0.2, 100)
 def predict_item(item, theta):
     return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
 
-
-_median = np.median([
-    line["metrics"][sys]["MetricX-23-c"]
-    for line in data_wmt
-    for sys in systems
-])
-
 points_y_true = [
     np.average([
-        x["metrics"][sys]["MetricX-23-c"]
-        # x["metrics"][sys]["MetricX-23-c"] > _median
+        x["score"][sys]
         for x in data_wmt
     ])
     for sys in systems
