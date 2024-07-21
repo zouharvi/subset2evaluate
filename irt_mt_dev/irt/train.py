@@ -4,13 +4,12 @@ import torch.utils
 import lightning as L
 import argparse
 from basic import IRTModel
-import random
 from sklearn.model_selection import train_test_split
 
 args = argparse.ArgumentParser()
 args.add_argument("--metric", default="score")
 args.add_argument("--binarize", "--bin", action="store_true")
-args.add_argument("--train-size", type=float, default=1.0)
+args.add_argument("--train-size", type=float, default=0.9)
 args.add_argument("--no-save", action="store_true")
 args = args.parse_args()
 
@@ -78,8 +77,6 @@ trainer.fit(
 suffix = ""
 if args.binarize:
     suffix += "_bin"
-if args.train_size != 1.0:
-    suffix += f"_sub{args.train_size:.1f}".replace("0.", "0")
 
 if not args.no_save:
     model.save_irt(f"computed/irt_{args.metric}{suffix}.json")

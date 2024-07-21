@@ -7,30 +7,25 @@ import json
 data_wmt = utils.load_data(normalize=True, binarize=False)
 
 # NOTE: no guarantee that this is the same dataset
-data_irt = json.load(open("computed/irt_score_0.json", "r"))
+data_irt = json.load(open("computed/irt_MetricX-23-c_noconst_3pl.json", "r"))
 systems = list(data_irt["systems"].keys())
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
 
-
 theta_min = min(data_irt["systems"].values())
 theta_max = max(data_irt["systems"].values())
-points_x = np.linspace(theta_min-0.2, theta_max+0.2, 100)
-
-
-def predict_item(item, theta):
-    return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
+points_x = np.linspace(theta_min-0.05, theta_max+0.05, 100)
 
 points_y_true = [
     np.average([
-        x["score"][sys]
+        x["metrics"][sys]["MetricX-23-c"]
         for x in data_wmt
     ])
     for sys in systems
 ]
 points_y_pred = [
     np.average([
-        predict_item(item, data_irt["systems"][sys])
+        utils.pred_irt(data_irt["systems"][sys], item)
         for item in data_irt["items"]
     ])
     for sys in systems
@@ -47,7 +42,7 @@ plt.plot(
     points_x,
     [
         np.average([
-            predict_item(item, theta)
+            utils.pred_irt(theta, item)
             for item in data_irt["items"]
         ])
         for theta in points_x

@@ -20,13 +20,9 @@ theta_max = 2.7
 points_x = np.linspace(theta_min-0.2, theta_max+0.2, 100)
 
 
-def predict_item(item, theta):
-    return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
-
-
 points_y_pred = [
     np.average([
-        predict_item(item, data_irt["systems"][sys])
+        utils.pred_irt(data_irt["systems"][sys], item)
         for item in data_irt["items"]
     ])
     for sys in systems
@@ -37,7 +33,7 @@ plt.plot(
     points_x,
     [
         np.average([
-            predict_item(item, theta)
+            utils.pred_irt(theta, item)
             for item in data_irt["items"]
         ])
         for theta in points_x
