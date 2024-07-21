@@ -16,6 +16,8 @@ class IRTModel(L.LightningModule):
         self.param_a = torch.nn.Parameter(torch.randn(len_items))
         # difficulty
         self.param_b = torch.nn.Parameter(torch.randn(len_items))
+        # feasability
+        self.param_c = torch.nn.Parameter(torch.randn(len_items))
         # mt ability
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
         self.systems = systems
@@ -26,10 +28,11 @@ class IRTModel(L.LightningModule):
         # self.loss_fn = torch.nn.BCELoss()
 
     def forward(self, i_item, i_system):
-        a = torch.nn.functional.softplus(self.param_a[i_item])
+        a = self.param_a[i_item]
         b = self.param_b[i_item]
+        c = self.param_c[i_item]
         theta = self.param_theta[i_system]
-        return 1 / (1 + torch.exp(-a * (theta - b)))
+        return torch.sigmoid(c) / (1 + torch.exp(-a * (theta - b)))
 
     def training_step(self, batch, batch_idx):
         # training_step defines the train loop.
@@ -71,10 +74,11 @@ class IRTModel(L.LightningModule):
             json.dump(
                 obj={
                     "items": [
-                        {"a": a, "b": b}
-                        for a, b in zip(
-                            torch.nn.functional.softplus(self.param_a).tolist(),
+                        {"a": a, "b": b, "c": c}
+                        for a, b, c in zip(
+                            self.param_a.tolist(),
                             self.param_b.tolist(),
+                            torch.sigmoid(self.param_c).tolist(),
                         )
                     ],
                     "systems": {
@@ -99,7 +103,7 @@ class IRTModel(L.LightningModule):
 
         for i in range(self.len_items):
             # need to inverse because we're saving softplused version
-            self.param_a[i] = softplus_inverse(data["items"][i]["a"])
+            self.param_a[i] = data["items"][i]["a"]
             self.param_b[i] = data["items"][i]["b"]
 
         f_or_fname.close()

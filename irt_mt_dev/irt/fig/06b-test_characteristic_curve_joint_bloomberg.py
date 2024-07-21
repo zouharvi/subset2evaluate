@@ -19,20 +19,16 @@ theta_max = max(max(data_irt_d0["systems"].values()), max(data_irt_d1["systems"]
 points_x = np.linspace(theta_min-0.4, theta_max+0.4, 100)
 
 
-def predict_item(item, theta):
-    return 1 / (1 + np.exp(-item["a"] * (theta - item["b"])))
-
-
 points_y_pred_d0 = [
     np.average([
-        predict_item(item, data_irt_d0["systems"][sys])
+        utils.pred_irt(data_irt_d0["systems"][sys], item)
         for item in data_irt_d0["items"]
     ])
     for sys in systems
 ]
 points_y_pred_d1 = [
     np.average([
-        predict_item(item, data_irt_d1["systems"][sys])
+        utils.pred_irt(data_irt_d1["systems"][sys], item)
         for item in data_irt_d1["items"]
     ])
     for sys in systems
@@ -42,14 +38,14 @@ points_y_pred_d1 = [
 plt.plot(
     [
         np.average([
-            predict_item(item, theta)
+            utils.pred_irt(theta, item)
             for item in data_irt_d0["items"]
         ])
         for theta in points_x
     ],
     [
         np.average([
-            predict_item(item, theta)
+            utils.pred_irt(theta, item)
             for item in data_irt_d1["items"]
         ])
         for theta in points_x
@@ -77,10 +73,6 @@ plt.text(
 
 plt.gca().xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
 plt.gca().yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
-# plt.xticks([1, 3], [1, 3])
-# plt.yticks([0.5, 1.0], ["50", "100"])
-# plt.xlabel(" " * 5 +r"$\theta$ (system ability)", labelpad=-10)
-# plt.ylabel("Metric score", labelpad=-15)
 
 irt_mt_dev.utils.fig.turn_off_spines()
 plt.tight_layout(pad=0)

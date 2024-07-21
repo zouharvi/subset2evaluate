@@ -145,29 +145,6 @@ def get_sys_absolute(data_new, metric="score") -> Dict[str, float]:
 
     return scores_new
 
-def get_sys_absolute_but_rank(data_new, metric="score"):
-    raise Exception("Deprecated")
-    import collections
-    import numpy as np
-
-    scores_new = collections.defaultdict(list)
-
-    systems = list(data_new[0]["score"].keys())
-    if metric == "score":
-        for line in data_new:
-            scores = sorted(list(line["score"].items()), key=lambda x: x[1])
-            for sys_rank, (sys, sys_v) in enumerate(scores):
-                scores_new[sys].append(sys_rank)
-    else:
-        raise NotImplementedError()
-
-    scores_new = {
-        sys: np.average(scores_new[sys])
-        for sys in systems
-    }
-
-    return scores_new
-
 def get_sys_ordering(data_new: list, metric="score"):
     scores_new = get_sys_absolute(data_new, metric)
     
@@ -183,7 +160,6 @@ def get_sys_ordering(data_new: list, metric="score"):
 
     return sys_ord
 
-
 def eval_data_pairs(data_new: list, data_old: list):
     import itertools
     import numpy as np
@@ -198,7 +174,6 @@ def eval_data_pairs(data_new: list, data_old: list):
         result.append((scores_old[sys1]<scores_old[sys2])==(scores_new[sys1]<scores_new[sys2]))
 
     return np.average(result)
-
 
 def get_ord_accuracy(ord1, ord2):
     import itertools
@@ -225,3 +200,13 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="score"):
 
     print(f"New average accuracy: {np.average([get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
     return data_old
+
+def pred_irt(system_theta, item):
+    import numpy as np
+    if "c" in item:
+        return item["c"] / (1 + np.exp(-item["a"] * (system_theta - item["b"])))
+    if "a" in item:
+        return 1 / (1 + np.exp(-item["a"] * (system_theta - item["b"])))
+    if "b" in item:
+        return 1 / (1 + np.exp(system_theta - item["b"]))
+    raise Exception("Uknown item", item)
