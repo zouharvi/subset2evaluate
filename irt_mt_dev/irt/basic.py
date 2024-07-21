@@ -45,12 +45,9 @@ class IRTModel(L.LightningModule):
         loss = self.loss_fn(y_hat, y)
 
         # regularize
-        # loss += sum([(p**2).sum() for p in self.param_theta])
-        # loss += sum([(p**2).sum() for p in self.param_a])
-        # loss += sum([(p**2).sum() for p in self.param_b])
+        # loss += torch.pow(self.param_a, 2).sum()/100
 
         self.log("train_loss", loss)
-        self.log("a_sign", torch.mean(torch.sign(self.param_a)))
         return loss
     
 
