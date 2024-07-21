@@ -42,6 +42,7 @@ def evaluate_lm_prediction(use_sample, use_system):
     model = LinearRegression()
     model.fit(X_train, Y_train)
     Y_pred = model.predict(X_test)
+    Y_pred = np.clip(Y_pred, 0, 1)
     print()
     print("Features: ")
     if use_sample:
