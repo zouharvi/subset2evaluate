@@ -15,6 +15,9 @@ def sigmoid_irt(x, a, b, c):
 def sigmoid_general(x, A, shift_x, slope, shift_y):
     return A / (1 + np.exp ((x - shift_x) / slope)) + shift_y
 
+def linear(x, a, b):
+    return a * x + b
+
 data_wmt = utils.load_data(normalize=True)
 systems = list(data_wmt[0]["score"].keys())
 
@@ -41,22 +44,25 @@ print(system_index)
 print(system_scores)
 
 
-fig, axs = plt.subplots(2, 2, figsize=(6, 6))
+fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 
 for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
     ax.set_title(f"Item {item_i}")
 
     data_y = [data_wmt[item_i]["metrics"][sys]["MetricX-23-c"] for sys in systems]
-    p, _ = curve_fit(sigmoid_irt, data_x, data_y, maxfev=50000)
-    ax.plot(data_x_ticks, sigmoid_irt(data_x_ticks, *p))
-    p, _ = curve_fit(sigmoid_general, data_x, data_y, maxfev=50000)
-    ax.plot(data_x_ticks, sigmoid_general(data_x_ticks, *p))
+
+    p, _ = curve_fit(linear, data_x, data_y, maxfev=50000)
+    ax.plot(data_x_ticks, linear(data_x_ticks, *p))
+    # p, _ = curve_fit(sigmoid_irt, data_x, data_y, maxfev=50000)
+    # ax.plot(data_x_ticks, sigmoid_irt(data_x_ticks, *p))
+    # p, _ = curve_fit(sigmoid_general, data_x, data_y, maxfev=50000)
+    # ax.plot(data_x_ticks, sigmoid_general(data_x_ticks, *p))
 
     for sys in systems:
         ax.scatter(
             [system_scores[sys]],
             [data_wmt[item_i]["metrics"][sys]["MetricX-23-c"]],
-            color="white",
+            color="#ccc",
             linewidth=1,
             edgecolor="black",
             marker="o",
