@@ -13,7 +13,9 @@ args.add_argument("--train-size", type=float, default=0.9)
 args.add_argument("--no-save", action="store_true")
 args = args.parse_args()
 
-data_wmt = utils.load_data(normalize=True, binarize=args.binarize)
+# WMT: 1k items, 15 systems
+# data_wmt = utils.load_data(normalize=True, binarize=args.binarize)
+data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
 
 systems = list(data_wmt[0]["score"].keys())
 model = IRTModel(len(data_wmt), systems)
@@ -62,7 +64,7 @@ data_test = torch.utils.data.DataLoader(
 )
 
 trainer = L.Trainer(
-    max_epochs=2000,
+    max_epochs=1000,
     log_every_n_steps=1,
     check_val_every_n_epoch=500,
     enable_checkpointing=not args.no_save,

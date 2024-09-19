@@ -4,6 +4,21 @@ from typing import Dict
 
 PROPS = [x/100 for x in range(10, 90+1, 10)]
 
+def load_data_squad(n_items=1000, n_systems=161):
+    import json
+    data = [json.loads(x) for x in open("data/squad_systems.jsonl")]
+    data_out = []
+    for pred_i, pred in enumerate(list(data[0]["predictions"].keys())[:n_items]):
+        data_out.append({
+            "i": pred_i,
+            # TODO: check that all systems have the same predictions
+            "score": {
+                sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["f1"]
+                for sys in data[:n_systems]
+            },
+        })
+    return data_out
+
 def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, systems=None):
     import glob
     import collections
