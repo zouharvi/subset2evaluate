@@ -13,8 +13,9 @@ args = argparse.ArgumentParser()
 args.add_argument("--metric", default="score")
 args = args.parse_args()
 
-data = utils.load_data(normalize=True, binarize=True)
-systems = list(data[0]["metrics"].keys())
+# data = utils.load_data(normalize=True, binarize=True)
+data = utils.load_data_squad(n_items=None, n_systems=None)
+systems = list(data[0]["score"].keys())
 
 def get_line_score(line, system):
     if args.metric == "score":
@@ -38,12 +39,13 @@ py_irt.io.write_jsonlines(
 
 dataset = py_irt.dataset.Dataset.from_jsonlines("/tmp/irt_dataset.jsonl")
 
-config = py_irt.config.IrtConfig(model_type='2pl', log_every=500, dropout=0)
+config = py_irt.config.IrtConfig(model_type='3pl', log_every=500, dropout=0)
 trainer = py_irt.training.IrtModelTrainer(config=config, data_path=None, dataset=dataset)
-trainer.train(epochs=5_000, device='cuda')
+trainer.train(epochs=2_000, device='cuda')
 
 json.dump({
     "theta": trainer.last_params["ability"],
     "a": trainer.last_params["disc"],
     "b": trainer.last_params["diff"],
-}, open(f"computed/2pl_{args.metric}.json", "w"))
+    "c": trainer.last_params["lambdas"],
+}, open(f"computed/3pl_{args.metric}.json", "w"))
