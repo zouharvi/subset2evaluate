@@ -14,17 +14,17 @@ for line in data[:10]:
 
 def heuristic_corr(line):
     return scipy.stats.spearmanr(
-        [sys_v["COMET"] for sys_v in line["metrics"].values()],
-        [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+        [sys_v["COMET"] for sys_v in line["scores"].values()],
+        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )[0]
 def heuristic_abs(line):
     # np.max is also good
     return np.average(
-        [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )
 
 def heuristic_std(line):
-    return np.std([sys_v["MetricX-23"] for sys_v in line["metrics"].values()])
+    return np.std([sys_v["MetricX-23"] for sys_v in line["scores"].values()])
 
 points_x_all = []
 points_y_rand_all = []

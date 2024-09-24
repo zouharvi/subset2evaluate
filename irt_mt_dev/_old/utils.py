@@ -11,10 +11,10 @@ def eval_data_pairs(data_new, data_old):
     scores_new = collections.defaultdict(list)
     for line in data_old:
         for sys, sys_v in line.items():
-            scores_old[sys].append(sys_v["score"])
+            scores_old[sys].append(sys_v["scores"]["human"])
     for line in data_new:
         for sys, sys_v in line.items():
-            scores_new[sys].append(sys_v["score"])
+            scores_new[sys].append(sys_v["scores"]["human"])
 
     systems = {
         sys

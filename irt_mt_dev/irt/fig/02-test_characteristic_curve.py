@@ -18,7 +18,7 @@ points_x = np.linspace(theta_min-0.05, theta_max+0.05, 100)
 
 points_y_true = [
     np.average([
-        x["metrics"][sys]["MetricX-23-c"]
+        x["scores"][sys]["MetricX-23-c"]
         for x in data_wmt
     ])
     for sys in systems

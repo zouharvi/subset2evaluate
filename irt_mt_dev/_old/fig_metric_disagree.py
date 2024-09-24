@@ -14,7 +14,7 @@ points_y = []
 # higher density at the beginning because there are higher changes in y
 PROPS = np.concatenate([np.linspace(0, 0.04, 35), np.linspace(0.04, 1, 65)])
 
-data_old.sort(key=lambda line: np.corrcoef([sys_v["metrics"]["metric_COMET"] for sys_v in line.values()], [sys_v["metrics"]["metric_SacreBLEU_bleu"] for sys_v in line.values()])[0,1])
+data_old.sort(key=lambda line: np.corrcoef([sys_v["scores"]["metric_COMET"] for sys_v in line.values()], [sys_v["scores"]["metric_SacreBLEU_bleu"] for sys_v in line.values()])[0,1])
 for prop in tqdm.tqdm(PROPS):
     points_x.append(prop)
 

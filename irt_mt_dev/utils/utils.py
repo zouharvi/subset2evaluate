@@ -12,9 +12,15 @@ def load_data_squad(n_items=1000, n_systems=161):
         data_out.append({
             "i": pred_i,
             # TODO: check that all systems have the same predictions
-            "score": {
-                sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["f1"]
-                for sys in data[:n_systems]
+            "scores": {
+                "exact_match": {
+                    sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["exact_match"]
+                    for sys in data[:n_systems]
+                },
+                "f1": {
+                    sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["f1"]
+                    for sys in data[:n_systems]
+                }
             },
         })
     return data_out
@@ -48,7 +54,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
     for line_raw in open(fname, "r").readlines():
     # for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score", "r").readlines():
         sys, score = line_raw.strip().split("\t")
-        line_score[sys].append({"score": score})
+        line_score[sys].append({"human": score})
 
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
         metric = f.split("/")[-1].removesuffix("-refA.seg.score")
@@ -64,8 +70,8 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
     line_id_true = 0
     for line_i, (line_src, line_ref, line_doc) in enumerate(zip(line_src, line_ref, line_doc)):
         # filter None on the whole row
-        if any([line_score[sys][line_i]["score"] in {"None", "0"} for sys in systems]):
-        # if any([line_score[sys][line_i]["score"] in {"None"} for sys in systems]):
+        if any([line_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
+        # if any([line_score[sys][line_i]["human"] in {"None"} for sys in systems]):
             continue
 
         line_domain, line_doc = line_doc.strip().split("\t")
@@ -76,8 +82,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
             "domain": line_domain,
-            "score": {sys: float(line_score[sys][line_i].pop("score")) for sys in systems},
-            "metrics": {sys: line_score[sys][line_i] for sys in systems},
+            "scores": {sys: line_score[sys][line_i] for sys in systems},
         })
         line_id_true += 1
     
@@ -87,11 +92,9 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
         import collections
         data_flat = collections.defaultdict(list)
         for line in data:
-            for met_all in line["metrics"].values():
+            for met_all in line["scores"].values():
                 for met_k, met_v in met_all.items():
                     data_flat[met_k].append(met_v)
-
-            data_flat["score"] += list(line["score"].values())
 
         # normalize
         data_flat = {
@@ -100,24 +103,19 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
         }
 
         for line in data:
-            for sys, met_all in line["metrics"].items():
+            for sys, met_all in line["scores"].items():
                 for met_k, met_v in met_all.items():
                     # (x-min)/(max-min) normalize
-                    line["metrics"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
-
-            for sys, sys_v in line["score"].items():
-                line["score"][sys]= (sys_v-data_flat["score"][0])/(data_flat["score"][1]-data_flat["score"][0])
+                    line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
 
     if binarize:
         import collections
         import numpy as np
         data_flat = collections.defaultdict(list)
         for line in data:
-            for met_all in line["metrics"].values():
+            for met_all in line["scores"].values():
                 for met_k, met_v in met_all.items():
                     data_flat[met_k].append(met_v)
-
-            data_flat["score"] += list(line["score"].values())
 
         # normalize
         data_flat = {
@@ -126,32 +124,23 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
         }
 
         for line in data:
-            for sys, met_all in line["metrics"].items():
+            for sys, met_all in line["scores"].items():
                 for met_k, met_v in met_all.items():
-                    line["metrics"][sys][met_k] = 1*(met_v >= data_flat[met_k])
-
-            for sys, sys_v in line["score"].items():
-                line["score"][sys]= 1*(sys_v >= data_flat["score"])
-
+                    line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
     print("Loaded", len(data), "lines of", len(systems), "systems")
     return data
 
-def get_sys_absolute(data_new, metric="score") -> Dict[str, float]:
+def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections
     import numpy as np
 
     scores_new = collections.defaultdict(list)
 
-    systems = list(data_new[0]["score"].keys())
-    if metric == "score":
-        for line in data_new:
-            for sys, sys_v in line["score"].items():
-                scores_new[sys].append(sys_v)
-    else:
-        for line in data_new:
-            for sys in systems:
-                scores_new[sys].append(line["metrics"][sys][metric])
+    systems = list(data_new[0]["scores"]["human"].keys())
+    for line in data_new:
+        for sys in systems:
+            scores_new[sys].append(line["scores"][sys][metric])
 
     scores_new = {
         sys: np.average(scores_new[sys])
@@ -160,7 +149,7 @@ def get_sys_absolute(data_new, metric="score") -> Dict[str, float]:
 
     return scores_new
 
-def get_sys_ordering(data_new: list, metric="score"):
+def get_sys_ordering(data_new: list, metric="human"):
     scores_new = get_sys_absolute(data_new, metric)
     
     # sort to get ordering
@@ -179,7 +168,7 @@ def eval_data_pairs(data_new: list, data_old: list):
     import itertools
     import numpy as np
     
-    systems = list(data_old[0]["score"].keys())
+    systems = list(data_old[0]["scores"]["human"].keys())
 
     scores_old = get_sys_absolute(data_old)
     scores_new = get_sys_absolute(data_new)
@@ -202,7 +191,7 @@ def get_ord_accuracy(ord1, ord2):
 
     return np.average(result)
 
-def get_nice_subset(data_old, target_size=100, step_size=10, metric="score"):
+def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
     import numpy as np
     order_full = get_sys_ordering(data_old, metric=metric)
 

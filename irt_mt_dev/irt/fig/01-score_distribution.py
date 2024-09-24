@@ -9,14 +9,14 @@ data_old = utils.load_data(normalize=True)
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
 
-systems = list(data_old[0]["score"].keys())
+systems = list(data_old[0]["scores"]["human"].keys())
 points_score = [
-    sent["score"][sys]
+    sent["scores"]["human"][sys]
     for sent in data_old
     for sys in systems
 ]
 points_metric = [
-    sent["metrics"][sys]["MetricX-23-c"]
+    sent["scores"][sys]["MetricX-23-c"]
     for sent in data_old
     for sys in systems
 ]

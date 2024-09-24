@@ -7,8 +7,8 @@ data_old = utils.load_data()
 results_all_pred = []
 results_all_true = []
 
-for sys_i in range(len(data_old[0]["score"].keys())):
-    SYSTEMS = list(data_old[0]["score"].keys())
+for sys_i in range(len(data_old[0]["scores"]["human"].keys())):
+    SYSTEMS = list(data_old[0]["scores"]["human"].keys())
     SYSTEM_TEST = SYSTEMS.pop(sys_i)
 
     data = collections.defaultdict(list)
@@ -23,17 +23,17 @@ for sys_i in range(len(data_old[0]["score"].keys())):
         median = np.median([
             v
             for line in data[domain]
-            for v in [line["metrics"][sys]["MetricX-23-c"] for sys in SYSTEMS]
+            for v in [line["scores"][sys]["MetricX-23-c"] for sys in SYSTEMS]
         ])
 
         data[domain] = [
             (
                 # store lookup vector
-                np.array([line["metrics"][sys]["MetricX-23-c"] >= median for sys in SYSTEMS], dtype=np.float_),
+                np.array([line["scores"][sys]["MetricX-23-c"] >= median for sys in SYSTEMS], dtype=np.float_),
                 # store actual scores
-                [line["metrics"][sys]["MetricX-23-c"] for sys in SYSTEMS],
+                [line["scores"][sys]["MetricX-23-c"] for sys in SYSTEMS],
                 # score test passing
-                line["metrics"][SYSTEM_TEST]["MetricX-23-c"]
+                line["scores"][SYSTEM_TEST]["MetricX-23-c"]
             )
             for line in data[domain]
         ]

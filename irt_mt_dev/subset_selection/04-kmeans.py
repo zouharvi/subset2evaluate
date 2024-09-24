@@ -8,13 +8,13 @@ from sklearn.preprocessing import StandardScaler
 
 def featurize(line):
     # human oracle
-    # scores = np.array(list(line["score"].values()))
+    # scores = np.array(list(line["scores"]["human"].values()))
     # val_median = np.median(scores)
     # return np.abs(scores-val_median)
     return np.array(
         [
-            np.average([sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]),
-            np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]),
+            np.average([sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]),
+            np.average([sys_v["COMET"] for sys_v in line["scores"].values()]),
             len(line["src"]),
             # len(line["ref"]),
         ]

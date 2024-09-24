@@ -19,14 +19,14 @@ def linear(x, a, b):
     return a * x + b
 
 data_wmt = utils.load_data(normalize=True)
-systems = list(data_wmt[0]["score"].keys())
+systems = list(data_wmt[0]["scores"]["human"].keys())
 
 irt_mt_dev.utils.fig.matplotlib_default()
 
 system_scores = {
     sys:
     np.average([
-        line["metrics"][sys]["MetricX-23-c"]
+        line["scores"][sys]["MetricX-23-c"]
         for line in data_wmt
     ])
     for sys in systems
@@ -49,7 +49,7 @@ fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
     ax.set_title(f"Item {item_i}")
 
-    data_y = [data_wmt[item_i]["metrics"][sys]["MetricX-23-c"] for sys in systems]
+    data_y = [data_wmt[item_i]["scores"][sys]["MetricX-23-c"] for sys in systems]
 
     p, _ = curve_fit(linear, data_x, data_y, maxfev=50000)
     ax.plot(data_x_ticks, linear(data_x_ticks, *p))
@@ -61,7 +61,7 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
     for sys in systems:
         ax.scatter(
             [system_scores[sys]],
-            [data_wmt[item_i]["metrics"][sys]["MetricX-23-c"]],
+            [data_wmt[item_i]["scores"][sys]["MetricX-23-c"]],
             color="#ccc",
             linewidth=1,
             edgecolor="black",
@@ -71,7 +71,7 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
         )
         ax.text(
             system_scores[sys],
-            data_wmt[item_i]["metrics"][sys]["MetricX-23-c"],
+            data_wmt[item_i]["scores"][sys]["MetricX-23-c"],
             system_index[sys],
             fontsize=7,
             ha="center", va="center",
