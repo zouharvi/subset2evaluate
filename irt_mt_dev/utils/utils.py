@@ -13,15 +13,12 @@ def load_data_squad(n_items=1000, n_systems=161):
             "i": pred_i,
             # TODO: check that all systems have the same predictions
             "scores": {
-                "exact_match": {
-                    sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["exact_match"]
-                    for sys in data[:n_systems]
-                },
-                "f1": {
-                    sys["name"] + ":" + sys["submission_id"]:sys["predictions"][pred]["scores"]["f1"]
-                    for sys in data[:n_systems]
+                sys["name"] + ":" + sys["submission_id"]: {
+                    "exact_match": sys["predictions"][pred]["scores"]["exact_match"],
+                    "f1": sys["predictions"][pred]["scores"]["f1"],
                 }
-            },
+                for sys in data[:n_systems]
+            }
         })
     return data_out
 
@@ -82,7 +79,7 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
             "domain": line_domain,
-            "scores": {sys: line_score[sys][line_i] for sys in systems},
+            "scores": {sys: {metric: float(v) for metric,v in line_score[sys][line_i].items()} for sys in systems},
         })
         line_id_true += 1
     
