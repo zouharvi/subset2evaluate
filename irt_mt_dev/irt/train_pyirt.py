@@ -10,21 +10,18 @@ import json
 
 
 args = argparse.ArgumentParser()
-args.add_argument("--metric", default="score")
+args.add_argument("--out", default="computed/pyyirt.json")
+args.add_argument("-s", "--seed", type=int, default=None)
+args.add_argument("-e", "--epochs", type=int, default=1_000)
+args.add_argument("--metric", default="exact_match")
 args = args.parse_args()
 
 # data = utils.load_data(normalize=True, binarize=True)
 data = utils.load_data_squad(n_items=None, n_systems=None)
-systems = list(data[0]["score"].keys())
-
-def get_line_score(line, system):
-    if args.metric == "score":
-        return line["score"][system]
-    else:
-        return line["metrics"][system][args.metric]
+systems = list(data[0]["scores"]["human"].keys())
 
 def get_line_class(line, system):
-    return bool(get_line_score(line, system))
+    return line["scores"]["human"][system] == 1.0
 
 py_irt.io.write_jsonlines(
     "/tmp/irt_dataset.jsonl",
@@ -39,13 +36,13 @@ py_irt.io.write_jsonlines(
 
 dataset = py_irt.dataset.Dataset.from_jsonlines("/tmp/irt_dataset.jsonl")
 
-config = py_irt.config.IrtConfig(model_type='3pl', log_every=500, dropout=0)
+config = py_irt.config.IrtConfig(model_type='4pl', log_every=500, dropout=0, seed=args.seed)
 trainer = py_irt.training.IrtModelTrainer(config=config, data_path=None, dataset=dataset)
-trainer.train(epochs=2_000, device='cuda')
+trainer.train(epochs=args.epochs, device='cuda')
 
 json.dump({
     "theta": trainer.last_params["ability"],
     "a": trainer.last_params["disc"],
     "b": trainer.last_params["diff"],
     "c": trainer.last_params["lambdas"],
-}, open(f"computed/3pl_{args.metric}.json", "w"))
+}, open(args.out, "w"))

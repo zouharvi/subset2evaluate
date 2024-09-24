@@ -9,10 +9,10 @@ from sklearn.preprocessing import StandardScaler
 def featurize(line):
     return np.array(
         [
-            np.average([sys_v["COMET"] for sys_v in line["metrics"].values()]),
-            # np.average([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]),
-            np.var([sys_v["COMET"] for sys_v in line["metrics"].values()]),
-            # np.var([sys_v["MetricX-23"] for sys_v in line["metrics"].values()]),
+            np.average([sys_v["COMET"] for sys_v in line["scores"].values()]),
+            # np.average([sys_v["MetricX-23"] for sys_v in line["scores"].values()]),
+            np.var([sys_v["COMET"] for sys_v in line["scores"].values()]),
+            # np.var([sys_v["MetricX-23"] for sys_v in line["scores"].values()]),
             len(line["src"]),
             len(line["ref"]),
         ]

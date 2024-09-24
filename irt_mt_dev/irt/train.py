@@ -17,18 +17,18 @@ args = args.parse_args()
 # data_wmt = utils.load_data(normalize=True, binarize=args.binarize)
 data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
 
-systems = list(data_wmt[0]["score"].keys())
+systems = list(data_wmt[0]["scores"]["human"].keys())
 model = IRTModel(len(data_wmt), systems)
 
 if args.metric == "score":
     data_loader = [
-        ((sent_i, sys_i), sent["score"][sys])
+        ((sent_i, sys_i), sent["scores"]["human"][sys])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]
 else:
     data_loader = [
-        ((sent_i, sys_i), sent["metrics"][sys][args.metric])
+        ((sent_i, sys_i), sent["scores"][sys][args.metric])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]

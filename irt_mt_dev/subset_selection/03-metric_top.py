@@ -15,14 +15,14 @@ points_y_hi = []
 def heuristic_abs(line):
     # np.max is also good
     return np.average(
-        [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )
 
 def heuristic_std(line):
-    return np.std([sys_v["MetricX-23"] for sys_v in line["metrics"].values()])
+    return np.std([sys_v["MetricX-23"] for sys_v in line["scores"].values()])
 
 def heuristic_max_diff(line):
-    return max([sys["COMET"] for sys in line["metrics"].values()])-min([sys["COMET"] for sys in line["metrics"].values()])
+    return max([sys["COMET"] for sys in line["scores"].values()])-min([sys["COMET"] for sys in line["scores"].values()])
 
     
 def heuristic_moment(line, pow=3):
@@ -31,20 +31,20 @@ def heuristic_moment(line, pow=3):
     # pow = 1: abs diff
     return  np.average([
         abs(sys_a_v["MetricX-23"]-sys_b_v["MetricX-23"])**pow
-        for sys_a_v, sys_b_v in itertools.combinations(line["metrics"].values(), 2)
+        for sys_a_v, sys_b_v in itertools.combinations(line["scores"].values(), 2)
     ])
 
 def heuristic_corr(line):
     return scipy.stats.spearmanr(
-        [sys_v["COMET"] for sys_v in line["metrics"].values()],
-        [sys_v["MetricX-23-c"] for sys_v in line["metrics"].values()]
+        [sys_v["COMET"] for sys_v in line["scores"].values()],
+        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )[0]
     
 def heuristic_score_abs(line):
-    return np.average(list(line["score"].values()))
+    return np.average(list(line["scores"]["human"].values()))
 
 def heuristic_score_std(line):
-    return np.std(list(line["score"].values()))
+    return np.std(list(line["scores"]["human"].values()))
 
 def heuristic_translation_dist_chrf(line):
     import sacrebleu

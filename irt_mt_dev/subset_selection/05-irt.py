@@ -6,7 +6,7 @@ import numpy as np
 data_irt = json.load(open("computed/irt_metricx.json", "r"))
 data_old = utils.load_data()
 
-systems = list(data_old[0]["score"].keys())
+systems = list(data_old[0]["scores"]["human"].keys())
 ord_gold = utils.get_sys_ordering(data_old)
 
 # EXPERIMENT: compare ITR MT performance with AVG MT one and with gold one

@@ -22,7 +22,7 @@ for line in data_old:
         sys_to_lines[sys].append(sys_v)
 # sort independently for each system
 for sys, sys_v in sys_to_lines.items():
-    sys_v.sort(key=lambda line: line["metrics"]["metric_COMET"])
+    sys_v.sort(key=lambda line: line["scores"]["metric_COMET"])
     
 for prop in tqdm.tqdm(PROPS):
     points_x.append(prop)
