@@ -12,13 +12,17 @@ import json
 args = argparse.ArgumentParser()
 args.add_argument("--out", default="computed/pyyirt.json")
 args.add_argument("-s", "--seed", type=int, default=None)
+args.add_argument("-d", "--data", choices=["squad", "wmt"], default="wmt")
 args.add_argument("-e", "--epochs", type=int, default=1_000)
 args.add_argument("--metric", default="exact_match")
 args.add_argument("--all-params", action="store_true")
 args = args.parse_args()
 
-data = utils.load_data()
-# data = utils.load_data_squad(n_items=None, n_systems=None)
+if args.data == "wmt":
+    data = utils.load_data()
+elif args.data == "squad":
+    data = utils.load_data_squad(n_items=None, n_systems=None)
+
 systems = list(data[0]["scores"].keys())
 
 median = np.median([
@@ -46,6 +50,8 @@ config = py_irt.config.IrtConfig(
     log_every=100,
     # dropout=0,
     seed=args.seed,
+    # TODO: see what this does
+    deterministic=True,
 )
 trainer = py_irt.training.IrtModelTrainer(
     config=config,
