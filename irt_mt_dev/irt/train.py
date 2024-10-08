@@ -22,7 +22,7 @@ model = IRTModel(len(data_wmt), systems)
 
 if args.metric == "score":
     data_loader = [
-        ((sent_i, sys_i), sent["scores"]["human"][sys])
+        ((sent_i, sys_i), sent["scores"][sys]["human"])
         for sent_i, sent in enumerate(data_wmt)
         for sys_i, sys in enumerate(systems)
     ]

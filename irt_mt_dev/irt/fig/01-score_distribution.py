@@ -9,9 +9,9 @@ data_old = utils.load_data(normalize=True)
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
 
-systems = list(data_old[0]["scores"]["human"].keys())
+systems = list(data_old[0]["scores"].keys())
 points_score = [
-    sent["scores"]["human"][sys]
+    sent["scores"][sys]["human"]
     for sent in data_old
     for sys in systems
 ]

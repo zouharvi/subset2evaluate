@@ -1,11 +1,11 @@
+# used for fellowhsip application
+
 import irt_mt_dev.utils as utils
 import irt_mt_dev.utils.fig
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.ticker as mtick
 import json
-import argparse
-
 
 data_irt_d0 = json.load(open(f"computed/irt_score_d0.json", "r"))
 data_irt_d1 = json.load(open(f"computed/irt_score_d1.json", "r"))

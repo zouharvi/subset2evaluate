@@ -4,13 +4,14 @@ Look at individual segments and how they correspond to system averages.
 
 import json
 import irt_mt_dev.utils.fig
+import irt_mt_dev.utils as utils
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
 
-data = [json.loads(x) for x in open("data/squad_systems.jsonl")]
-items = list(data[0]["predictions"].keys())
-data = [[sys["predictions"][item]["scores"]["f1"] for item in items] for sys in data]
+data = utils.load_data_squad()
+systems = list(data[0]["scores"].keys())
+data = [[item["scores"][sys]["f1"] for item in data] for sys in systems]
 
 def linear(x, a, b):
     return a * x + b
@@ -21,7 +22,6 @@ data_x = [
     np.average(sys_v)
     for sys_v in data
 ]
-data_x_ticks = np.linspace(min(data_x), max(data_x), 100)
 
 fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 
@@ -32,6 +32,7 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
 
     _data_y = np.array([sys_v[item_i] for sys_v in data])[system_subset]
     _data_x = np.array(data_x)[system_subset]
+    data_x_ticks = np.linspace(min(_data_x), max(_data_x), 100)
 
     p, _ = curve_fit(linear, _data_x, _data_y, maxfev=50000)
     ax.plot(data_x_ticks, linear(data_x_ticks, *p))

@@ -3,10 +3,6 @@ import torch.utils
 import lightning as L
 import json
 
-def softplus_inverse(x):
-    return x + torch.log(-torch.expm1(-x))
-
-
 class IRTModel(L.LightningModule):
     def __init__(self, len_items, systems):
         super().__init__()
