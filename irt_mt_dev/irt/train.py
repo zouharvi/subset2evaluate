@@ -8,31 +8,23 @@ from sklearn.model_selection import train_test_split
 
 args = argparse.ArgumentParser()
 args.add_argument("--metric", default="score")
-args.add_argument("--binarize", "--bin", action="store_true")
 args.add_argument("--train-size", type=float, default=0.9)
-args.add_argument("--no-save", action="store_true")
+args.add_argument("--epochs", type=int, default=5000)
+args.add_argument("--out", default="/dev/null")
 args = args.parse_args()
 
 # WMT: 1k items, 15 systems
-# data_wmt = utils.load_data(normalize=True, binarize=args.binarize)
-data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
+data_wmt = utils.load_data(normalize=True, binarize=False)
+# data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
 
-systems = list(data_wmt[0]["scores"]["human"].keys())
+systems = list(data_wmt[0]["scores"].keys())
 model = IRTModel(len(data_wmt), systems)
 
-if args.metric == "score":
-    data_loader = [
-        ((sent_i, sys_i), sent["scores"][sys]["human"])
-        for sent_i, sent in enumerate(data_wmt)
-        for sys_i, sys in enumerate(systems)
-    ]
-else:
-    data_loader = [
-        ((sent_i, sys_i), sent["scores"][sys][args.metric])
-        for sent_i, sent in enumerate(data_wmt)
-        for sys_i, sys in enumerate(systems)
-    ]
-
+data_loader = [
+    ((sent_i, sys_i), sent["scores"][sys][args.metric])
+    for sent_i, sent in enumerate(data_wmt)
+    for sys_i, sys in enumerate(systems)
+]
 
 # subsample training data
 assert args.train_size > 0.0 and args.train_size <= 1.0
@@ -64,11 +56,11 @@ data_test = torch.utils.data.DataLoader(
 )
 
 trainer = L.Trainer(
-    max_epochs=1000,
+    max_epochs=args.epochs,
     log_every_n_steps=1,
     check_val_every_n_epoch=500,
-    enable_checkpointing=not args.no_save,
-    logger=not args.no_save,
+    enable_checkpointing=False,
+    logger=False,
 )
 trainer.fit(
     model=model,
@@ -76,9 +68,4 @@ trainer.fit(
     val_dataloaders=data_test,
 )
 
-suffix = ""
-if args.binarize:
-    suffix += "_bin"
-
-if not args.no_save:
-    model.save_irt(f"computed/irt_{args.metric}{suffix}.json")
+model.save_irt(args.out)

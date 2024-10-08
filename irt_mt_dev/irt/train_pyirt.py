@@ -60,20 +60,18 @@ trainer = py_irt.training.IrtModelTrainer(
 )
 trainer.train(epochs=args.epochs, device='cuda')
 
-if args.all_params:
-    json.dump([
-        {
-            "theta": params["ability"],
-            "disc": params["disc"],
-            "diff": params["diff"],
-            "feas": params["lambdas"],
-        }
-        for params in trainer.all_params
-    ], open(args.out, "w"))
-else:
-    json.dump({
-        "theta": trainer.last_params["ability"],
-        "disc": trainer.last_params["disc"],
-        "diff": trainer.last_params["diff"],
-        "feas": trainer.last_params["lambdas"],
-    }, open(args.out, "w"))
+json.dump([
+    {
+        "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+        "items": [
+            {"disc": disc, "diff": diff, "feas": feas}
+            for disc, diff, feas in zip(
+                params["disc"],
+                params["diff"],
+                params["lambdas"],
+            )
+        ]
+    }
+    for params
+    in (trainer.all_params if args.all_params else [trainer.last_params])
+], open(args.out, "w"))
