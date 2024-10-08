@@ -19,7 +19,10 @@ def fig2img(fig):
 def plot_irt(x):
 	params_i, data = x
 	cmap=cm.coolwarm_r
-	norm=mpl.colors.Normalize(vmin=min(data["lambda"])-0.01, vmax=max(data["lambda"])+0.01)
+	norm=mpl.colors.Normalize(
+		vmin=min([item["feas"] for item in data["items"]])-0.01,
+		vmax=max([item["feas"] for item in data["items"]])+0.01,
+	)
 
 	fig, axs = plt.subplots(
 		ncols=2, nrows=2,
@@ -29,19 +32,19 @@ def plot_irt(x):
 
 	# main plot
 	axs[1, 0].scatter(
-		data["diff"],
-		data["disc"],
+		[item["diff"] for item in data["items"]],
+		[item["disc"] for item in data["items"]],
 		s=10,
 		alpha=0.5,
 		linewidths=0,
-		color=[cmap(norm(x)) for x in data["lambda"]],
+		color=[cmap(norm(item["feas"])) for item in data["items"]],
 	)
 	axs[1, 0].set_ylabel(r"Discriminability ($\alpha$)")
 	axs[1, 0].set_xlabel(r"Difficulty ($\beta$)")
 
 	# top histogram (difficulty)
 	axs[0, 0].hist(
-		data["diff"],
+		[item["diff"] for item in data["items"]],
 		bins=np.linspace(*axs[1, 0].get_xlim(), 40),
 		orientation="vertical",
 		color="black",
@@ -50,7 +53,7 @@ def plot_irt(x):
 
 	# right histogram (discriminability)
 	axs[1, 1].hist(
-		data["disc"],
+		[item["disc"] for item in data["items"]],
 		bins=np.linspace(*axs[1, 0].get_ylim(), 40),
 		orientation="horizontal",
 		color="black",
@@ -73,8 +76,8 @@ def plot_irt(x):
 
 	pos_theta_tick = axs[1, 0].get_ylim()[0]+(axs[1, 0].get_ylim()[1]-axs[1, 0].get_ylim()[0])*0.1
 	axs[1, 0].plot(
-		data["theta"],
-		len(data["theta"])*[pos_theta_tick],
+		data["systems"].values(),
+		len(list(data["systems"].values()))*[pos_theta_tick],
 		marker="|",
 		alpha=0.5,
 		color="black",
@@ -87,13 +90,14 @@ def plot_irt(x):
 	
 	return img
 
-for seed in [0, 1, 2, 3, 4]:
+# for seed in [0, 1, 2, 3, 4]:
+for seed in [0]:
 	# paralelize
 	with Pool(10) as pool:
 		imgs = pool.map(
 			plot_irt,
 			# skip zeroth epoch
-			enumerate(json.load(open(f"computed/irt_squad_4pl_s{seed}_eall_em.json"))[1:])
+			enumerate(json.load(open(f"computed/irt_wmt_4pl_s{seed}_our.json"))[1:])
 		)
 
 		# compute video

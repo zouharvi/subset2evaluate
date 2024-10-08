@@ -2,6 +2,7 @@ import torch
 import torch.utils
 import lightning as L
 import json
+import copy
 
 class IRTModel(L.LightningModule):
     def __init__(self, len_items, systems):
@@ -19,6 +20,8 @@ class IRTModel(L.LightningModule):
         self.systems = systems
         self.len_items = len_items
 
+        self.params_log = []
+
         # self.loss_fn = torch.nn.L1Loss()
         self.loss_fn = torch.nn.MSELoss()
         # self.loss_fn = torch.nn.BCELoss()
@@ -31,6 +34,9 @@ class IRTModel(L.LightningModule):
         return feas + (1 - feas) / (1 + torch.exp(-disc * (theta - diff)))
 
     def training_step(self, batch, batch_idx):
+        # apply constraint
+        self.param_feas.data = torch.clamp(self.param_feas, min=0, max=1)
+        
         # training_step defines the train loop.
         # it is independent of forward
         (i_item, i_system), y = batch
@@ -42,6 +48,7 @@ class IRTModel(L.LightningModule):
 
         # regularize
         # loss += torch.pow(self.param_a, 2).sum()/100
+
 
         self.log("train_loss", loss)
         return loss
@@ -59,26 +66,43 @@ class IRTModel(L.LightningModule):
 
         self.log("val_loss_vs_constant", loss_pred-loss_const)
 
+        self.params_log.append({
+            "theta": self.param_theta.clone().detach().tolist(),
+            "disc": self.param_disc.clone().detach().tolist(),
+            "diff": self.param_diff.clone().detach().tolist(),
+            "feas": self.param_feas.clone().detach().tolist(),
+        })
+
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.01)
 
     def save_irt(self, filename):
+        # save last parameters
+        self.params_log.append({
+            "theta": self.param_theta.clone().detach().tolist(),
+            "disc": self.param_disc.clone().detach().tolist(),
+            "diff": self.param_diff.clone().detach().tolist(),
+            "feas": self.param_feas.clone().detach().tolist(),
+        })
+
         with open(filename, "w") as f:
             json.dump(
-                obj={
-                    "items": [
-                        {"disc": disc, "diff": diff, "feas": feas}
-                        for disc, diff, feas in zip(
-                            self.param_disc.tolist(),
-                            self.param_diff.tolist(),
-                            self.param_feas.tolist(),
-                        )
-                    ],
-                    "systems": {
-                        sys: sys_v
-                        for sys, sys_v in zip(self.systems, self.param_theta.tolist())
-                    },
-                },
+                obj=[
+                    {
+                        "items": [
+                            {"disc": disc, "diff": diff, "feas": feas}
+                            for disc, diff, feas in zip(
+                                params["disc"],
+                                params["diff"],
+                                params["feas"],
+                            )
+                        ],
+                        "systems": {
+                            sys: sys_v
+                            for sys, sys_v in zip(self.systems, params["theta"])
+                        },
+                    } for params in self.params_log
+                ],
                 fp=f,
             )
 
