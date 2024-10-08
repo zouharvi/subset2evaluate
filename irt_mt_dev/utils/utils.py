@@ -134,7 +134,7 @@ def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
 
     scores_new = collections.defaultdict(list)
 
-    systems = list(data_new[0]["scores"]["human"].keys())
+    systems = list(data_new[0]["scores"].keys())
     for line in data_new:
         for sys in systems:
             scores_new[sys].append(line["scores"][sys][metric])
@@ -165,7 +165,7 @@ def eval_data_pairs(data_new: list, data_old: list):
     import itertools
     import numpy as np
     
-    systems = list(data_old[0]["scores"]["human"].keys())
+    systems = list(data_old[0]["scores"].keys())
 
     scores_old = get_sys_absolute(data_old)
     scores_new = get_sys_absolute(data_new)
@@ -204,10 +204,10 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
 
 def pred_irt(system_theta, item):
     import numpy as np
-    if "c" in item:
-        return item["c"] / (1 + np.exp(-item["a"] * (system_theta - item["b"])))
-    if "a" in item:
-        return 1 / (1 + np.exp(-item["a"] * (system_theta - item["b"])))
-    if "b" in item:
-        return 1 / (1 + np.exp(system_theta - item["b"]))
+    if "feas" in item:
+        return item["feas"] + (1 - item["feas"]) / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
+    if "disc" in item:
+        return 1 / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
+    if "diff" in item:
+        return 1 / (1 + np.exp(system_theta - item["diff"]))
     raise Exception("Uknown item", item)

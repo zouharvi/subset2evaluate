@@ -19,7 +19,7 @@ args.add_argument("--all-params", action="store_true")
 args = args.parse_args()
 
 if args.data == "wmt":
-    data = utils.load_data()
+    data = utils.load_data(normalize=True)
 elif args.data == "squad":
     data = utils.load_data_squad(n_items=None, n_systems=None)
 
@@ -66,7 +66,7 @@ if args.all_params:
             "theta": params["ability"],
             "disc": params["disc"],
             "diff": params["diff"],
-            "lambda": params["lambdas"],
+            "feas": params["lambdas"],
         }
         for params in trainer.all_params
     ], open(args.out, "w"))
@@ -75,5 +75,5 @@ else:
         "theta": trainer.last_params["ability"],
         "disc": trainer.last_params["disc"],
         "diff": trainer.last_params["diff"],
-        "lambda": trainer.last_params["lambdas"],
+        "feas": trainer.last_params["lambdas"],
     }, open(args.out, "w"))

@@ -12,14 +12,11 @@ from scipy.optimize import curve_fit
 def sigmoid_irt(x, a, b, c):
     return c / (1 + np.exp(-a * (x - b)))
 
-def sigmoid_general(x, A, shift_x, slope, shift_y):
-    return A / (1 + np.exp ((x - shift_x) / slope)) + shift_y
-
 def linear(x, a, b):
     return a * x + b
 
 data_wmt = utils.load_data(normalize=True)
-systems = list(data_wmt[0]["scores"]["human"].keys())
+systems = list(data_wmt[0]["scores"].keys())
 
 irt_mt_dev.utils.fig.matplotlib_default()
 
@@ -43,7 +40,6 @@ system_index = {
 print(system_index)
 print(system_scores)
 
-
 fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 
 for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
@@ -53,10 +49,6 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
 
     p, _ = curve_fit(linear, data_x, data_y, maxfev=50000)
     ax.plot(data_x_ticks, linear(data_x_ticks, *p))
-    # p, _ = curve_fit(sigmoid_irt, data_x, data_y, maxfev=50000)
-    # ax.plot(data_x_ticks, sigmoid_irt(data_x_ticks, *p))
-    # p, _ = curve_fit(sigmoid_general, data_x, data_y, maxfev=50000)
-    # ax.plot(data_x_ticks, sigmoid_general(data_x_ticks, *p))
 
     for sys in systems:
         ax.scatter(
@@ -79,7 +71,6 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
         )
     ax.set_ylabel("Item score")
     ax.set_xlabel("System average")
-    # ax.set_ylim(0.3, 0.9)
 
 plt.tight_layout()
 

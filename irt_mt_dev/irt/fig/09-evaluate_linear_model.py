@@ -7,7 +7,7 @@ import numpy as np
 data_wmt = utils.load_data(normalize=True, binarize=False)
 systems = list(data_wmt[0]["scores"]["human"].keys())
 # data_loader = [
-#     ((sent_i, sys_i), sent["scores"]["human"][sys])
+#     ((sent_i, sys_i), sent["scores"][sys]["human"])
 #     for sent_i, sent in enumerate(data_wmt)
 #     for sys_i, sys in enumerate(systems)
 # ]
