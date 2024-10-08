@@ -9,12 +9,12 @@ class IRTModel(L.LightningModule):
 
         # normally distribute at the beginning
         # discrimination
-        self.param_a = torch.nn.Parameter(torch.randn(len_items))
+        self.param_disc = torch.nn.Parameter(torch.randn(len_items))
         # difficulty
-        self.param_b = torch.nn.Parameter(torch.randn(len_items))
+        self.param_diff = torch.nn.Parameter(torch.randn(len_items))
         # feasability
-        self.param_c = torch.nn.Parameter(torch.randn(len_items))
-        # mt ability
+        self.param_feas = torch.nn.Parameter(torch.randn(len_items))
+        # MT ability
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
         self.systems = systems
         self.len_items = len_items
@@ -24,11 +24,11 @@ class IRTModel(L.LightningModule):
         # self.loss_fn = torch.nn.BCELoss()
 
     def forward(self, i_item, i_system):
-        a = self.param_a[i_item]
-        b = self.param_b[i_item]
-        c = self.param_c[i_item]
+        disc = self.param_disc[i_item]
+        diff = self.param_diff[i_item]
+        feas = self.param_feas[i_item]
         theta = self.param_theta[i_system]
-        return torch.sigmoid(c) / (1 + torch.exp(-a * (theta - b)))
+        return feas + (1 - feas) / (1 + torch.exp(-disc * (theta - diff)))
 
     def training_step(self, batch, batch_idx):
         # training_step defines the train loop.
@@ -67,11 +67,11 @@ class IRTModel(L.LightningModule):
             json.dump(
                 obj={
                     "items": [
-                        {"a": a, "b": b, "c": c}
-                        for a, b, c in zip(
-                            self.param_a.tolist(),
-                            self.param_b.tolist(),
-                            torch.sigmoid(self.param_c).tolist(),
+                        {"disc": disc, "diff": diff, "feas": feas}
+                        for disc, diff, feas in zip(
+                            self.param_disc.tolist(),
+                            self.param_diff.tolist(),
+                            self.param_feas.tolist(),
                         )
                     ],
                     "systems": {
@@ -83,7 +83,7 @@ class IRTModel(L.LightningModule):
             )
 
     def load_irt(self, f_or_fname):
-        print("WARNING: Loading is untested")
+        raise Exception("WARNING: Loading is untested")
         if type(f_or_fname) == str:
             f_or_fname = open(f_or_fname, "r")
         
@@ -96,7 +96,7 @@ class IRTModel(L.LightningModule):
 
         for i in range(self.len_items):
             # need to inverse because we're saving softplused version
-            self.param_a[i] = data["items"][i]["a"]
-            self.param_b[i] = data["items"][i]["b"]
+            self.param_disc[i] = data["items"][i]["a"]
+            self.param_diff[i] = data["items"][i]["b"]
 
         f_or_fname.close()
