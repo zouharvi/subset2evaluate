@@ -35,8 +35,8 @@ class IRTModel(L.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # apply constraint
-        self.param_feas.data = torch.clamp(self.param_feas, min=0, max=1)
-        
+        self.param_feas.data = torch.clamp(self.param_feas, min=10e-3, max=1-10e-3)
+
         # training_step defines the train loop.
         # it is independent of forward
         (i_item, i_system), y = batch
@@ -74,7 +74,7 @@ class IRTModel(L.LightningModule):
         })
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.01)
+        return torch.optim.Adam(self.parameters(), lr=0.1)
 
     def save_irt(self, filename):
         # save last parameters
