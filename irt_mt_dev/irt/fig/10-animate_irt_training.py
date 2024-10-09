@@ -97,13 +97,13 @@ for seed in [0]:
 		imgs = pool.map(
 			plot_irt,
 			# skip zeroth epoch
-			enumerate(json.load(open(f"computed/irt_wmt_4pl_s{seed}_our.json"))[1:])
+			enumerate(json.load(open(f"computed/irt_wmt_4pl_s{seed}_pyirt.json"))[1:])
 		)
 
 		# compute video
 		videodims = (imgs[0].width, imgs[0].height)
 		fourcc = cv2.VideoWriter_fourcc(*'mp4v')    
-		video = cv2.VideoWriter(f"computed/irt_squad_4pl_s{seed}_em.mp4", fourcc, 4, videodims)
+		video = cv2.VideoWriter(f"computed/irt_squad_4pl_s{seed}_pyirt.mp4", fourcc, 4, videodims)
 		img = Image.new('RGB', videodims, color = 'darkred')
 
 		for img in imgs:

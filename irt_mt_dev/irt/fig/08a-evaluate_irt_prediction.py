@@ -13,7 +13,7 @@ data_loader = [
 
 data_train, data_test = train_test_split(data_loader, random_state=0, train_size=0.9)
 
-data_irt = json.load(open("computed/irt_wmt_4pl_s0_our.json"))
+data_irt = json.load(open("computed/irt_wmt_4pl_s0_our.json"))[5]
 
 error_model = []
 data_test_avg = np.average([x[1] for x in data_test])
