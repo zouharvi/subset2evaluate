@@ -1,3 +1,5 @@
+# python3 irt_mt_dev/peng/02-example_random.py
+
 import irt_mt_dev.utils as utils
 import random
 
