@@ -32,10 +32,10 @@ for prop in tqdm.tqdm(utils.PROPS):
 
         lines_most_stable = lines_most_stable.most_common(k)
         data_new = [data_old[line_i] for line_i, _ in lines_most_stable]
-        points_y_local.append(utils.eval_data_pairs(data_new, data_old))
+        points_y_local.append(utils.eval_system_clusters(data_new))
         
     points_y.append(np.average(points_y_local))
     
-print(f"Average  {np.average(points_y):.2%}")
+print(f"Average  {np.average(points_y):.2f}")
 
-irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "stable_subset")
+irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2f}")], "stable_subset")

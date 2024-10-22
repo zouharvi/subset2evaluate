@@ -47,6 +47,8 @@ for prop in tqdm.tqdm(utils.PROPS):
                 data_old, key=lambda x: l2_dist(cluster_center_feat, x["feat"])
             )
         )
+        # TODO: this is not fair to evaluate with cluster count when the lines are duplicated which adds unfair statistical advantage
+        # TODO: ;should be deduplicated
 
     # duplicate each example based on its nearest prototype
     data_new = []
@@ -54,8 +56,8 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_new.append(cluster_prototypes[cluster_i])
 
     # repeat each sampling 10 times to smooth it out
-    points_y.append(utils.eval_data_pairs(data_new, data_old))
+    points_y.append(utils.eval_system_clusters(data_new))
 
-print(f"Average  {np.average(points_y):.2%}")
+print(f"Average  {np.average(points_y):.2f}")
 
-irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2%}")], "kmeans_true")
+irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"k-means true {np.average(points_y):.2f}")], "kmeans_true")
