@@ -14,14 +14,14 @@ for prop in tqdm.tqdm(utils.PROPS):
 
     points_y_local = []
     # repeat each sampling 10 times to smooth it out
-    for _ in range(100):
+    for _ in range(10):
         data_new = random.sample(data_old, k=int(len(data_old)*prop))
-        points_y_local.append(utils.eval_data_pairs(data_new, data_old))
+        points_y_local.append(utils.eval_system_clusters(data_new))
     points_y.append(np.average(points_y_local))
 
-print(f"Average  {np.average(points_y):.2%}")
+print(f"Average  {np.average(points_y):.2f}")
 
 irt_mt_dev.utils.fig.plot_subsetacc(
-    [(points_x, points_y, f"{np.average(points_y):.2%}")],
+    [(points_x, points_y, f"Random {np.average(points_y):.2f}")],
     "01-random_subset"
 )

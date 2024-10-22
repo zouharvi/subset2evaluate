@@ -60,19 +60,19 @@ for prop in tqdm.tqdm(utils.PROPS):
             data_old_hi_local = [x for x in data_old_hi_local if x["i"] not in data_new_hi_set_i]
             data_new_hi.append(line_hi_conf)
 
-        points_y_lo_local.append(utils.eval_data_pairs(data_new_lo, data_old))
-        points_y_hi_local.append(utils.eval_data_pairs(data_new_hi, data_old))
+        points_y_lo_local.append(utils.eval_system_clusters(data_new_lo))
+        points_y_hi_local.append(utils.eval_system_clusters(data_new_hi))
 
     points_y_lo.append(np.average(points_y_lo_local))
     points_y_hi.append(np.average(points_y_hi_local))
 
-print(f"Average (lo) {np.average(points_y_lo):.2%}")
-print(f"Average (hi) {np.average(points_y_hi):.2%}")
+print(f"Average (lo) {np.average(points_y_lo):.2f}")
+print(f"Average (hi) {np.average(points_y_hi):.2f}")
 
 irt_mt_dev.utils.fig.plot_subsetacc(
     [
-        (points_x, points_y_lo, f"From closest {np.average(points_y_lo):.2%}"),
-        (points_x, points_y_hi, f"From different {np.average(points_y_hi):.2%}"),
+        (points_x, points_y_lo, f"From closest {np.average(points_y_lo):.2f}"),
+        (points_x, points_y_hi, f"From different {np.average(points_y_hi):.2f}"),
     ],
     "06-decision_boundary",
 )

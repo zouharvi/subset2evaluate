@@ -26,6 +26,13 @@ def plot_subsetacc(points, filename=None):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
 
+    # either it's accuracy or clusters
+    IS_CLUSTERS = any(
+        y > 1
+        for _, points_y, _ in points
+        for y in points_y
+    )
+
     matplotlib_default()
     plt.figure(figsize=(3, 2))
 
@@ -46,13 +53,17 @@ def plot_subsetacc(points, filename=None):
             linewidth=2,
         )
 
-    plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
+    if IS_CLUSTERS:
+        plt.ylabel("Number of clusters")
+    else:
+        plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
     plt.xlabel("Proportion of original data", labelpad=-2)
 
     ax = plt.gca()
     ax.spines[['top', 'right']].set_visible(False)
     ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    if not IS_CLUSTERS:
+        ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
     plt.legend(
         loc="lower right",
@@ -63,7 +74,8 @@ def plot_subsetacc(points, filename=None):
         scatteryoffsets=[0.5]*len(points),
     )
 
-    plt.ylim(0.7, 1)
+    if not IS_CLUSTERS:
+        plt.ylim(0.7, 1)
     plt.tight_layout(pad=0.1)
     if filename:
         plt.savefig(f"figures/{filename}.svg")

@@ -22,6 +22,7 @@ print(f"Acc MetricX: {utils.get_ord_accuracy(ord_gold, ord_metricx):.2%}")
 def metric(item_i):
     # aggregared fisher information content
     item = data_irt["items"][item_i["i"]]
+
     information = 0
     for theta in data_irt["systems"].values():
         prob = utils.pred_irt(
@@ -43,8 +44,8 @@ for prop in utils.PROPS:
 
     data_old.sort(key=metric)
     
-    points_y_lo.append(utils.eval_data_pairs(data_old[:int(len(data_old)*prop)], data_old))
-    points_y_hi.append(utils.eval_data_pairs(data_old[-int(len(data_old)*prop):], data_old))
+    points_y_lo.append(utils.eval_system_clusters(data_old[:int(len(data_old)*prop)]))
+    points_y_hi.append(utils.eval_system_clusters(data_old[-int(len(data_old)*prop):]))
     
 print(f"Average from lowest  {np.average(points_y_lo):.2%}")
 print(f"Average from highest {np.average(points_y_hi):.2%}")

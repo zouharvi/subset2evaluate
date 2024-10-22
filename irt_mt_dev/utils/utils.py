@@ -161,7 +161,30 @@ def get_sys_ordering(data_new: list, metric="human"):
 
     return sys_ord
 
-def eval_data_pairs(data_new: list, data_old: list):
+def eval_system_clusters(data: list):
+    from scipy.stats import wilcoxon
+    # computes number of clusters
+
+    # sort from top
+    sys_ord = list(get_sys_absolute(data).items())
+    sys_ord.sort(key=lambda x: x[1], reverse=True)
+    sys_ord = [sys for sys, _ in sys_ord]
+
+    def get_scores(system):
+        return [line["scores"][system]["human"] for line in data]
+
+    clusters = [[get_scores(sys_ord.pop(0))]]
+    while sys_ord:
+        sys_scores = get_scores(sys_ord.pop(0))
+        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][0])]
+        if wilcoxon(diffs, alternative="less").pvalue < 0.05:
+            clusters.append([sys_scores])
+        else:
+            clusters[-1].append(sys_scores)
+    return len(clusters)
+
+def eval_order_accuracy(data_new: list, data_old: list):
+    # evaluates against ordering from data_old
     import itertools
     import numpy as np
     
