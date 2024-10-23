@@ -78,5 +78,7 @@ def plot_subsetacc(points, filename=None):
         plt.ylim(0.7, 1)
     plt.tight_layout(pad=0.1)
     if filename:
-        plt.savefig(f"figures/{filename}.svg")
+        # save in files compatible with both LaTeX and Typst
+        plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
+        plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
     plt.show()
