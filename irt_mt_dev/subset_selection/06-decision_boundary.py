@@ -69,7 +69,7 @@ for prop in tqdm.tqdm(utils.PROPS):
 print(f"Average (lo) {np.average(points_y_lo):.2f}")
 print(f"Average (hi) {np.average(points_y_hi):.2f}")
 
-irt_mt_dev.utils.fig.plot_subsetacc(
+irt_mt_dev.utils.fig.plot_subset_selection(
     [
         (points_x, points_y_lo, f"From closest {np.average(points_y_lo):.2f}"),
         (points_x, points_y_hi, f"From different {np.average(points_y_hi):.2f}"),

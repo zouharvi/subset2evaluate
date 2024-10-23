@@ -37,23 +37,37 @@ def metric(item_i):
     # return data_irt["items"][item["i"]]["diff"]
 
 points_x = []
-points_y_lo = []
-points_y_hi = []
+points_y_lo_acc = []
+points_y_hi_acc = []
+points_y_lo_clu = []
+points_y_hi_clu = []
 for prop in utils.PROPS:
     points_x.append(prop)
 
     data_old.sort(key=metric)
     
-    points_y_lo.append(utils.eval_system_clusters(data_old[:int(len(data_old)*prop)]))
-    points_y_hi.append(utils.eval_system_clusters(data_old[-int(len(data_old)*prop):]))
+    points_y_lo_acc.append(utils.eval_order_accuracy(data_old[:int(len(data_old)*prop)], data_old))
+    points_y_hi_acc.append(utils.eval_order_accuracy(data_old[-int(len(data_old)*prop):], data_old))
+    points_y_lo_clu.append(utils.eval_system_clusters(data_old[:int(len(data_old)*prop)]))
+    points_y_hi_clu.append(utils.eval_system_clusters(data_old[-int(len(data_old)*prop):]))
     
-print(f"Average from lowest  {np.average(points_y_lo):.2%}")
-print(f"Average from highest {np.average(points_y_hi):.2%}")
+print(f"Average ACC from lowest  {np.average(points_y_lo_acc):.2%}")
+print(f"Average ACC from highest {np.average(points_y_hi_acc):.2%}")
+print(f"Average CLU from lowest  {np.average(points_y_lo_clu):.2f}")
+print(f"Average CLU from highest {np.average(points_y_hi_clu):.2f}")
 
-irt_mt_dev.utils.fig.plot_subsetacc(
+
+irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (points_x, points_y_lo, f"From lowest {np.average(points_y_lo):.2%}"),
-        (points_x, points_y_hi, f"From highest {np.average(points_y_hi):.2%}"),
+        (points_x, points_y_lo_acc, f"From lowest {np.average(points_y_lo_acc):.2%}"),
+        (points_x, points_y_hi_acc, f"From highest {np.average(points_y_hi_acc):.2%}"),
+    ],
+    "irt",
+)
+irt_mt_dev.utils.fig.plot_subset_selection(
+    [
+        (points_x, points_y_lo_clu, f"From lowest {np.average(points_y_lo_clu):.2f}"),
+        (points_x, points_y_hi_clu, f"From highest {np.average(points_y_hi_clu):.2f}"),
     ],
     "irt",
 )

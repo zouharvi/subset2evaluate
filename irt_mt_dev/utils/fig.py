@@ -22,7 +22,8 @@ def turn_off_spines(which=['top', 'right']):
     ax = plt.gca()
     ax.spines[which].set_visible(False)
 
-def plot_subsetacc(points, filename=None):
+def plot_subset_selection(points, filename=None):
+    import os
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
 
@@ -79,6 +80,8 @@ def plot_subsetacc(points, filename=None):
     plt.tight_layout(pad=0.1)
     if filename:
         # save in files compatible with both LaTeX and Typst
-        plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
-        plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
+        if os.environ.get("FIG_EXPORT", "") == "PDF":
+            plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
+        else:
+            plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
     plt.show()

@@ -8,14 +8,16 @@ import itertools
 data_old = utils.load_data()
 
 points_x = []
-points_y_lo = []
-points_y_hi = []
+points_y_lo_acc = []
+points_y_hi_acc = []
+points_y_lo_clu = []
+points_y_hi_clu = []
 
 # mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
 def heuristic_abs(line):
     # np.max is also good
     return np.average(
-        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
+        [sys_v["MetricX-23"] for sys_v in line["scores"].values()]
     )
 
 def heuristic_std(line):
@@ -40,11 +42,11 @@ def heuristic_corr(line):
         [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )[0]
     
-def heuristic_score_abs(line):
-    return np.average(list(line["scores"]["human"].values()))
+def heuristic_human_abs(line):
+    return np.average([sys_v["human"] for sys_v in line["scores"].values()])
 
-def heuristic_score_std(line):
-    return np.std(list(line["scores"]["human"].values()))
+def heuristic_human_std(line):
+    return np.std([sys_v["human"] for sys_v in line["scores"].values()])
 
 def heuristic_translation_dist_chrf(line):
     import sacrebleu
@@ -71,22 +73,38 @@ data_old = [x[0] for x in data_old]
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
 
-    # taking lines with the lowest metric score
-    points_y_lo.append(
+    # taking lines with the highest/lowest metric score
+    points_y_lo_acc.append(
+        utils.eval_order_accuracy(data_old[: int(len(data_old) * prop)], data_old)
+    )
+    points_y_hi_acc.append(
+        utils.eval_order_accuracy(data_old[-int(len(data_old) * prop) :], data_old)
+    )
+    points_y_lo_clu.append(
         utils.eval_system_clusters(data_old[: int(len(data_old) * prop)])
     )
-    points_y_hi.append(
+    points_y_hi_clu.append(
         utils.eval_system_clusters(data_old[-int(len(data_old) * prop) :])
     )
 
-print(f"Average from lowest  {np.average(points_y_lo):.2f}")
-print(f"Average from highest {np.average(points_y_hi):.2f}")
+print(f"Average ACC from lowest  {np.average(points_y_lo_acc):.2%}")
+print(f"Average ACC from highest {np.average(points_y_hi_acc):.2%}")
+print(f"Average CLU from lowest  {np.average(points_y_lo_clu):.2f}")
+print(f"Average CLU from highest {np.average(points_y_hi_clu):.2f}")
 
 
-irt_mt_dev.utils.fig.plot_subsetacc(
+irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (points_x, points_y_lo, f"From lowest {np.average(points_y_lo):.2f}"),
-        (points_x, points_y_hi, f"From highest {np.average(points_y_hi):.2f}"),
+        (points_x, points_y_lo_acc, f"From lowest {np.average(points_y_lo_acc):.2%}"),
+        (points_x, points_y_hi_acc, f"From highest {np.average(points_y_hi_acc):.2%}"),
     ],
-    "metric_top",
+    "03-metric_heuristic",
+)
+
+irt_mt_dev.utils.fig.plot_subset_selection(
+    [
+        (points_x, points_y_lo_clu, f"From lowest {np.average(points_y_lo_clu):.2f}"),
+        (points_x, points_y_hi_clu, f"From highest {np.average(points_y_hi_clu):.2f}"),
+    ],
+    "03-metric_heuristic",
 )

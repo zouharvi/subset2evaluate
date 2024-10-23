@@ -38,4 +38,4 @@ for prop in tqdm.tqdm(utils.PROPS):
     
 print(f"Average  {np.average(points_y):.2f}")
 
-irt_mt_dev.utils.fig.plot_subsetacc([(points_x, points_y, f"{np.average(points_y):.2f}")], "stable_subset")
+irt_mt_dev.utils.fig.plot_subset_selection([(points_x, points_y, f"{np.average(points_y):.2f}")], "stable_subset")
