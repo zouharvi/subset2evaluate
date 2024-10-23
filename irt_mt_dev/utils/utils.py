@@ -176,7 +176,8 @@ def eval_system_clusters(data: list):
     clusters = [[get_scores(sys_ord.pop(0))]]
     while sys_ord:
         sys_scores = get_scores(sys_ord.pop(0))
-        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
+        # TODO: should this be clusters[-1][0] or clusters[-1][-1]?
+        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][0])]
         if wilcoxon(diffs, alternative="less").pvalue < 0.05:
             clusters.append([sys_scores])
         else:
