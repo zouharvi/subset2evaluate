@@ -23,6 +23,12 @@ def metric(item_i):
     # aggregared fisher information content
     item = data_irt["items"][item_i["i"]]
 
+    # alternatives
+    # return item["disc"]
+    # return item["feas"]
+    # return item["diff"]
+    # return item["diff"]*item["disc"]
+
     information = 0
     for theta in data_irt["systems"].values():
         prob = utils.pred_irt(
@@ -32,9 +38,6 @@ def metric(item_i):
         information += prob*(1-prob)*(item["disc"]**2)
     return information
 
-    # return data_irt["items"][item["i"]]["disc"]
-    # return data_irt["items"][item["i"]]["feas"]
-    # return data_irt["items"][item["i"]]["diff"]
 
 points_x = []
 points_y_lo_acc = []
@@ -62,12 +65,12 @@ irt_mt_dev.utils.fig.plot_subset_selection(
         (points_x, points_y_lo_acc, f"From lowest {np.average(points_y_lo_acc):.2%}"),
         (points_x, points_y_hi_acc, f"From highest {np.average(points_y_hi_acc):.2%}"),
     ],
-    "irt",
+    "05-irt",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
         (points_x, points_y_lo_clu, f"From lowest {np.average(points_y_lo_clu):.2f}"),
         (points_x, points_y_hi_clu, f"From highest {np.average(points_y_hi_clu):.2f}"),
     ],
-    "irt",
+    "05-irt",
 )
