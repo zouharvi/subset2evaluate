@@ -19,9 +19,9 @@ print(f"Acc ITR: {utils.get_ord_accuracy(ord_gold, ord_irt_mt):.2%}")
 print(f"Acc MetricX: {utils.get_ord_accuracy(ord_gold, ord_metricx):.2%}")
 
 # EXPERIMENT: take the most difficult/discriminative examples?
-def metric(item_i):
+def metric(item):
     # aggregared fisher information content
-    item = data_irt["items"][item_i["i"]]
+    item = data_irt["items"][item["i"]]
 
     # alternatives
     # return item["disc"]
