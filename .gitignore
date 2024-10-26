@@ -1,6 +1,7 @@
 # added by zouharvi
-/data/
-/figures/
+/data
+/figures
+/figures_pdf
 /lightning_logs
 /computed
 

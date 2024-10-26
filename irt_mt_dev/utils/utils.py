@@ -161,7 +161,7 @@ def get_sys_ordering(data_new: list, metric="human"):
 
     return sys_ord
 
-def eval_system_clusters(data: list):
+def eval_system_clusters(data: list, metric="human"):
     from scipy.stats import wilcoxon
     # computes number of clusters
 
@@ -171,7 +171,7 @@ def eval_system_clusters(data: list):
     sys_ord = [sys for sys, _ in sys_ord]
 
     def get_scores(system):
-        return [line["scores"][system]["human"] for line in data]
+        return [line["scores"][system][metric] for line in data]
 
     clusters = [[get_scores(sys_ord.pop(0))]]
     while sys_ord:
