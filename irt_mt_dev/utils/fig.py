@@ -75,13 +75,15 @@ def plot_subset_selection(points, filename=None):
         scatteryoffsets=[0.5]*len(points),
     )
 
-    if not IS_CLUSTERS:
+    if IS_CLUSTERS:
+        plt.ylim(2, 7.1)
+    else:
         plt.ylim(0.7, 1)
     plt.tight_layout(pad=0.1)
     if filename:
         # save in files compatible with both LaTeX and Typst
         if os.environ.get("FIG_EXPORT", "") == "PDF":
-            plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
+            plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
         else:
             plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
     plt.show()
