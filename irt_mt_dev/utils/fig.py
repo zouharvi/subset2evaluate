@@ -1,3 +1,6 @@
+from typing import List, Text, Tuple
+
+
 COLORS = [
     "#bc272d",  # red
     "#50ad9f",  # green
@@ -22,7 +25,11 @@ def turn_off_spines(which=['top', 'right']):
     ax = plt.gca()
     ax.spines[which].set_visible(False)
 
-def plot_subset_selection(points, filename=None):
+def plot_subset_selection(
+        points: List[Tuple[List, List, Text]],
+        filename=None,
+        areas: List[Tuple[List, List, List]] = [],
+    ):
     import os
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
@@ -53,11 +60,20 @@ def plot_subset_selection(points, filename=None):
             clip_on=False if min(points_y) > 0.65 else True,
             linewidth=2,
         )
+    for (points_x, points_y_low, points_y_high), color in zip(areas, colors):
+        plt.fill_between(
+            points_x,
+            y1=points_y_low,
+            y2=points_y_high,
+            color=color,
+            alpha=0.3,
+            linewidth=0,
+        )
 
     if IS_CLUSTERS:
-        plt.ylabel("Number of clusters")
+        plt.ylabel("Number of clusters" + " " * 5, labelpad=17)
     else:
-        plt.ylabel("Sys. rank accuracy" + " " * 5, labelpad=-5)
+        plt.ylabel("Subset consistency acc." + " " * 5, labelpad=-5)
     plt.xlabel("Proportion of original data", labelpad=-2)
 
     ax = plt.gca()

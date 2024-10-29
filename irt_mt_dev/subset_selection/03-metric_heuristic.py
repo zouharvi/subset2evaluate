@@ -14,7 +14,7 @@ points_y_lo_clu = []
 points_y_hi_clu = []
 
 # mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
-def heuristic_abs(line):
+def heuristic_avg(line):
     # np.max is also good
     return np.average(
         [sys_v["MetricX-23"] for sys_v in line["scores"].values()]
@@ -63,10 +63,10 @@ def heuristic_translation_dist_unigram(line):
         text_a = collections.Counter(text_a.split())
         text_b = collections.Counter(text_b.split())
         out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
-    return np.average(out)
+    return np.average(out), ""
 
 # sort by the heuristic
-data_old = [(line, heuristic_abs(line)) for line in tqdm.tqdm(data_old)]
+data_old = [(line, heuristic_std(line)) for line in tqdm.tqdm(data_old)]
 data_old.sort(key=lambda x: x[1])
 data_old = [x[0] for x in data_old]
 
@@ -94,17 +94,17 @@ print(f"Average CLU from highest {np.average(points_y_hi_clu):.2f}")
 
 
 irt_mt_dev.utils.fig.plot_subset_selection(
-    [
+    points=[
         (points_x, points_y_lo_acc, f"From lowest {np.average(points_y_lo_acc):.2%}"),
         (points_x, points_y_hi_acc, f"From highest {np.average(points_y_hi_acc):.2%}"),
     ],
-    "03-metric_heuristic",
+    filename="03-metric_heuristic",
 )
 
 irt_mt_dev.utils.fig.plot_subset_selection(
-    [
+    points=[
         (points_x, points_y_lo_clu, f"From lowest {np.average(points_y_lo_clu):.2f}"),
         (points_x, points_y_hi_clu, f"From highest {np.average(points_y_hi_clu):.2f}"),
     ],
-    "03-metric_heuristic",
+    filename="03-metric_heuristic",
 )
