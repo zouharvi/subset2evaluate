@@ -7,13 +7,13 @@ import copy
 
 args = argparse.ArgumentParser()
 args.add_argument('data', type=str, default='wmt23/en-cs')
-args.add_argument('--method', default="var")
+args.add_argument('--method', default="var", choices=methods.METHODS.keys())
 args.add_argument('--metric', default="MetricX-23")
 args = args.parse_args()
 
 if args.data.startswith("wmt"):
     data_year, data_lang = args.data.split("/")
-    data = utils.load_data(year=data_year, langs=data_lang)
+    data = utils.load_data(year=data_year, langs=data_lang, normalize=True)
 elif os.path.exists(args.data):
     data = [json.loads(x) for x in open(args.data, "r")]
 else:
@@ -28,5 +28,5 @@ method = methods.METHODS[method]
 data_old = copy.deepcopy(data)
 data_new = method(data, args)
 
-for item in data:
+for item in data_new:
     print(json.dumps(item, ensure_ascii=False))
