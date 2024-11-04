@@ -1,22 +1,31 @@
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 import torch.utils
 from irt_mt_dev.irt.base import IRTModelBase
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sentence_transformers import SentenceTransformer
 
-class IRTModelTFIDF(IRTModelBase):
+class IRTModelEmbd(IRTModelBase):
     def __init__(self, items, systems):
         super().__init__(systems=systems)
 
-        encoder = TfidfVectorizer(max_features=768)
+        encoder = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
         self.text_src = torch.nn.Parameter(
-            torch.tensor(encoder.fit_transform([item["src"] for item in items]).toarray()).float(),
-            requires_grad=False
+            torch.tensor(encoder.encode([item["src"] for item in items])),
+            requires_grad=False,
         )
 
         # normally distribute at the beginning
-        self.param_disc = torch.nn.Linear(768, 1)
-        self.param_diff = torch.nn.Linear(768, 1)
-        self.param_feas = torch.nn.Linear(768, 1)
+        fn = lambda: torch.nn.Sequential(
+            # torch.nn.Linear(384, 384),
+            # torch.nn.ReLU(),
+            # torch.nn.Linear(384, 384),
+            # torch.nn.ReLU(),
+            torch.nn.Linear(384, 1),
+        )
+        self.param_disc = fn()
+        self.param_diff = fn()
+        self.param_feas = fn()
 
         self.len_items = len(items)
     

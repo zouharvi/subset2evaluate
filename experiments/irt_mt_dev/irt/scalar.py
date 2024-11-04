@@ -14,6 +14,8 @@ class IRTModelScalar(IRTModelBase):
         # feasability
         self.param_feas = torch.nn.Parameter(torch.randn(len(items)))
     
+        self.clamp_feas = True
+
     def get_irt_params(self, i_item, name):
         if name == "disc":
             return self.param_disc[i_item]

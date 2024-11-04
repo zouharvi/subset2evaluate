@@ -22,12 +22,19 @@ def irt(data, args, selection):
     import torch
     import torch.utils
     import lightning as L
-    from irt_mt_dev.irt.scalar import IRTModelScalar
-    from irt_mt_dev.irt.tfidf import IRTModelTFIDF
     import irt_mt_dev.utils as utils
 
     systems = list(data[0]["scores"].keys())
-    model = IRTModelScalar(data, systems)
+
+    if args.model == "scalar":
+        from irt_mt_dev.irt.scalar import IRTModelScalar
+        model = IRTModelScalar(data, systems)
+    elif args.model == "tfidf":
+        from irt_mt_dev.irt.tfidf import IRTModelTFIDF
+        model = IRTModelTFIDF(data, systems)
+    elif args.model == "embd":
+        from irt_mt_dev.irt.embd import IRTModelEmbd
+        model = IRTModelEmbd(data, systems)
 
     data_loader = [
         ((sent_i, sys_i), sent["scores"][sys][args.metric])
@@ -51,7 +58,9 @@ def irt(data, args, selection):
     )
 
     trainer = L.Trainer(
-        max_epochs=500,
+        # for scalar and tfidf, 500 is best
+        # for embd, more is needed (2k?)
+        max_epochs=2000,
         enable_checkpointing=False,
         enable_progress_bar=False,
         logger=False,

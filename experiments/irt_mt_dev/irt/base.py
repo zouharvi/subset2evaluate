@@ -14,16 +14,20 @@ class IRTModelBase(L.LightningModule):
         self.params_log = []
         self.loss_fn = torch.nn.MSELoss()
 
+        self.clamp_feas = False
+
     def forward(self, i_item, i_system):
         disc = self.get_irt_params(i_item, "disc")
         diff = self.get_irt_params(i_item, "diff")
         feas = self.get_irt_params(i_item, "feas")
         theta = self.param_theta[i_system]
+
         return feas + (1 - feas) / (1 + torch.exp(-disc * (theta - diff)))
 
     def training_step(self, batch, batch_idx):
         # apply constraint
-        self.param_feas.data = torch.clamp(self.param_feas, min=10e-3, max=1-10e-3)
+        if self.clamp_feas:
+            self.param_feas.data = torch.clamp(self.param_feas, min=10e-3, max=1-10e-3)
 
         # training_step defines the train loop.
         # it is independent of forward
@@ -50,6 +54,8 @@ class IRTModelBase(L.LightningModule):
             torch.full_like(y_true, fill_value=torch.mean(y_true)),
             y_true
         )
+
+        # TODO: monitor accuracy & clusters here to know when to stop
 
         self.log("val_loss_vs_constant", loss_pred-loss_const)
 
