@@ -68,4 +68,4 @@ trainer.fit(
     val_dataloaders=data_test,
 )
 
-model.save_irt(args.out)
+model.save_irt_params(args.out)

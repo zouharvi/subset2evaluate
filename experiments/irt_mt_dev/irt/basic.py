@@ -22,9 +22,7 @@ class IRTModel(L.LightningModule):
 
         self.params_log = []
 
-        # self.loss_fn = torch.nn.L1Loss()
         self.loss_fn = torch.nn.MSELoss()
-        # self.loss_fn = torch.nn.BCELoss()
 
     def forward(self, i_item, i_system):
         disc = self.param_disc[i_item]
@@ -48,7 +46,6 @@ class IRTModel(L.LightningModule):
 
         # regularize
         # loss += torch.pow(self.param_a, 2).sum()/100
-
 
         self.log("train_loss", loss)
         return loss
@@ -75,52 +72,26 @@ class IRTModel(L.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.1)
+    
+    def get_irt_params(self):
+        return {
+            "items": [
+                {"disc": disc, "diff": diff, "feas": feas}
+                for disc, diff, feas in zip(
+                    self.param_disc.clone().detach().tolist(),
+                    self.param_diff.clone().detach().tolist(),
+                    self.param_feas.clone().detach().tolist(),
+                )
+            ],
+            "systems": {
+                sys: sys_v
+                for sys, sys_v in zip(self.systems, self.param_theta.clone().detach().tolist())
+            },
+        }
 
-    def save_irt(self, filename):
+    def save_irt_params(self, filename):
         # save last parameters
-        self.params_log.append({
-            "theta": self.param_theta.clone().detach().tolist(),
-            "disc": self.param_disc.clone().detach().tolist(),
-            "diff": self.param_diff.clone().detach().tolist(),
-            "feas": self.param_feas.clone().detach().tolist(),
-        })
+        self.params_log.append(self.get_irt_params())
 
         with open(filename, "w") as f:
-            json.dump(
-                obj=[
-                    {
-                        "items": [
-                            {"disc": disc, "diff": diff, "feas": feas}
-                            for disc, diff, feas in zip(
-                                params["disc"],
-                                params["diff"],
-                                params["feas"],
-                            )
-                        ],
-                        "systems": {
-                            sys: sys_v
-                            for sys, sys_v in zip(self.systems, params["theta"])
-                        },
-                    } for params in self.params_log
-                ],
-                fp=f,
-            )
-
-    def load_irt(self, f_or_fname):
-        raise Exception("WARNING: Loading is untested")
-        if type(f_or_fname) == str:
-            f_or_fname = open(f_or_fname, "r")
-        
-        data = json.load(f_or_fname)
-
-        # make sure the ordering is the same
-        assert set(self.systems) == set(data["systems"].keys())
-        for sys_i, sys in enumerate(self.systems):
-            self.param_theta[sys_i] = data["systems"][sys]
-
-        for i in range(self.len_items):
-            # need to inverse because we're saving softplused version
-            self.param_disc[i] = data["items"][i]["a"]
-            self.param_diff[i] = data["items"][i]["b"]
-
-        f_or_fname.close()
+            json.dump(obj=self.params_log, fp=f)
