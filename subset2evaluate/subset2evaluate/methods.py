@@ -22,11 +22,12 @@ def irt(data, args, selection):
     import torch
     import torch.utils
     import lightning as L
-    from irt_mt_dev.irt.basic import IRTModel
+    from irt_mt_dev.irt.scalar import IRTModelScalar
+    from irt_mt_dev.irt.tfidf import IRTModelTFIDF
     import irt_mt_dev.utils as utils
 
     systems = list(data[0]["scores"].keys())
-    model = IRTModel(len(data), systems)
+    model = IRTModelScalar(data, systems)
 
     data_loader = [
         ((sent_i, sys_i), sent["scores"][sys][args.metric])
@@ -61,7 +62,7 @@ def irt(data, args, selection):
     )
 
 
-    data_irt = model.get_irt_params()
+    data_irt = model.pack_irt_params()
     items_joint = list(zip(data, data_irt["items"]))
 
     def fn_disc(item):

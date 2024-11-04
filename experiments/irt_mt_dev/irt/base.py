@@ -2,32 +2,22 @@ import torch
 import torch.utils
 import lightning as L
 import json
-import copy
 
-class IRTModel(L.LightningModule):
-    def __init__(self, len_items, systems):
+class IRTModelBase(L.LightningModule):
+    def __init__(self, systems):
         super().__init__()
 
-        # normally distribute at the beginning
-        # discrimination
-        self.param_disc = torch.nn.Parameter(torch.randn(len_items))
-        # difficulty
-        self.param_diff = torch.nn.Parameter(torch.randn(len_items))
-        # feasability
-        self.param_feas = torch.nn.Parameter(torch.randn(len_items))
-        # MT ability
+        # MT ability modelling is always the same across all models (scalar)
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
+
         self.systems = systems
-        self.len_items = len_items
-
         self.params_log = []
-
         self.loss_fn = torch.nn.MSELoss()
 
     def forward(self, i_item, i_system):
-        disc = self.param_disc[i_item]
-        diff = self.param_diff[i_item]
-        feas = self.param_feas[i_item]
+        disc = self.get_irt_params(i_item, "disc")
+        diff = self.get_irt_params(i_item, "diff")
+        feas = self.get_irt_params(i_item, "feas")
         theta = self.param_theta[i_system]
         return feas + (1 - feas) / (1 + torch.exp(-disc * (theta - diff)))
 
@@ -63,35 +53,29 @@ class IRTModel(L.LightningModule):
 
         self.log("val_loss_vs_constant", loss_pred-loss_const)
 
-        self.params_log.append({
-            "theta": self.param_theta.clone().detach().tolist(),
-            "disc": self.param_disc.clone().detach().tolist(),
-            "diff": self.param_diff.clone().detach().tolist(),
-            "feas": self.param_feas.clone().detach().tolist(),
-        })
+        self.params_log.append(self.pack_irt_params())
+
+    def get_irt_params(self, i_item, name):
+        raise NotImplementedError
+
+    def pack_irt_params_items(self):
+        raise NotImplementedError
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.1)
     
-    def get_irt_params(self):
+    def pack_irt_params(self):
         return {
-            "items": [
-                {"disc": disc, "diff": diff, "feas": feas}
-                for disc, diff, feas in zip(
-                    self.param_disc.clone().detach().tolist(),
-                    self.param_diff.clone().detach().tolist(),
-                    self.param_feas.clone().detach().tolist(),
-                )
-            ],
+            "items": self.pack_irt_params_items(),
             "systems": {
                 sys: sys_v
-                for sys, sys_v in zip(self.systems, self.param_theta.clone().detach().tolist())
+                for sys, sys_v in zip(self.systems, self.param_theta.detach().tolist())
             },
         }
 
     def save_irt_params(self, filename):
         # save last parameters
-        self.params_log.append(self.get_irt_params())
+        self.params_log.append(self.pack_irt_params())
 
         with open(filename, "w") as f:
             json.dump(obj=self.params_log, fp=f)
