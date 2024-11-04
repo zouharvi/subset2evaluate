@@ -14,17 +14,17 @@ points_y_lo_clu = []
 points_y_hi_clu = []
 
 # mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
-def heuristic_avg(line):
+def heuristic_avg(item):
     # np.max is also good
     return np.average(
-        [sys_v["MetricX-23"] for sys_v in line["scores"].values()]
+        [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
     )
 
-def heuristic_std(line):
-    return np.std([sys_v["MetricX-23"] for sys_v in line["scores"].values()])
+def heuristic_std(item):
+    return np.std([sys_v["MetricX-23"] for sys_v in item["scores"].values()])
 
-def heuristic_max_diff(line):
-    return max([sys["COMET"] for sys in line["scores"].values()])-min([sys["COMET"] for sys in line["scores"].values()])
+def heuristic_max_diff(item):
+    return max([sys["COMET"] for sys in item["scores"].values()])-min([sys["COMET"] for sys in item["scores"].values()])
 
     
 def heuristic_moment(line, pow=3):
