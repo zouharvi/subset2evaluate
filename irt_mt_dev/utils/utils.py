@@ -124,8 +124,9 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
             for sys, met_all in line["scores"].items():
                 for met_k, met_v in met_all.items():
                     line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
-
-    print("Loaded", len(data), "lines of", len(systems), "systems")
+    
+    import sys
+    print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
     return data
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
@@ -184,15 +185,15 @@ def eval_system_clusters(data: list, metric="human"):
             clusters[-1].append(sys_scores)
     return len(clusters)
 
-def eval_order_accuracy(data_new: list, data_old: list):
+def eval_order_accuracy(data_new: list, data_old: list, metric="human"):
     # evaluates against ordering from data_old
     import itertools
     import numpy as np
     
     systems = list(data_old[0]["scores"].keys())
 
-    scores_old = get_sys_absolute(data_old)
-    scores_new = get_sys_absolute(data_new)
+    scores_old = get_sys_absolute(data_old, metric=metric)
+    scores_new = get_sys_absolute(data_new, metric=metric)
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):
