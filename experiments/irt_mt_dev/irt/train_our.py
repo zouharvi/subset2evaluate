@@ -3,7 +3,7 @@ import torch
 import torch.utils
 import lightning as L
 import argparse
-from basic import IRTModel
+from experiments.irt_mt_dev.irt.scalar import IRTModelScalar
 from sklearn.model_selection import train_test_split
 
 args = argparse.ArgumentParser()
@@ -18,7 +18,7 @@ data_wmt = utils.load_data(normalize=True, binarize=False)
 # data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
 
 systems = list(data_wmt[0]["scores"].keys())
-model = IRTModel(len(data_wmt), systems)
+model = IRTModelScalar(len(data_wmt), systems)
 
 data_loader = [
     ((sent_i, sys_i), sent["scores"][sys][args.metric])
