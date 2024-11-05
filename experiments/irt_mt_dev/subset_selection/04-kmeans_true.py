@@ -23,7 +23,7 @@ def l2_dist(a, b):
     return np.linalg.norm(a - b)
 
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 data_old_vec = StandardScaler().fit_transform([featurize(line) for line in data_old])
 for line, line_feat in zip(data_old, data_old_vec):
     line["feat"] = line_feat

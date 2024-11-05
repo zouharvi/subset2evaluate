@@ -6,7 +6,7 @@ import tqdm
 import random
 import copy
 
-data = utils.load_data(year="wmt23", langs="cs-uk")
+data = utils.load_data_wmt(year="wmt23", langs="cs-uk")
 
 data.sort(key=lambda x: len(x["src"]))
 for line in data[:10]:
@@ -36,7 +36,7 @@ for year, langs in [("wmt23", "en-de"), ("wmt23", "cs-uk"), ("wmt23", "en-cs"), 
     points_y_rand = []
     points_y_var = []
     points_y_len = []
-    data_old = utils.load_data(year=year, langs=langs)
+    data_old = utils.load_data_wmt(year=year, langs=langs)
 
     data_old_len = copy.deepcopy(data_old)
     data_old_var = copy.deepcopy(data_old)

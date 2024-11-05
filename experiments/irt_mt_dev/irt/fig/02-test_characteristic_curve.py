@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
-data_wmt = utils.load_data(normalize=True, binarize=False)
+data_wmt = utils.load_data_wmt(normalize=True, binarize=False)
 
 data_irt = json.load(
     open("computed/irt_wmt_4pl_s0_eall_metricx.json", "r"))[10]

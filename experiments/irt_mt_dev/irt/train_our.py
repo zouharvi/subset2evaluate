@@ -14,7 +14,7 @@ args.add_argument("--out", default="/dev/null")
 args = args.parse_args()
 
 # WMT: 1k items, 15 systems
-data_wmt = utils.load_data(normalize=True, binarize=False)
+data_wmt = utils.load_data_wmt(normalize=True, binarize=False)
 # data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
 
 systems = list(data_wmt[0]["scores"].keys())

@@ -6,10 +6,10 @@
 # Then, in Python, you can do:
 
 import irt_mt_dev.utils as utils
-data = utils.load_data()
+data = utils.load_data_wmt()
 
 # In most cases we want to normalize the data such that values are in [0, 1]
-data = utils.load_data(normalize=True)
+data = utils.load_data_wmt(normalize=True)
 
 # There are other options that load a different language pair from a different year but the default should be fine for now
 # The `data` is a list of items

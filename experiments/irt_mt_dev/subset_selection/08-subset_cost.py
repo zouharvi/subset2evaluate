@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 irt_mt_dev.utils.fig.matplotlib_default()
 
 data_irt = json.load(open("computed/irt_wmt_4pl_s0_pyirt.json", "r"))[-1]
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 def utility_metricx_avg(item):
     return -np.average(

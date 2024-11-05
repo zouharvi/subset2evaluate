@@ -12,7 +12,7 @@ args = args.parse_args()
 
 if args.data_old.startswith("wmt"):
     data_year, data_lang = args.data_old.split("/")
-    data_old = utils.load_data(year=data_year, langs=data_lang, normalize=True)
+    data_old = utils.load_data_wmt(year=data_year, langs=data_lang, normalize=True)
 elif os.path.exists(args.data_old):
     data_old = [json.loads(x) for x in open(args.data_old, "r")]
 else:
@@ -21,7 +21,7 @@ else:
 
 if args.data_new.startswith("wmt"):
     data_year, data_lang = args.data_new.split("/")
-    data_new = utils.load_data(year=data_year, langs=data_lang, normalize=True)
+    data_new = utils.load_data_wmt(year=data_year, langs=data_lang, normalize=True)
 elif os.path.exists(args.data_new):
     data_new = [json.loads(x) for x in open(args.data_new, "r")]
 else:

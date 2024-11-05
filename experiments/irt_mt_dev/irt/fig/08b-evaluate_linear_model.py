@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 import irt_mt_dev.utils as utils
 import numpy as np
 
-data_wmt = utils.load_data(normalize=True, binarize=False)
+data_wmt = utils.load_data_wmt(normalize=True, binarize=False)
 systems = list(data_wmt[0]["scores"].keys())
 data_loader = [
     ((sent_i, sys_i), sent["scores"][sys]["MetricX-23-c"])

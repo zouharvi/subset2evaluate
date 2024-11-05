@@ -3,7 +3,7 @@
 import irt_mt_dev.utils as utils
 import random
 
-data_full = utils.load_data()
+data_full = utils.load_data_wmt()
 
 for k in range(50, 500, 50):
     data_subset_random = random.Random(0).sample(data_full, k=k)

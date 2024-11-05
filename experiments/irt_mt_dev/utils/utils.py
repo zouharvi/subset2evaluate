@@ -22,12 +22,22 @@ def load_data_squad(n_items=1000, n_systems=161):
         })
     return data_out
 
-def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, systems=None):
+def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import glob
     import collections
     line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
     line_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
-    line_ref = open(f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt", "r").readlines()
+    for fname in [
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
+    ]:
+        if os.path.exists(fname):
+            line_ref = open(fname, "r").readlines()
+            break
     line_sys = {}
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
         sys = f.split("/")[-1].removesuffix(".txt")
@@ -36,31 +46,41 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
 
         line_sys[sys] = open(f, "r").readlines()
 
-    if systems is None:
-        systems = list(line_sys.keys())
-    else:
-        assert type(systems) == list
+    systems = list(line_sys.keys())
 
     line_score = collections.defaultdict(list)
-    fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score"
-    if not os.path.exists(fname):
-        fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score"
-    if not os.path.exists(fname):
-        fname = f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score"
+    for fname in [
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+        False
+    ]:
+        if fname and os.path.exists(fname):
+            break
+    
+    if not fname:
+        # did not find human scores
+        return []
     
     for line_raw in open(fname, "r").readlines():
-    # for line_raw in open(f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score", "r").readlines():
-        sys, score = line_raw.strip().split("\t")
+        sys, score = line_raw.strip().split()
         line_score[sys].append({"human": score})
+
 
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
         metric = f.split("/")[-1].removesuffix("-refA.seg.score")
         for line_i, line_raw in enumerate(open(f, "r").readlines()):
             sys, score = line_raw.strip().split("\t")
-            if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
+            # for refA, refB, synthetic_ref, and other "systems" not evaluated
+            # TODO: maybe remove those from the systems list?
+            if sys not in line_score:
                 continue
             # NOTE: there's no guarantee that this indexing is correct
             line_score[sys][line_i % len(line_src)][metric] = float(score)
+
+    # filter out lines that have no human score
+    line_score = {k:v for k,v in line_score.items() if len(v) > 0}
+    systems = [sys for sys in systems if sys in line_score]
 
     # putting it all together
     data = []
@@ -125,9 +145,114 @@ def load_data(year="wmt23", langs="en-cs", normalize=False, binarize=False, syst
                 for met_k, met_v in met_all.items():
                     line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
     
-    import sys
-    print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
+    # import sys
+    # print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
     return data
+
+def load_data_wmt_all(**kwargs):
+    data = {
+        args: load_data_wmt(*args, **kwargs)
+        for args in [
+            ("wmt23.sent", "en-de"),
+            ("wmt23", "cs-uk"),
+            ("wmt23", "de-en"),
+            ("wmt23", "en-cs"),
+            ("wmt23", "en-de"),
+            ("wmt23", "en-he"),
+            ("wmt23", "en-ja"),
+            ("wmt23", "en-ru"),
+            ("wmt23", "en-uk"),
+            ("wmt23", "en-zh"),
+            ("wmt23", "he-en"),
+            ("wmt23", "ja-en"),
+            ("wmt23", "ru-en"),
+            ("wmt23", "uk-en"),
+            ("wmt23", "zh-en"),
+
+            ("wmt22", "cs-en"),
+            ("wmt22", "cs-uk"),
+            ("wmt22", "de-en"),
+            ("wmt22", "en-cs"),
+            ("wmt22", "en-de"),
+            ("wmt22", "en-hr"),
+            ("wmt22", "en-ja"),
+            ("wmt22", "en-liv"),
+            ("wmt22", "en-ru"),
+            ("wmt22", "en-uk"),
+            ("wmt22", "en-zh"),
+            ("wmt22", "ja-en"),
+            ("wmt22", "liv-en"),
+            ("wmt22", "ru-en"),
+            ("wmt22", "sah-ru"),
+            ("wmt22", "uk-cs"),
+            ("wmt22", "uk-en"),
+            ("wmt22", "zh-en"),
+
+            ("wmt21.tedtalks", "en-de"),
+            ("wmt21.tedtalks", "en-ru"),
+            ("wmt21.tedtalks", "zh-en"),
+            ("wmt21.news", "cs-en"),
+            ("wmt21.news", "de-en"),
+            ("wmt21.news", "de-fr"),
+            ("wmt21.news", "en-cs"),
+            ("wmt21.news", "en-de"),
+            ("wmt21.news", "en-ha"),
+            ("wmt21.news", "en-is"),
+            ("wmt21.news", "en-ja"),
+            ("wmt21.news", "en-ru"),
+            ("wmt21.news", "en-zh"),
+            ("wmt21.news", "fr-de"),
+            ("wmt21.news", "ha-en"),
+            ("wmt21.news", "is-en"),
+            ("wmt21.news", "ja-en"),
+            ("wmt21.news", "ru-en"),
+            ("wmt21.news", "zh-en"),
+            ("wmt21.flores", "bn-hi"),
+            ("wmt21.flores", "hi-bn"),
+            ("wmt21.flores", "xh-zu"),
+            ("wmt21.flores", "zu-xh"),
+
+            ("wmt20", "km-en"),
+            ("wmt20", "en-zh"),
+            ("wmt20", "ps-en"),
+            ("wmt20", "zh-en"),
+            ("wmt20", "ru-en"),
+            ("wmt20", "iu-en"),
+            ("wmt20", "ta-en"),
+            ("wmt20", "en-ta"),
+            ("wmt20", "en-cs"),
+            ("wmt20", "de-en"),
+            ("wmt20", "en-de"),
+            ("wmt20", "en-ja"),
+            ("wmt20", "cs-en"),
+            ("wmt20", "en-pl"),
+            ("wmt20", "pl-en"),
+            ("wmt20", "en-ru"),
+            ("wmt20", "en-iu"),
+            ("wmt20", "ja-en"),
+
+            ("wmt19", "en-zh"),
+            ("wmt19", "en-lt"),
+            ("wmt19", "en-gu"),
+            ("wmt19", "ru-en"),
+            ("wmt19", "kk-en"),
+            ("wmt19", "en-fi"),
+            ("wmt19", "zh-en"),
+            ("wmt19", "fi-en"),
+            ("wmt19", "en-cs"),
+            ("wmt19", "de-en"),
+            ("wmt19", "en-ru"),
+            ("wmt19", "gu-en"),
+            ("wmt19", "en-kk"),
+            ("wmt19", "lt-en"),
+            ("wmt19", "de-fr"),
+            ("wmt19", "fr-de"),
+            ("wmt19", "en-de"),
+            ("wmt19", "de-cs"),
+        ]
+    }
+    # filter out empty datasets
+    return {k:v for k,v in data.items() if len(v) > 0}
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections

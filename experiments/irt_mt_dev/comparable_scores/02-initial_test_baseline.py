@@ -2,7 +2,7 @@ import irt_mt_dev.utils as utils
 import collections
 import numpy as np
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 results_all_pred = []
 results_all_true = []
