@@ -19,7 +19,7 @@ args.add_argument("--all-params", action="store_true")
 args = args.parse_args()
 
 if args.data == "wmt":
-    data = utils.load_data(normalize=True)
+    data = utils.load_data_wmt(normalize=True)
 elif args.data == "squad":
     data = utils.load_data_squad(n_items=None, n_systems=None)
 

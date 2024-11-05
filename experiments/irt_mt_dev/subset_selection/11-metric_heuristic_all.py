@@ -5,7 +5,7 @@ import tqdm
 import scipy.stats
 import itertools
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 points_x = []
 points_y_metricx_avg_acc = []

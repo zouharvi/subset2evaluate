@@ -5,7 +5,7 @@ import random
 import numpy as np
 import tqdm
 
-data_old = utils.load_data(normalize=True)
+data_old = utils.load_data_wmt(normalize=True)
 irt_mt_dev.utils.fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
 

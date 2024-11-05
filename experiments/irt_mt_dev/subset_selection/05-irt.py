@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 data_irt = json.load(open("computed/irt_wmt_4pl_s0_our.json", "r"))[10]
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 systems = list(data_old[0]["scores"].keys())
 ord_gold = utils.get_sys_ordering(data_old)

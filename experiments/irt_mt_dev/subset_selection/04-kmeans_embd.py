@@ -11,7 +11,7 @@ def vec_sim(a, b):
     # return -np.linalg.norm(a-b)
     return np.dot(a, b)
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 # encode references
 for line in tqdm.tqdm(data_old):
     line["feat"] = model.encode([line["ref"]])[0]

@@ -44,7 +44,7 @@ def irt(data, args, selection):
 
     # TODO: in the future run first training with dev set to find out the best epoch count
     # and then run again on full data with that epoch count
-    data_train= data_loader
+    data_train = data_loader
 
     data_train = torch.utils.data.DataLoader(
         data_train,

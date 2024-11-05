@@ -6,7 +6,7 @@ import tqdm
 import scipy.stats as st
 import matplotlib.pyplot as plt
 
-data_old = irt_mt_dev.utils.load_data()
+data_old = irt_mt_dev.utils.load_data_wmt()
 
 def confidence_interval(data):
     return st.t.interval(

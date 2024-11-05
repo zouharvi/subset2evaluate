@@ -15,7 +15,7 @@ def sigmoid_irt(x, a, b, c):
 def linear(x, a, b):
     return a * x + b
 
-data_wmt = utils.load_data(normalize=True)
+data_wmt = utils.load_data_wmt(normalize=True)
 systems = list(data_wmt[0]["scores"].keys())
 
 irt_mt_dev.utils.fig.matplotlib_default()

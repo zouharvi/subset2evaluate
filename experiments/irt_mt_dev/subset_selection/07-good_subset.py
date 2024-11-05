@@ -6,7 +6,7 @@ import tqdm
 import collections
 import multiprocessing
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 points_x = []
 points_y = []

@@ -5,7 +5,7 @@ import random
 import numpy as np
 import tqdm
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 for line in data_old:
     # TODO: also try with oracle?
     line["ord"] = utils.get_sys_ordering([line], metric="MetricX-23-c")

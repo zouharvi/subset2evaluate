@@ -1,7 +1,7 @@
 import irt_mt_dev.utils as utils
 import json
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 systems_irt = json.load(open("computed/irt_wmt_4pl_s0_eall_metricx.json"))[20]["theta"]
 systems_wmt = utils.get_sys_absolute(data_old, metric="MetricX-23-c")

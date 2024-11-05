@@ -5,7 +5,7 @@ import numpy as np
 import tqdm
 import scipy.stats as st
 
-data_old = utils.load_data()
+data_old = utils.load_data_wmt()
 
 points_x = []
 points_y_acc = []
