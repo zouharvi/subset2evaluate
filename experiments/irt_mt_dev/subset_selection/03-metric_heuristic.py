@@ -20,8 +20,8 @@ def heuristic_avg(item):
         [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
     )
 
-def heuristic_std(item):
-    return np.std([sys_v["MetricX-23"] for sys_v in item["scores"].values()])
+def heuristic_var(item):
+    return np.var([sys_v["MetricX-23"] for sys_v in item["scores"].values()])
 
 def heuristic_max_diff(item):
     return max([sys["COMET"] for sys in item["scores"].values()])-min([sys["COMET"] for sys in item["scores"].values()])
@@ -66,7 +66,7 @@ def heuristic_translation_dist_unigram(line):
     return np.average(out), ""
 
 # sort by the heuristic
-data_old = [(line, heuristic_std(line)) for line in tqdm.tqdm(data_old)]
+data_old = [(line, heuristic_var(line)) for line in tqdm.tqdm(data_old)]
 data_old.sort(key=lambda x: x[1])
 data_old = [x[0] for x in data_old]
 
