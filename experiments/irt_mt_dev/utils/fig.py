@@ -101,5 +101,5 @@ def plot_subset_selection(
         if os.environ.get("FIG_EXPORT", "") == "PDF":
             plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
         else:
-            plt.savefig(f"figures/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
+            plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
     plt.show()
