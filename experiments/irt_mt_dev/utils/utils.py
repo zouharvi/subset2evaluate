@@ -25,8 +25,9 @@ def load_data_squad(n_items=1000, n_systems=161):
 def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import glob
     import collections
-    line_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
-    line_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
+    lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
+    lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
+    lines_ref = None
     for fname in [
         f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
         f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
@@ -34,10 +35,14 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
         f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
         f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
         f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
+        f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
     ]:
         if os.path.exists(fname):
-            line_ref = open(fname, "r").readlines()
+            lines_ref = open(fname, "r").readlines()
             break
+    if lines_ref is None:
+        return []
+
     line_sys = {}
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
         sys = f.split("/")[-1].removesuffix(".txt")
@@ -48,11 +53,14 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
 
     systems = list(line_sys.keys())
 
-    line_score = collections.defaultdict(list)
+    lines_score = collections.defaultdict(list)
     for fname in [
         f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
         f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
+        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
         False
     ]:
         if fname and os.path.exists(fname):
@@ -64,7 +72,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     
     for line_raw in open(fname, "r").readlines():
         sys, score = line_raw.strip().split()
-        line_score[sys].append({"human": score})
+        lines_score[sys].append({"human": score})
 
 
     for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
@@ -73,22 +81,23 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
             sys, score = line_raw.strip().split("\t")
             # for refA, refB, synthetic_ref, and other "systems" not evaluated
             # TODO: maybe remove those from the systems list?
-            if sys not in line_score:
+            if sys not in lines_score:
                 continue
             # NOTE: there's no guarantee that this indexing is correct
-            line_score[sys][line_i % len(line_src)][metric] = float(score)
+            lines_score[sys][line_i % len(lines_src)][metric] = float(score)
 
     # filter out lines that have no human score
-    line_score = {k:v for k,v in line_score.items() if len(v) > 0}
-    systems = [sys for sys in systems if sys in line_score]
+    lines_score = {k:v for k,v in lines_score.items() if len(v) > 0}
+    systems = [sys for sys in systems if sys in lines_score]
 
     # putting it all together
     data = []
     line_id_true = 0
-    for line_i, (line_src, line_ref, line_doc) in enumerate(zip(line_src, line_ref, line_doc)):
+
+    for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
         # filter None on the whole row
-        if any([line_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
-        # if any([line_score[sys][line_i]["human"] in {"None"} for sys in systems]):
+        # TODO: maybe still consider segments with 0?
+        if any([lines_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
             continue
 
         line_domain, line_doc = line_doc.strip().split("\t")
@@ -99,7 +108,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
             "domain": line_domain,
-            "scores": {sys: {metric: float(v) for metric,v in line_score[sys][line_i].items()} for sys in systems},
+            "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
         })
         line_id_true += 1
     
@@ -144,6 +153,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
             for sys, met_all in line["scores"].items():
                 for met_k, met_v in met_all.items():
                     line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
+
     
     # import sys
     # print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
@@ -158,15 +168,10 @@ def load_data_wmt_all(**kwargs):
             ("wmt23", "de-en"),
             ("wmt23", "en-cs"),
             ("wmt23", "en-de"),
-            ("wmt23", "en-he"),
             ("wmt23", "en-ja"),
-            ("wmt23", "en-ru"),
-            ("wmt23", "en-uk"),
             ("wmt23", "en-zh"),
             ("wmt23", "he-en"),
             ("wmt23", "ja-en"),
-            ("wmt23", "ru-en"),
-            ("wmt23", "uk-en"),
             ("wmt23", "zh-en"),
 
             ("wmt22", "cs-en"),
@@ -252,6 +257,7 @@ def load_data_wmt_all(**kwargs):
         ]
     }
     # filter out empty datasets
+    # some years/langs have issues with human annotations coverage
     return {k:v for k,v in data.items() if len(v) > 0}
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
