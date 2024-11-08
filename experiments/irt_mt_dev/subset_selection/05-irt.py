@@ -3,7 +3,7 @@ import irt_mt_dev.utils.fig
 import json
 import numpy as np
 
-data_irt = json.load(open("computed/irt_wmt_4pl_s0_our.json", "r"))[10]
+data_irt = json.load(open("computed/irt_wmt_4pl_s0_our.json", "r"))[-1]
 data_old = utils.load_data_wmt()
 
 systems = list(data_old[0]["scores"].keys())
