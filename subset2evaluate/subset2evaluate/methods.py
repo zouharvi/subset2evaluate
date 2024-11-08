@@ -1,10 +1,13 @@
 import numpy as np
+import irt_mt_dev.utils as utils
 from functools import partial
+
 
 def random(data, args):
     import random
     random.Random(0).shuffle(data)
     return data
+
 
 def metric_avg(data, args):
     data.sort(key=lambda item: np.average(
@@ -12,11 +15,32 @@ def metric_avg(data, args):
     ))
     return data
 
+
 def metric_var(data, args):
     data.sort(key=lambda item: np.var(
         [sys_v[args.metric] for sys_v in item["scores"].values()]
     ), reverse=True)
     return data
+
+
+def metric_consistency(data, args):
+    metric_scores = utils.get_sys_absolute(data, metric=args.metric)
+    rank_correlation = {}
+    sys_names = list(metric_scores.keys())
+    for example in data:
+        consistency = 0
+        total = 0
+        for i in range(len(sys_names)):
+            for j in range(i+1, len(sys_names)):
+                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][args.metric] - example['scores'][sys_names[j]][args.metric]) > 0:
+                    consistency += 1
+                else:
+                    consistency -= 1
+                total += 1
+        rank_correlation[example['i']] = consistency / total
+    data.sort(key=lambda item: rank_correlation[item['i']], reverse=True)
+    return data
+
 
 def irt(data, args, selection):
     import torch
