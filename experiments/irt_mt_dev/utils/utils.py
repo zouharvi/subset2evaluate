@@ -159,7 +159,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     # print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
     return data
 
-def load_data_wmt_all(**kwargs):
+def load_data_wmt_all(min_segments=500, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
@@ -258,7 +258,7 @@ def load_data_wmt_all(**kwargs):
     }
     # filter out empty datasets
     # some years/langs have issues with human annotations coverage
-    return {k:v for k,v in data.items() if len(v) > 0}
+    return {k:v for k,v in data.items() if len(v) > min_segments}
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections
