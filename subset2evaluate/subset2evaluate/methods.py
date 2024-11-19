@@ -3,28 +3,28 @@ import irt_mt_dev.utils as utils
 from functools import partial
 
 
-def random(data, args):
+def random(data, **kwargs):
     import random
     random.Random(0).shuffle(data)
     return data
 
 
-def metric_avg(data, args):
+def metric_avg(data, **kwargs):
     data.sort(key=lambda item: np.average(
-        [sys_v[args.metric] for sys_v in item["scores"].values()]
+        [sys_v[kwargs["metric"]] for sys_v in item["scores"].values()]
     ))
     return data
 
 
-def metric_var(data, args):
+def metric_var(data, **kwargs):
     data.sort(key=lambda item: np.var(
-        [sys_v[args.metric] for sys_v in item["scores"].values()]
+        [sys_v[kwargs["metric"]] for sys_v in item["scores"].values()]
     ), reverse=True)
     return data
 
 
-def metric_consistency(data, args):
-    metric_scores = utils.get_sys_absolute(data, metric=args.metric)
+def metric_consistency(data, **kwargs):
+    metric_scores = utils.get_sys_absolute(data, metric=kwargs["metric"])
     rank_correlation = {}
     sys_names = list(metric_scores.keys())
     for example in data:
@@ -32,7 +32,7 @@ def metric_consistency(data, args):
         total = 0
         for i in range(len(sys_names)):
             for j in range(i+1, len(sys_names)):
-                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][args.metric] - example['scores'][sys_names[j]][args.metric]) > 0:
+                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][kwargs["metric"]] - example['scores'][sys_names[j]][kwargs["metric"]]) > 0:
                     consistency += 1
                 else:
                     consistency -= 1
@@ -42,7 +42,7 @@ def metric_consistency(data, args):
     return data
 
 
-def irt(data, args, selection):
+def irt(data, selection, **kwargs):
     import torch
     import torch.utils
     import lightning as L
@@ -50,18 +50,18 @@ def irt(data, args, selection):
 
     systems = list(data[0]["scores"].keys())
 
-    if args.model == "scalar":
+    if kwargs["model"] == "scalar":
         from irt_mt_dev.irt.scalar import IRTModelScalar
         model = IRTModelScalar(data, systems)
-    elif args.model == "tfidf":
+    elif kwargs["model"] == "tfidf":
         from irt_mt_dev.irt.tfidf import IRTModelTFIDF
         model = IRTModelTFIDF(data, systems)
-    elif args.model == "embd":
+    elif kwargs["model"] == "embd":
         from irt_mt_dev.irt.embd import IRTModelEmbd
         model = IRTModelEmbd(data, systems)
 
     data_loader = [
-        ((sent_i, sys_i), sent["scores"][sys][args.metric])
+        ((sent_i, sys_i), sent["scores"][sys][kwargs["metric"]])
         for sent_i, sent in enumerate(data)
         for sys_i, sys in enumerate(systems)
     ]
