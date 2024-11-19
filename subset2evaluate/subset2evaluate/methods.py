@@ -59,6 +59,8 @@ def irt(data, selection, **kwargs):
     elif kwargs["model"] == "embd":
         from irt_mt_dev.irt.embd import IRTModelEmbd
         model = IRTModelEmbd(data, systems)
+    else:
+        raise Exception("Model not defined")
 
     data_loader = [
         ((sent_i, sys_i), sent["scores"][sys][kwargs["metric"]])
@@ -84,7 +86,7 @@ def irt(data, selection, **kwargs):
     trainer = L.Trainer(
         # for scalar and tfidf, 500 is best
         # for embd, more is needed (2k?)
-        max_epochs=2000,
+        max_epochs=500 if kwargs["model"] != "embd" else 2000,
         enable_checkpointing=False,
         enable_progress_bar=False,
         logger=False,
