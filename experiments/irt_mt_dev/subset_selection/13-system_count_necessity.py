@@ -20,6 +20,7 @@ systems = list(data_old[0]["scores"].keys())
 
 # %%
 accs_all = []
+clus_all = []
 for subset_size in tqdm.tqdm(range(1, len(systems)+1)):
     def _run(_):
         systems_local = random.sample(systems, k=subset_size)
@@ -41,34 +42,75 @@ for subset_size in tqdm.tqdm(range(1, len(systems)+1)):
         data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="irt_ic", model="scalar", metric="MetricX-23")
 
         # we dropped some systems but we can recover them with the same ordering from data_old
-        _, acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        (_, clu_new_avg), acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_avg
         ])
-        _, acc_new_var = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        (_, clu_new_var), acc_new_var = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_var
         ])
-        _, acc_new_irt = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        (_, clu_new_irt), acc_new_irt = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_irt
         ])
-        return np.average(acc_new_avg), np.average(acc_new_var), np.average(acc_new_irt)
+        return (
+            (np.average(clu_new_avg), np.average(clu_new_var), np.average(clu_new_irt)),
+            (np.average(acc_new_avg), np.average(acc_new_var), np.average(acc_new_irt))
+        )
     
-    acc_new = [_run(_) for _ in range(2)]
+    ITERS = 10
+    if subset_size == len(systems):
+        ITERS = 1
+    results = [_run(_) for _ in range(ITERS)]
+    clus_new = [x[0] for x in results]
+    accs_new = [x[1] for x in results]
 
     # NOTE: can't use torch in multiprocessing
     # with multiprocessing.Pool(20) as pool:
-    #     acc_new = pool.map(_run, range(20))
-    accs_all.append(np.average(acc_new, axis=0))
+    #     acc_new = pool.map(_run, range(ITERS))
+    accs_all.append(np.average(accs_new, axis=0))
+    clus_all.append(np.average(clus_new, axis=0))
 
 # %%
+acc_random = []
+clu_random = []
+for _ in range(50):
+    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
+    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new)
+    acc_random.append(np.average(acc_new))
+    clu_random.append(np.average(clu_new))
+
+# %%
+from scipy.signal import savgol_filter
+
 fig_utils.matplotlib_default()
-plt.plot([x[0] for x in accs_all], label="MetricX-23 avg")
-plt.plot([x[1] for x in accs_all], label="MetricX-23 var")
-plt.plot([x[2] for x in accs_all], label="IRT")
+plt.figure(figsize=(4, 3))
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[0] for x in accs_all[1:]], 3, 1),
+    label="MetricX-23 avg"
+)
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[1] for x in accs_all[1:]], 3, 1),
+    label="MetricX-23 var"
+)
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[2] for x in accs_all[1:]], 3, 1),
+    label="IRT Information Content"
+)
+plt.hlines(
+    y=np.average(acc_random),
+    xmin=2, xmax=len(systems),
+    color="black",
+    label="Random",
+)
 # plt.ylim(0.91, None)
 plt.ylabel("Average accuracy")
-plt.xlabel("Number of systems")
+plt.xlabel("Number of systems in training data")
+plt.xticks(range(1, len(systems)+1, 3))
 plt.legend()
+plt.gca().spines[['top', 'right']].set_visible(False)
 plt.show()
