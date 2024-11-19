@@ -1,17 +1,12 @@
 import json
-import os
-import irt_mt_dev.utils as utils
-import methods
+from typing import List
+import subset2evaluate.utils as utils
+import subset2evaluate.methods as methods
 import copy
 
-def run_select_subset(data, method, metric=None, model=None):
-    if data.startswith("wmt"):
-        data_year, data_lang = data.split("/")
-        data = utils.load_data_wmt(year=data_year, langs=data_lang, normalize=True)
-    elif os.path.exists(data):
-        data = [json.loads(x) for x in open(data, "r")]
-    else:
-        raise Exception("Could not parse data")
+def run_select_subset(data : List | str, method, metric=None, model=None):
+    # both list or descriptor is fine
+    data = utils.load_data(data)
 
     if method not in methods.METHODS:
         raise Exception(f"Method {method} not found")
