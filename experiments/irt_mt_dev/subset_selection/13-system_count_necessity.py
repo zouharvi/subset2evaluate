@@ -88,17 +88,17 @@ fig_utils.matplotlib_default()
 plt.figure(figsize=(4, 3))
 plt.plot(
     range(2, len(systems)+1),
-    savgol_filter([x[0] for x in accs_all[1:]], 3, 1),
+    savgol_filter([x[0] for x in accs_all[1:]], 2, 1),
     label="MetricX-23 avg"
 )
 plt.plot(
     range(2, len(systems)+1),
-    savgol_filter([x[1] for x in accs_all[1:]], 3, 1),
+    savgol_filter([x[1] for x in accs_all[1:]], 2, 1),
     label="MetricX-23 var"
 )
 plt.plot(
     range(2, len(systems)+1),
-    savgol_filter([x[2] for x in accs_all[1:]], 3, 1),
+    savgol_filter([x[2] for x in accs_all[1:]], 2, 1),
     label="IRT Information Content"
 )
 plt.hlines(
@@ -113,4 +113,42 @@ plt.xlabel("Number of systems in training data")
 plt.xticks(range(1, len(systems)+1, 3))
 plt.legend()
 plt.gca().spines[['top', 'right']].set_visible(False)
+plt.tight_layout()
+plt.savefig("figures_pdf/13-system_count_necessity_acc.pdf")
+plt.show()
+
+# %%
+from scipy.signal import savgol_filter
+
+fig_utils.matplotlib_default()
+plt.figure(figsize=(4, 3))
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[0] for x in clus_all[1:]], 2, 1),
+    label="MetricX-23 avg"
+)
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[1] for x in clus_all[1:]], 2, 1),
+    label="MetricX-23 var"
+)
+plt.plot(
+    range(2, len(systems)+1),
+    savgol_filter([x[2] for x in clus_all[1:]], 2, 1),
+    label="IRT Information Content"
+)
+plt.hlines(
+    y=np.average(clu_random),
+    xmin=2, xmax=len(systems),
+    color="black",
+    label="Random",
+)
+# plt.ylim(0.91, None)
+plt.ylabel("Average number of clusters")
+plt.xlabel("Number of systems in training data")
+plt.xticks(range(1, len(systems)+1, 3))
+# plt.legend()
+plt.gca().spines[['top', 'right']].set_visible(False)
+plt.tight_layout()
+plt.savefig("figures_pdf/13-system_count_necessity_clu.pdf")
 plt.show()
