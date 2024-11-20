@@ -85,7 +85,7 @@ for _ in range(50):
 from scipy.signal import savgol_filter
 
 fig_utils.matplotlib_default()
-plt.figure(figsize=(4, 3))
+plt.figure(figsize=(3, 2))
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[0] for x in accs_all[1:]], 2, 1),
@@ -99,7 +99,8 @@ plt.plot(
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[2] for x in accs_all[1:]], 2, 1),
-    label="IRT Information Content"
+    label="IRT Inf. Content"
+
 )
 plt.hlines(
     y=np.average(acc_random),
@@ -109,9 +110,15 @@ plt.hlines(
 )
 # plt.ylim(0.91, None)
 plt.ylabel("Average accuracy")
-plt.xlabel("Number of systems in training data")
+plt.xlabel("Number of systems in training data" + " " * 5)
 plt.xticks(range(1, len(systems)+1, 3))
-plt.legend()
+plt.legend(
+    handletextpad=0.2,
+    handlelength=1,
+    labelspacing=0.2,
+    facecolor="#ccc",
+    # scatteryoffsets=[0.5]*len(points),
+)
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
 plt.savefig("figures_pdf/13-system_count_necessity_acc.pdf")
@@ -121,7 +128,7 @@ plt.show()
 from scipy.signal import savgol_filter
 
 fig_utils.matplotlib_default()
-plt.figure(figsize=(4, 3))
+plt.figure(figsize=(3, 2))
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[0] for x in clus_all[1:]], 2, 1),
@@ -144,8 +151,8 @@ plt.hlines(
     label="Random",
 )
 # plt.ylim(0.91, None)
-plt.ylabel("Average number of clusters")
-plt.xlabel("Number of systems in training data")
+plt.ylabel("Average cluster count" + " "*10, labelpad=10)
+plt.xlabel("Number of systems in training data" + " " * 5)
 plt.xticks(range(1, len(systems)+1, 3))
 # plt.legend()
 plt.gca().spines[['top', 'right']].set_visible(False)
