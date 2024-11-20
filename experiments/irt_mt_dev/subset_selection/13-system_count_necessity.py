@@ -89,17 +89,17 @@ plt.figure(figsize=(3, 2))
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[0] for x in accs_all[1:]], 2, 1),
-    label="MetricX-23 avg"
+    label="Heuristics avg"
 )
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[1] for x in accs_all[1:]], 2, 1),
-    label="MetricX-23 var"
+    label="Heuristics var"
 )
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[2] for x in accs_all[1:]], 2, 1),
-    label="IRT Inf. Content"
+    label="IRT FIC"
 
 )
 plt.hlines(
@@ -117,6 +117,8 @@ plt.legend(
     handlelength=1,
     labelspacing=0.2,
     facecolor="#ccc",
+    loc="upper left",
+    fontsize=8
     # scatteryoffsets=[0.5]*len(points),
 )
 plt.gca().spines[['top', 'right']].set_visible(False)
@@ -142,7 +144,7 @@ plt.plot(
 plt.plot(
     range(2, len(systems)+1),
     savgol_filter([x[2] for x in clus_all[1:]], 2, 1),
-    label="IRT Information Content"
+    label="IRT FIC"
 )
 plt.hlines(
     y=np.average(clu_random),
