@@ -69,7 +69,7 @@ for metric in tqdm.tqdm(metrics):
     accs_all['var'].append(np.average(acc_new))
 
 
-    data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="irt_ic", model="scalar", metric=metric)
+    data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="irt_fic", model="scalar", metric=metric)
     (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
         data_old_i_to_line[line["i"]]
         for line in data_new_var
