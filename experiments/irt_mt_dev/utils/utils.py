@@ -298,7 +298,7 @@ def eval_system_clusters(data: list, metric="human"):
     # computes number of clusters
 
     # sort from top
-    sys_ord = list(get_sys_absolute(data).items())
+    sys_ord = list(get_sys_absolute(data, metric=metric).items())
     sys_ord.sort(key=lambda x: x[1], reverse=True)
     sys_ord = [sys for sys, _ in sys_ord]
 
@@ -310,7 +310,7 @@ def eval_system_clusters(data: list, metric="human"):
         sys_scores = get_scores(sys_ord.pop(0))
         # TODO: should this be clusters[-1][0] or clusters[-1][-1]?
         diffs = [x - y for x, y in zip(sys_scores, clusters[-1][0])]
-        if wilcoxon(diffs, alternative="less").pvalue < 0.05:
+        if all([d==0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
             clusters.append([sys_scores])
         else:
             clusters[-1].append(sys_scores)

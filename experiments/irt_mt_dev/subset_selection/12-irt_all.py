@@ -9,12 +9,6 @@ data_old = utils.load_data_wmt()
 systems = list(data_old[0]["scores"].keys())
 ord_gold = utils.get_sys_ordering(data_old)
 
-# EXPERIMENT: compare ITR MT performance with AVG MT one and with gold one
-ord_metricx = utils.get_sys_ordering(data_old, metric="MetricX-23-c")
-ord_irt_mt = list(data_irt["systems"].items())
-ord_irt_mt.sort(key=lambda x: x[1], reverse=True)
-ord_irt_mt = {sys: sys_i for sys_i, (sys, sys_v) in enumerate(ord_irt_mt)}
-
 def utility_information_content(item):
     # aggregared fisher information content
     item = data_irt["items"][item["i"]]
