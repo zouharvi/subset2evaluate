@@ -1,4 +1,4 @@
-from typing import List, Text, Tuple
+from typing import Callable, List, Text, Tuple
 
 
 COLORS = [
@@ -29,6 +29,7 @@ def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
         filename=None,
         areas: List[Tuple[List, List, List]] = [],
+        fn_extra: Callable = lambda _: None
     ):
     import os
     import matplotlib.pyplot as plt
@@ -82,6 +83,9 @@ def plot_subset_selection(
     if not IS_CLUSTERS:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
+
+    fn_extra(plt.gca())
+
     plt.legend(
         loc="lower right",
         handletextpad=0.2,
@@ -92,14 +96,12 @@ def plot_subset_selection(
     )
 
     if IS_CLUSTERS:
-        plt.ylim(2, 7.1)
+        plt.ylim(3, 7.2)
     else:
-        plt.ylim(0.7, 1)
+        plt.ylim(0.8, 1)
     plt.tight_layout(pad=0.1)
     if filename:
         # save in files compatible with both LaTeX and Typst
-        if os.environ.get("FIG_EXPORT", "") == "PDF":
-            plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
-        else:
-            plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
+        plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
+        plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
     plt.show()

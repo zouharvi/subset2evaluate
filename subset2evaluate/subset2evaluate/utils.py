@@ -12,6 +12,14 @@ def load_data(data: List | str):
         data = utils.load_data_wmt(year=data_year, langs=data_lang, normalize=True)
     elif os.path.exists(data):
         data = [json.loads(x) for x in open(data, "r")]
+        
+        # TODO: REMOVE ME!!
+        systems = set(data[0]["scores"].keys())
+        for line in data:
+            systems = systems.intersection(set(line["scores"].keys()))
+
+        for line in data:
+            line["scores"] = {k:v for k,v in line["scores"].items() if k in systems}
     else:
         raise Exception("Could not parse data")
     
