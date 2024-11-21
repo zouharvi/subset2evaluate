@@ -101,7 +101,13 @@ def irt(data, selection, **kwargs):
     items_joint = list(zip(data, data_irt["items"]))
 
     def fn_disc(item):
-        return item["disc"]
+        return -item["disc"]
+    
+    def fn_diff(item):
+        return -item["diff"]
+    
+    def fn_feas(item):
+        return item["feas"]
     
     def fn_information_content(item):
         information = 0
@@ -114,7 +120,11 @@ def irt(data, selection, **kwargs):
         return information
 
     if selection == "diff":
+        fn_utility = fn_diff
+    elif selection == "disc":
         fn_utility = fn_disc
+    elif selection == "feas":
+        fn_utility = fn_feas
     elif selection == "information_content":
         fn_utility = fn_information_content
 
@@ -127,5 +137,7 @@ METHODS = {
     "avg": metric_avg,
     "var": metric_var,
     "irt_diff": partial(irt, selection="diff"),
-    "irt_ic": partial(irt, selection="information_content"),
+    "irt_disc": partial(irt, selection="disc"),
+    "irt_feas": partial(irt, selection="feas"),
+    "irt_fic": partial(irt, selection="information_content"),
 }

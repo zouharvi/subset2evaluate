@@ -39,7 +39,7 @@ for subset_size in tqdm.tqdm(range(1, len(systems)+1)):
 
         data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old_local, method="avg", metric="MetricX-23")
         data_new_var = subset2evaluate.select_subset.run_select_subset(data_old_local, method="var", metric="MetricX-23")
-        data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="irt_ic", model="scalar", metric="MetricX-23")
+        data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="irt_fic", model="scalar", metric="MetricX-23")
 
         # we dropped some systems but we can recover them with the same ordering from data_old
         (_, clu_new_avg), acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [

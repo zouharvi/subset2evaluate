@@ -13,7 +13,6 @@ data_old_all = list(utils.load_data_wmt_all().values())[:9]
 points_y_acc_all = collections.defaultdict(list)
 points_y_clu_all = collections.defaultdict(list)
 
-# mre-score-labse-regular', 'MetricX-23', 'chrF', 'COMET', 'f200spBLEU', 'tokengram_F', 'YiSi-1', 'embed_llama', 'XCOMET-XXL', 'BLEU', 'prismRef', 'eBLEU', 'XCOMET-XL', 'MetricX-23-c', 'XCOMET-Ensemble', 'BERTscore', 'XLsim', 'BLEURT-20', 'MetricX-23-b'
 def heuristic_metricx_avg(line):
     return np.average(
         [sys_v["MetricX-23"] for sys_v in line["scores"].values()]

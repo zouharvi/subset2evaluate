@@ -1,71 +1,81 @@
+# %%
+
 import irt_mt_dev.utils as utils
 import irt_mt_dev.utils.fig
-import json
 import numpy as np
+import os
+import subset2evaluate.evaluate
+import subset2evaluate.select_subset
+import tqdm
+import collections
 
-data_irt = json.load(open("computed/irt_wmt_4pl_s0_pyirt.json", "r"))[-1]
-data_old = utils.load_data_wmt()
+os.chdir("/home/vilda/irt-mt-dev")
 
-systems = list(data_old[0]["scores"].keys())
-ord_gold = utils.get_sys_ordering(data_old)
+# data_irt = json.load(open("computed/irt_wmt_4pl_s0_pyirt.json", "r"))[-1]
+data_old_all = list(utils.load_data_wmt_all().values())[:9]
+points_y_acc_all = collections.defaultdict(list)
+points_y_clu_all = collections.defaultdict(list)
 
-def utility_information_content(item):
-    # aggregared fisher information content
-    item = data_irt["items"][item["i"]]
+for data_old in tqdm.tqdm(data_old_all):
+    # TODO: run multiple times to smooth?
+    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        data_old,
+        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_diff", metric="MetricX-23", model="scalar"),
+        metric="human"
+    )
+    points_y_acc_all["diff"].append(acc_new)
+    points_y_clu_all["diff"].append(clu_new)
 
-    information = 0
-    for theta in data_irt["systems"].values():
-        prob = utils.pred_irt(
-            theta,
-            item
-        )
-        information += prob*(1-prob)*(item["disc"]**2)
-    return information
+    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        data_old,
+        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_disc", metric="MetricX-23", model="scalar"),
+        metric="human"
+    )
+    points_y_acc_all["disc"].append(acc_new)
+    points_y_clu_all["disc"].append(clu_new)
 
+    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        data_old,
+        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_feas", metric="MetricX-23", model="scalar"),
+        metric="human"
+    )
+    points_y_acc_all["feas"].append(acc_new)
+    points_y_clu_all["feas"].append(clu_new)
 
-def utility_diffdisc(item):
-    item = data_irt["items"][item["i"]]
-    return item["diff"] * item["disc"]
+    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        data_old,
+        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_fic", metric="MetricX-23", model="scalar"),
+        metric="human"
+    )
+    points_y_acc_all["fic"].append(acc_new)
+    points_y_clu_all["fic"].append(clu_new)
 
-def utility_feas(item):
-    item = data_irt["items"][item["i"]]
-    return item["feas"]
+# %%
+points_y_acc_all = {
+    k: np.average(np.array(v), axis=0)
+    for k,v in points_y_acc_all.items()
+}
+points_y_clu_all = {
+    k: np.average(np.array(v), axis=0)
+    for k,v in points_y_clu_all.items()
+}
 
-points_x = []
-points_y_diffdisc_acc = []
-points_y_diffdisc_clu = []
-points_y_infocontent_acc = []
-points_y_infocontent_clu = []
-points_y_feas_acc = []
-points_y_feas_clu = []
-
-data_irt_diffdisc = sorted(data_old, key=lambda x: -utility_diffdisc(x))
-data_irt_infocontent = sorted(data_old, key=lambda x: -utility_information_content(x))
-data_irt_feas = sorted(data_old, key=lambda x: utility_feas(x))
-
-for prop in utils.PROPS:
-    points_x.append(prop)
-
-    points_y_diffdisc_acc.append(utils.eval_order_accuracy(data_irt_diffdisc[:int(len(data_old)*prop)], data_old))
-    points_y_diffdisc_clu.append(utils.eval_system_clusters(data_irt_diffdisc[:int(len(data_old)*prop)]))
-    points_y_infocontent_acc.append(utils.eval_order_accuracy(data_irt_infocontent[:int(len(data_old)*prop)], data_old))
-    points_y_infocontent_clu.append(utils.eval_system_clusters(data_irt_infocontent[:int(len(data_old)*prop)]))
-    points_y_feas_acc.append(utils.eval_order_accuracy(data_irt_feas[:int(len(data_old)*prop)], data_old))
-    points_y_feas_clu.append(utils.eval_system_clusters(data_irt_feas[:int(len(data_old)*prop)]))
-
+# %%
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (points_x, points_y_feas_acc, f"IRT feasability {np.average(points_y_feas_acc):.2%}"),
-        (points_x, points_y_diffdisc_acc, f"IRT difficulty$\\times$discrim. {np.average(points_y_diffdisc_acc):.2%}"),
-        (points_x, points_y_infocontent_acc, f"IRT information content {np.average(points_y_infocontent_acc):.2%}"),
+        (utils.PROPS, points_y_acc_all['feas'], f"IRT feasability {np.average(points_y_acc_all['feas']):.2%}"),
+        (utils.PROPS, points_y_acc_all['diff'], f"IRT difficulty {np.average(points_y_acc_all['diff']):.2%}"),
+        (utils.PROPS, points_y_acc_all['disc'], f"IRT discriminability {np.average(points_y_acc_all['disc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['fic'], f"IRT information content {np.average(points_y_acc_all['fic']):.2%}"),
     ],
     "12-irt_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (points_x, points_y_feas_clu, f"IRT feasability {np.average(points_y_feas_clu):.2f}"),
-        (points_x, points_y_diffdisc_clu, f"IRT difficulty$\\times$discrim. {np.average(points_y_diffdisc_clu):.2f}"),
-        (points_x, points_y_infocontent_clu, f"IRT information content {np.average(points_y_infocontent_clu):.2f}"),
+        (utils.PROPS, points_y_clu_all['feas'], f"IRT feasability {np.average(points_y_clu_all['feas']):.2f}"),
+        (utils.PROPS, points_y_clu_all['diff'], f"IRT difficulty {np.average(points_y_clu_all['diff']):.2f}"),
+        (utils.PROPS, points_y_clu_all['disc'], f"IRT discriminability {np.average(points_y_clu_all['disc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['fic'], f"IRT information content {np.average(points_y_clu_all['fic']):.2f}"),
     ],
     "12-irt_all",
 )
