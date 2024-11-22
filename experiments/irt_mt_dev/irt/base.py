@@ -1,12 +1,16 @@
+import numpy as np
 import torch
 import torch.utils
 import lightning as L
 import json
 import irt_mt_dev.utils as utils
+import subset2evaluate.evaluate
 
 class IRTModelBase(L.LightningModule):
     def __init__(self, systems, **kwargs):
         super().__init__()
+
+        self.data_old = kwargs["data_old"]
 
         # MT ability modelling is always the same across all models (scalar)
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
@@ -62,21 +66,41 @@ class IRTModelBase(L.LightningModule):
 
         self.log("train_loss", loss)
         return loss
-    
 
     def validation_step(self, batch, batch_idx):
-        (x_items, x_systems), y_true = batch
-        y_pred = self.forward(x_items, x_systems)
-
-        loss_pred = torch.nn.functional.l1_loss(y_pred, y_true)
-        loss_const = torch.nn.functional.l1_loss(
-            torch.full_like(y_true, fill_value=torch.mean(y_true)),
-            y_true
-        )
+        # we ignore the inputs and use the current parameters which are aligned with the full data
 
         # TODO: monitor accuracy & clusters here to know when to stop
+        data_irt = self.pack_irt_params()
+        items_joint = list(zip(self.data_old, data_irt["items"]))
+        items_joint.sort(
+            key=lambda x: self.fn_utility(x[1], data_irt["systems"]),
+            reverse=True
+        )
 
-        self.log("val_loss_vs_constant", loss_pred-loss_const)
+        data_new = [x[0] for x in items_joint]
+        
+        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            self.data_old,
+            data_new,
+            # TODO: look at human and how it changes
+            # TODO: set this dynamically
+            metric="MetricX-23"
+        )
+        print(f"metric = {np.average(clu_new):.2f}  {np.average(acc_new):.2%}", end=" | ")
+        self.log("cluster_count_metric", np.average(clu_new))
+        self.log("subset_consistency_accuracy_metric", np.average(acc_new))
+
+        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            self.data_old,
+            data_new,
+            # TODO: set this dynamically
+            metric="human"
+        )
+        print(f"human = {np.average(clu_new):.2f}  {np.average(acc_new):.2%}")
+
+        self.log("cluster_count_human", np.average(clu_new))
+        self.log("subset_consistency_accuracy_human", np.average(acc_new))
 
         self.params_log.append(self.pack_irt_params())
 
@@ -87,7 +111,7 @@ class IRTModelBase(L.LightningModule):
         raise NotImplementedError
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.1)
+        return torch.optim.Adam(self.parameters(), lr=0.05)
     
     def pack_irt_params(self):
         return {

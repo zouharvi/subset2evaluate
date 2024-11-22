@@ -3,16 +3,16 @@ import torch.utils
 from irt_mt_dev.irt.base import IRTModelBase
 
 class IRTModelScalar(IRTModelBase):
-    def __init__(self, items, systems, **kwargs):
+    def __init__(self, data, systems, **kwargs):
         super().__init__(systems=systems, **kwargs)
 
         # normally distribute at the beginning
         # discrimination
-        self.param_disc = torch.nn.Parameter(torch.randn(len(items)))
+        self.param_disc = torch.nn.Parameter(torch.randn(len(data)))
         # difficulty
-        self.param_diff = torch.nn.Parameter(torch.randn(len(items)))
+        self.param_diff = torch.nn.Parameter(torch.randn(len(data)))
         # feasability
-        self.param_feas = torch.nn.Parameter(torch.randn(len(items)))
+        self.param_feas = torch.nn.Parameter(torch.randn(len(data)))
     
         self.clamp_feas = True
 
