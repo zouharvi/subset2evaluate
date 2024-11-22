@@ -12,43 +12,30 @@ import collections
 os.chdir("/home/vilda/irt-mt-dev")
 
 # data_irt = json.load(open("computed/irt_wmt_4pl_s0_pyirt.json", "r"))[-1]
-data_old_all = list(utils.load_data_wmt_all().values())[:9]
+data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 points_y_acc_all = collections.defaultdict(list)
 points_y_clu_all = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
-    # TODO: run multiple times to smooth?
-    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-        data_old,
-        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_diff", metric="MetricX-23", model="scalar"),
-        metric="human"
-    )
-    points_y_acc_all["diff"].append(acc_new)
-    points_y_clu_all["diff"].append(clu_new)
 
-    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-        data_old,
-        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_disc", metric="MetricX-23", model="scalar"),
-        metric="human"
-    )
-    points_y_acc_all["disc"].append(acc_new)
-    points_y_clu_all["disc"].append(clu_new)
+    # the parameters *can't* be re-used probably instead of having to train from scrach
+    # because it affects the early stopping criteria
+    for method in ["irt_diff", "irt_disc", "irt_feas", "irt_fic"]:
+        points_y_acc_local = []
+        points_y_clu_local = []
 
-    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-        data_old,
-        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_feas", metric="MetricX-23", model="scalar"),
-        metric="human"
-    )
-    points_y_acc_all["feas"].append(acc_new)
-    points_y_clu_all["feas"].append(clu_new)
+        # run multiple times to smooth
+        for _ in range(2):
+            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+                data_old,
+                subset2evaluate.select_subset.run_select_subset(data_old, method=method, metric="MetricX-23", model="scalar"),
+                metric="human"
+            )
+            points_y_acc_local.append(acc_new)
+            points_y_clu_local.append(clu_new)
 
-    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-        data_old,
-        subset2evaluate.select_subset.run_select_subset(data_old, method="irt_fic", metric="MetricX-23", model="scalar"),
-        metric="human"
-    )
-    points_y_acc_all["fic"].append(acc_new)
-    points_y_clu_all["fic"].append(clu_new)
+        points_y_acc_all[method].append(np.average(acc_new, axis=0))
+        points_y_clu_all[method].append(np.average(clu_new, axis=0))
 
 # %%
 points_y_acc_all = {
@@ -63,19 +50,19 @@ points_y_clu_all = {
 # %%
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_acc_all['feas'], f"IRT feasability {np.average(points_y_acc_all['feas']):.2%}"),
-        (utils.PROPS, points_y_acc_all['diff'], f"IRT difficulty {np.average(points_y_acc_all['diff']):.2%}"),
-        (utils.PROPS, points_y_acc_all['disc'], f"IRT discriminability {np.average(points_y_acc_all['disc']):.2%}"),
-        (utils.PROPS, points_y_acc_all['fic'], f"IRT information content {np.average(points_y_acc_all['fic']):.2%}"),
+        (utils.PROPS, points_y_acc_all['irt_feas'], f"IRT feasability {np.average(points_y_acc_all['irt_feas']):.2%}"),
+        (utils.PROPS, points_y_acc_all['irt_diff'], f"IRT difficulty {np.average(points_y_acc_all['irt_diff']):.2%}"),
+        (utils.PROPS, points_y_acc_all['irt_disc'], f"IRT discriminability {np.average(points_y_acc_all['irt_disc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['irt_fic'], f"IRT information content {np.average(points_y_acc_all['irt_fic']):.2%}"),
     ],
     "12-irt_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_clu_all['feas'], f"IRT feasability {np.average(points_y_clu_all['feas']):.2f}"),
-        (utils.PROPS, points_y_clu_all['diff'], f"IRT difficulty {np.average(points_y_clu_all['diff']):.2f}"),
-        (utils.PROPS, points_y_clu_all['disc'], f"IRT discriminability {np.average(points_y_clu_all['disc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['fic'], f"IRT information content {np.average(points_y_clu_all['fic']):.2f}"),
+        (utils.PROPS, points_y_clu_all['irt_feas'], f"IRT feasability {np.average(points_y_clu_all['irt_feas']):.2f}"),
+        (utils.PROPS, points_y_clu_all['irt_diff'], f"IRT difficulty {np.average(points_y_clu_all['irt_diff']):.2f}"),
+        (utils.PROPS, points_y_clu_all['irt_disc'], f"IRT discriminability {np.average(points_y_clu_all['irt_disc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['irt_fic'], f"IRT information content {np.average(points_y_clu_all['irt_fic']):.2f}"),
     ],
     "12-irt_all",
 )

@@ -4,12 +4,12 @@ from irt_mt_dev.irt.base import IRTModelBase
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 class IRTModelTFIDF(IRTModelBase):
-    def __init__(self, items, systems, **kwargs):
+    def __init__(self, data, systems, **kwargs):
         super().__init__(systems=systems, **kwargs)
 
         encoder = TfidfVectorizer(max_features=768)
         self.text_src = torch.nn.Parameter(
-            torch.tensor(encoder.fit_transform([item["src"] for item in items]).toarray()).float(),
+            torch.tensor(encoder.fit_transform([item["src"] for item in data]).toarray()).float(),
             requires_grad=False
         )
 
@@ -18,7 +18,7 @@ class IRTModelTFIDF(IRTModelBase):
         self.param_diff = torch.nn.Linear(768, 1)
         self.param_feas = torch.nn.Linear(768, 1)
 
-        self.len_items = len(items)
+        self.len_items = len(data)
     
     def get_irt_params(self, i_item, name):
         if name == "disc":

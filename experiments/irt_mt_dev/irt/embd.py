@@ -6,12 +6,12 @@ from irt_mt_dev.irt.base import IRTModelBase
 from sentence_transformers import SentenceTransformer
 
 class IRTModelEmbd(IRTModelBase):
-    def __init__(self, items, systems, **kwargs):
+    def __init__(self, data, systems, **kwargs):
         super().__init__(systems=systems, **kwargs)
 
         encoder = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
         self.text_src = torch.nn.Parameter(
-            torch.tensor(encoder.encode([item["src"] for item in items])),
+            torch.tensor(encoder.encode([item["src"] for item in data])),
             requires_grad=False,
         )
 
@@ -27,7 +27,7 @@ class IRTModelEmbd(IRTModelBase):
         self.param_diff = fn()
         self.param_feas = fn()
 
-        self.len_items = len(items)
+        self.len_items = len(data)
     
     def get_irt_params(self, i_item, name):
         if name == "disc":
