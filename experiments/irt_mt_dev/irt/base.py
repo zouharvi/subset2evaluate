@@ -2,9 +2,10 @@ import torch
 import torch.utils
 import lightning as L
 import json
+import irt_mt_dev.utils as utils
 
 class IRTModelBase(L.LightningModule):
-    def __init__(self, systems):
+    def __init__(self, systems, **kwargs):
         super().__init__()
 
         # MT ability modelling is always the same across all models (scalar)
@@ -15,6 +16,24 @@ class IRTModelBase(L.LightningModule):
         self.loss_fn = torch.nn.MSELoss()
 
         self.clamp_feas = False
+
+        
+        def fn_information_content(item, system_thetas):
+            information = 0
+            for theta in system_thetas.values():
+                prob = utils.pred_irt(
+                    theta,
+                    item
+                )
+                information += prob*(1-prob)*(item["disc"]**2)
+            return information
+
+        self.fn_utility = {
+            "diff": lambda item, *args: -item["diff"],
+            "disc": lambda item, *args: -item["disc"],
+            "feas": lambda item, *args: item["feas"],
+            "fisher_information_content": fn_information_content,
+        }[kwargs["fn_utility"]]
 
     def forward(self, i_item, i_system):
         disc = self.get_irt_params(i_item, "disc")

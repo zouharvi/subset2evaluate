@@ -3,8 +3,8 @@ import torch.utils
 from irt_mt_dev.irt.base import IRTModelBase
 
 class IRTModelScalar(IRTModelBase):
-    def __init__(self, items, systems):
-        super().__init__(systems=systems)
+    def __init__(self, items, systems, **kwargs):
+        super().__init__(systems=systems, **kwargs)
 
         # normally distribute at the beginning
         # discrimination

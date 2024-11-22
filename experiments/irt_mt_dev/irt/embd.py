@@ -6,8 +6,8 @@ from irt_mt_dev.irt.base import IRTModelBase
 from sentence_transformers import SentenceTransformer
 
 class IRTModelEmbd(IRTModelBase):
-    def __init__(self, items, systems):
-        super().__init__(systems=systems)
+    def __init__(self, items, systems, **kwargs):
+        super().__init__(systems=systems, **kwargs)
 
         encoder = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
         self.text_src = torch.nn.Parameter(
