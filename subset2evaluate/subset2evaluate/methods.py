@@ -42,23 +42,26 @@ def metric_consistency(data, **kwargs):
     return data
 
 
-def irt(data, selection, **kwargs):
+def irt(data, **kwargs):
     import torch
     import torch.utils
     import lightning as L
     import irt_mt_dev.utils as utils
+    # turn off pesky pytorch logs
+    import logging
+    logging.disable(logging.INFO)
 
     systems = list(data[0]["scores"].keys())
 
     if kwargs["model"] == "scalar":
         from irt_mt_dev.irt.scalar import IRTModelScalar
-        model = IRTModelScalar(data, systems)
+        model = IRTModelScalar(data, systems, **kwargs)
     elif kwargs["model"] == "tfidf":
         from irt_mt_dev.irt.tfidf import IRTModelTFIDF
-        model = IRTModelTFIDF(data, systems)
+        model = IRTModelTFIDF(data, systems, **kwargs)
     elif kwargs["model"] == "embd":
         from irt_mt_dev.irt.embd import IRTModelEmbd
-        model = IRTModelEmbd(data, systems)
+        model = IRTModelEmbd(data, systems, **kwargs)
     else:
         raise Exception("Model not defined")
 
@@ -89,8 +92,10 @@ def irt(data, selection, **kwargs):
         max_epochs=500 if kwargs["model"] != "embd" else 2000,
         enable_checkpointing=False,
         enable_progress_bar=False,
+        enable_model_summary=False,
         logger=False,
     )
+
     trainer.fit(
         model=model,
         train_dataloaders=data_train,
@@ -100,35 +105,7 @@ def irt(data, selection, **kwargs):
     data_irt = model.pack_irt_params()
     items_joint = list(zip(data, data_irt["items"]))
 
-    def fn_disc(item):
-        return -item["disc"]
-    
-    def fn_diff(item):
-        return -item["diff"]
-    
-    def fn_feas(item):
-        return item["feas"]
-    
-    def fn_information_content(item):
-        information = 0
-        for theta in data_irt["systems"].values():
-            prob = utils.pred_irt(
-                theta,
-                item
-            )
-            information += prob*(1-prob)*(item["disc"]**2)
-        return information
-
-    if selection == "diff":
-        fn_utility = fn_diff
-    elif selection == "disc":
-        fn_utility = fn_disc
-    elif selection == "feas":
-        fn_utility = fn_feas
-    elif selection == "information_content":
-        fn_utility = fn_information_content
-
-    items_joint.sort(key=lambda x: fn_utility(x[1]), reverse=True)
+    items_joint.sort(key=lambda x: model.fn_utility(x[1], data_irt["systems"]), reverse=True)
 
     return [x[0] for x in items_joint]
 
@@ -136,8 +113,8 @@ METHODS = {
     "random": random,
     "avg": metric_avg,
     "var": metric_var,
-    "irt_diff": partial(irt, selection="diff"),
-    "irt_disc": partial(irt, selection="disc"),
-    "irt_feas": partial(irt, selection="feas"),
-    "irt_fic": partial(irt, selection="information_content"),
+    "irt_diff": partial(irt, fn_utility="diff"),
+    "irt_disc": partial(irt, fn_utility="disc"),
+    "irt_feas": partial(irt, fn_utility="feas"),
+    "irt_fic": partial(irt, fn_utility="fisher_information_content"),
 }
