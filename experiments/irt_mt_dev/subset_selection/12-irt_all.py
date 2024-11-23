@@ -34,8 +34,8 @@ for data_old in tqdm.tqdm(data_old_all):
             points_y_acc_local.append(acc_new)
             points_y_clu_local.append(clu_new)
 
-        points_y_acc_all[method].append(np.average(acc_new, axis=0))
-        points_y_clu_all[method].append(np.average(clu_new, axis=0))
+        points_y_acc_all[method].append(np.average(points_y_acc_local, axis=0))
+        points_y_clu_all[method].append(np.average(points_y_clu_local, axis=0))
 
 # %%
 points_y_acc_all = {
