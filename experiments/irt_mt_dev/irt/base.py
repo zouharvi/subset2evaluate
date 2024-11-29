@@ -16,6 +16,7 @@ class IRTModelBase(L.LightningModule):
         self.param_theta = torch.nn.Parameter(torch.randn(len(systems)))
 
         self.systems = systems
+        self.results_log = []
         self.params_log = []
         self.loss_fn = torch.nn.MSELoss()
 
@@ -80,28 +81,37 @@ class IRTModelBase(L.LightningModule):
 
         data_new = [x[0] for x in items_joint]
         
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        (_, clu_new_metric), acc_new_metric = subset2evaluate.evaluate.run_evaluate_topk(
             self.data_old,
             data_new,
             # TODO: look at human and how it changes
             # TODO: set this dynamically
             metric="MetricX-23"
         )
-        print(f"metric = {np.average(clu_new):.2f}  {np.average(acc_new):.2%}", end=" | ")
-        self.log("cluster_count_metric", np.average(clu_new))
-        self.log("subset_consistency_accuracy_metric", np.average(acc_new))
 
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        (_, clu_new_human), acc_new_human = subset2evaluate.evaluate.run_evaluate_topk(
             self.data_old,
             data_new,
             # TODO: set this dynamically
             metric="human"
         )
-        print(f"human = {np.average(clu_new):.2f}  {np.average(acc_new):.2%}")
+        
+        # print(
+        # f"Metric CLU: {np.average(clu_new_metric):.2f} | ACC: {np.average(acc_new_metric):.2%} | ",
+        # f"Human  CLU: {np.average(clu_new_human):.2f} | ACC: {np.average(acc_new_human):.2%}",
+        # )
 
-        self.log("cluster_count_human", np.average(clu_new))
-        self.log("subset_consistency_accuracy_human", np.average(acc_new))
+        self.log("cluster_count_metric", np.average(clu_new_metric))
+        self.log("subset_consistency_accuracy_metric", np.average(acc_new_metric))
+        self.log("cluster_count_human", np.average(clu_new_human))
+        self.log("subset_consistency_accuracy_human", np.average(acc_new_human))
 
+        self.results_log.append({
+            "cluster_count_metric": np.average(clu_new_metric),
+            "subset_consistency_accuracy_metric": np.average(acc_new_metric),
+            "cluster_count_human": np.average(clu_new_human),
+            "subset_consistency_accuracy_human": np.average(acc_new_human),
+        })
         self.params_log.append(self.pack_irt_params())
 
     def get_irt_params(self, i_item, name):

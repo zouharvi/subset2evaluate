@@ -8,6 +8,8 @@ import tqdm
 import scipy.stats as st
 import os
 os.chdir("/home/vilda/irt-mt-dev")
+import subset2evaluate.evaluate
+import subset2evaluate.select_subset
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
@@ -25,24 +27,23 @@ def confidence_interval(data):
 for data_old in tqdm.tqdm(data_old_all):
     points_y_acc = []
     points_y_clu = []
-    for prop in utils.PROPS:
-        points_y_local_acc = []
-        points_y_local_clu = []
 
-        # repeat each sampling 10 times to smooth it out
-        for _ in range(10):
-            data_new = random.sample(data_old, k=int(len(data_old)*prop))
-            points_y_local_acc.append(utils.eval_order_accuracy(data_new, data_old))
-            points_y_local_clu.append(utils.eval_system_clusters(data_new))
-
-        points_y_acc.append(np.average(points_y_local_acc))
-        points_y_clu.append(np.average(points_y_local_clu))
-
-    points_y_acc_all.append(points_y_acc)
-    points_y_clu_all.append(points_y_clu)
+    # repeat each sampling 50 times to smooth it out
+    for _ in range(50):
+        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            data_old,
+            subset2evaluate.select_subset.run_select_subset(data_old, method="random"),
+            metric="human"
+        )
+        points_y_acc.append(acc_new)
+        points_y_clu.append(clu_new)
+    
+    points_y_acc_all.append(np.average(points_y_acc, axis=0))
+    points_y_clu_all.append(np.average(points_y_clu, axis=0))
 
 print(f"Average ACC {np.average(points_y_acc):.2%}")
 print(f"Average CLU {np.average(points_y_clu):.2f}")
+
 
 # %%
 def plot_extra_acc(ax):
@@ -67,12 +68,12 @@ def plot_extra_clu(ax):
         )
 
 irt_mt_dev.utils.fig.plot_subset_selection(
-    points=[(utils.PROPS, [np.average(l) for l in points_y_acc], f"Random {np.average(points_y_acc):.2%}")],
+    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.2%}")],
     filename="01-random_subset",
     fn_extra=plot_extra_acc,
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
-    points=[(utils.PROPS, [np.average(l) for l in points_y_clu], f"Random {np.average(points_y_clu):.2f}")],
+    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_clu).T], f"Random {np.average(points_y_clu):.2f}")],
     filename="01-random_subset",
     fn_extra=plot_extra_clu,
 )
