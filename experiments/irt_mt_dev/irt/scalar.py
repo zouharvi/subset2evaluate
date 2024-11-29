@@ -33,3 +33,9 @@ class IRTModelScalar(IRTModelBase):
             }
             for disc, diff, feas in zip(self.param_disc, self.param_diff, self.param_feas)
         ]
+
+    def load_irt_params(self, params):
+        self.systems = torch.nn.Parameter(torch.Tensor(params["systems"]))
+        self.param_disc = torch.nn.Parameter(torch.Tensor(params["items"]["disc"]))
+        self.param_diff = torch.nn.Parameter(torch.Tensor(params["items"]["diff"]))
+        self.param_feas = torch.nn.Parameter(torch.Tensor(params["items"]["feas"]))
