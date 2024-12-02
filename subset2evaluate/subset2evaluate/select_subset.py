@@ -4,7 +4,7 @@ import subset2evaluate.utils as utils
 import subset2evaluate.methods as methods
 import copy
 
-def run_select_subset(data : List | str, method, metric=None, model=None):
+def run_select_subset(data : List | str, method, metric=None, model=None, **kwargs):
     # both list or descriptor is fine
     data = utils.load_data(data)
 
@@ -13,7 +13,7 @@ def run_select_subset(data : List | str, method, metric=None, model=None):
     method = methods.METHODS[method]
 
     # methods might mutate data, make sure we keep it clean
-    data_new = method(copy.deepcopy(data), model=model, metric=metric)
+    data_new = method(copy.deepcopy(data), model=model, metric=metric, **kwargs)
 
     return data_new
 

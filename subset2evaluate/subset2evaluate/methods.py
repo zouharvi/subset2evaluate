@@ -174,7 +174,6 @@ def pyirt(data, **kwargs):
         for line in data
         for system_v in line["scores"].values()
     ])
-    print("Median", f"{median:.2f}")
 
     systems = list(data[0]["scores"].keys())
 
@@ -195,34 +194,51 @@ def pyirt(data, **kwargs):
         item_columns=[f"item_{line['i']}" for line in data],
     )
 
-
     config = py_irt.config.IrtConfig(
-        model_type='4pl',
+        model_type=kwargs["model_type"],
         log_every=100,
-        # dropout=0,
+        dropout=kwargs["dropout"],
+        priors=kwargs["priors"],
         seed=0,
-        # TODO: see what this does
-        deterministic=True,
+        deterministic=kwargs["deterministic"],
     )
     trainer = py_irt.training.IrtModelTrainer(
         config=config,
         data_path=None,
         dataset=dataset,
+        verbose=False
     )
-    trainer.train(epochs=1_000, device='cuda')
+    trainer.train(epochs=kwargs["epochs"], device='cuda')
 
     params = trainer.best_params
-    data_irt = {
-        "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-        "items": [
-            {"disc": disc, "diff": diff, "feas": feas}
-            for disc, diff, feas in zip(
-                params["disc"],
-                params["diff"],
-                params["lambdas"],
-            )
-        ]
-    }
+    # TODO: 4PL does not have an extra parameter?
+    # NOTE: we are probably doing prediction for 4PL incorrect
+    # TODO: cross-check make sure that we do the predictions as the models were trained
+
+    # 3PL/4PL
+    if "lambdas" in params:
+        data_irt = {
+            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+            "items": [
+                {"disc": disc, "diff": diff, "feas": feas}
+                for disc, diff, feas in zip(
+                    params["disc"],
+                    params["diff"],
+                    params["lambdas"],
+                )
+            ]
+        }
+    else:
+        data_irt = {
+            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+            "items": [
+                {"disc": disc, "diff": diff}
+                for disc, diff in zip(
+                    params["disc"],
+                    params["diff"],
+                )
+            ]
+        }
 
     def fn_irt_utility(item, system_thetas, fn_utility):
         if fn_utility == "fisher_information_content":

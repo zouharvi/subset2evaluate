@@ -309,7 +309,8 @@ def eval_system_clusters(data: list, metric="human"):
     while sys_ord:
         sys_scores = get_scores(sys_ord.pop(0))
         # TODO: should this be clusters[-1][0] or clusters[-1][-1]?
-        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][0])]
+        # TODO: handle different domains?
+        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
         if all([d==0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
             clusters.append([sys_scores])
         else:
@@ -361,6 +362,8 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
 def pred_irt(system_theta, item):
     import numpy as np
     if "feas" in item:
+        # NOTE: true for 4PL, not for 3PL
+        # return  item["feas"] / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
         return item["feas"] + (1 - item["feas"]) / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
     if "disc" in item:
         return 1 / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
