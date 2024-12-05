@@ -1,3 +1,5 @@
+import torch
+import neural_irt.train
 import numpy as np
 import irt_mt_dev.utils as utils
 from functools import partial
@@ -258,6 +260,174 @@ def pyirt(data, **kwargs):
 
     return [x[0] for x in items_joint]
 
+def nnirt(data, **kwargs):
+    import neural_irt.train
+    from neural_irt.lit_module import IrtLitModule
+    from neural_irt.data import collators, datasets
+    from neural_irt.configs.common import IrtModelConfig
+    from torch.utils import data as torch_data
+    import wandb
+    from lightning.pytorch.loggers import WandbLogger
+    from pytorch_lightning.callbacks import ModelCheckpoint
+    from sklearn.model_selection import train_test_split
+    from typing import Any, Optional, Sequence
+    from pydantic import BaseModel
+
+    BATCH_SIZE = 256
+
+    systems = list(data[0]["scores"].keys())
+
+    def wrangle_data(data_local):
+        data_out = []
+        for line in data_local:
+            for sys, sys_v in line["scores"].items():
+                data_out.append({
+                    "agent_name": sys,
+                    "agent_id": systems.index(sys),
+                    "agent_type": "general",
+                    "query_id": line["i"],
+                    "query_rep": torch.nn.functional.one_hot(torch.tensor([line["i"]]), num_classes=len(data)).float(),
+                    "ruling": sys_v[kwargs["metric"]],
+                })
+        return data_out
+    
+
+    def create_agent_indexer_from_dataset(
+        dataset_or_path: str | Sequence[dict[str, Any]],
+    ) -> neural_irt.train.AgentIndexer:
+        dataset = dataset_or_path
+        if isinstance(dataset, str):
+            dataset = datasets.load_as_hf_dataset(dataset_or_path)
+
+        # NOTE: this was entry["id"] and entry["type"] before
+        agent_ids = [entry["agent_id"] for entry in dataset]
+        agent_types = list({entry["agent_type"] for entry in dataset})
+        agent_type_map = {entry["agent_id"]: entry["agent_type"] for entry in dataset}
+        return neural_irt.train.AgentIndexer(agent_ids, agent_types, agent_type_map)
+
+    
+    data_train, data_test = train_test_split(data, test_size=0.1, random_state=0)
+    data_train = wrangle_data(data_train)
+    data_test = wrangle_data(data_test)
+    agent_indexer = create_agent_indexer_from_dataset(data_train+data_test)
+    train_collator = collators.CaimiraCollator(agent_indexer, is_training=True)
+    val_collator = collators.CaimiraCollator(agent_indexer, is_training=False)
+
+    # TODO: very likely will fail here because the data is not wrangled properly
+    train_loader = torch_data.DataLoader(
+        data_train,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+        collate_fn=train_collator,
+        num_workers=1,
+    )
+    val_loaders_dict = {
+        "val": torch_data.DataLoader(
+        data_test,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+        collate_fn=train_collator,
+        num_workers=1,
+    )
+    }
+    val_loader_names = list(val_loaders_dict.keys())
+    val_loaders = [val_loaders_dict[name] for name in val_loader_names]
+
+
+    class TrainerConfig(BaseModel):
+        # Train time
+        # TODO: we define max_epochs twice?
+        max_epochs: int = 100
+        max_steps: Optional[int] = None
+        sampler: Optional[str] = None
+        batch_size: int = BATCH_SIZE
+
+        # Optimizer
+        optimizer: str = "Adam"  # [Adam, RMSprop, SGD]
+        learning_rate: float = 1e-3
+        cyclic_lr: bool = False
+
+        second_optimizer: str = "SGD"
+        second_learning_rate: float = 5e-4
+        second_optimizer_start_epoch: Optional[int] = 75
+
+        freeze_bias_after: Optional[int] = None
+
+        ckpt_savedir: str = "./checkpoints/irt"
+
+        c_reg_skill : float = 1e-6
+        c_reg_difficulty : float = 1e-6
+        c_reg_relevance : float = 1e-6
+
+    class CaimiraConfig(IrtModelConfig):
+        # Number of dimensions in item embeddings
+        # TODO: turn this into real embeddings
+        n_dim_item_embed: int = len(data)
+
+        # Number of dimensions for the agent embedding
+        rel_mode: str = "linear"  # [linear, mlp]
+        dif_mode: str = "linear"  # [linear, mlp]
+
+        # Number of hidden units for the MLPs if mode is mlp
+        n_hidden_dif: int = 128
+        n_hidden_rel: int = 128
+
+        # Sparsity controls for importance [only used if fit_importance is True]
+        # Temperature for importance
+        rel_temperature: float = 0.5
+        fast: bool = False
+
+        @property
+        def arch(self):
+            return "caimira"
+        
+        n_agents: int = len(systems)
+        # 1 for now because we don't know what it really is
+        n_agent_types : int = 1
+        n_dim : int = 32
+        fit_guess_bias : float = False
+        # TODO: turn off?
+        fit_agent_type_embeddings : bool = True
+
+
+    model = IrtLitModule(
+        trainer_config=TrainerConfig(),
+        model_or_config=CaimiraConfig(),
+        val_dataloader_names=val_loader_names,
+        agent_indexer=agent_indexer,
+    )
+
+    train_logger = None
+    train_logger = WandbLogger(
+        project="irt-mt-dev",
+        name="nnirt base",
+    )
+
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=3,
+        monitor="val/acc",
+        mode="max",  # Error: This should be "max" instead of "min" for accuracy
+        auto_insert_metric_name=False,
+        filename="epoch={epoch}-acc={val/acc:.2f}",
+    )
+    checkpoint_callback.FILE_EXTENSION = ""
+    trainer = neural_irt.train.CaimiraTrainer(
+        max_epochs=kwargs["max_epochs"],
+        accelerator="auto",
+        logger=train_logger,
+        callbacks=[checkpoint_callback],
+    )
+
+    trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loaders)
+    loaded_model = IrtLitModule.load_from_checkpoint(
+        checkpoint_callback.best_model_path
+    )
+    print(loaded_model)
+    wandb.save()
+
+
+    pass
+
 METHODS = {
     "random": random,
     "avg": metric_avg,
@@ -271,4 +441,5 @@ METHODS = {
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
+    "nnirt_fic": partial(nnirt, fn_utility="fisher_information_content"),
 }
