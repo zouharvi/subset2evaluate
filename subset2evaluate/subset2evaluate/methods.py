@@ -152,7 +152,7 @@ def irt(data, **kwargs):
     # data_irt = model.pack_irt_params()
 
     best_val_step = max(range(len(model.results_log)), key=lambda i: model.results_log[i]["subset_consistency_accuracy_metric"])
-    print("Best validation step was:", best_val_step)
+    # print("Best validation step was:", best_val_step)
     data_irt = model.params_log[best_val_step]
 
     items_joint = list(zip(data, data_irt["items"]))
@@ -183,6 +183,8 @@ def pyirt(data, **kwargs):
         "system": systems,
         **{
             f"item_{line['i']}": [
+                line["scores"][system][kwargs["metric"]]
+                if "_score" in kwargs["model_type"] else
                 line["scores"][system][kwargs["metric"]] >= median
                 for system in systems
             ]
@@ -424,9 +426,6 @@ def nnirt(data, **kwargs):
     )
     print(loaded_model)
     wandb.save()
-
-
-    pass
 
 METHODS = {
     "random": random,
