@@ -1,5 +1,7 @@
 {
     "python.analysis.extraPaths": [
-        "./experiments"
-    ]
+        "./experiments",
+        "/home/vilda/neural-irt"
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }
