@@ -1,6 +1,7 @@
 {
     "python.analysis.extraPaths": [
         "./experiments",
+        "./subset2evaluate",
         "/home/vilda/neural-irt"
     ],
     "python.analysis.typeCheckingMode": "off"

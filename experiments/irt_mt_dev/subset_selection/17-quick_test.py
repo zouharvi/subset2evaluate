@@ -23,9 +23,13 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
         )
         points_y_acc.append(acc_new)
         points_y_clu.append(clu_new)
+        print(f"- ACC: {np.average(acc_new):.2%} | CLU: {np.average(clu_new):.2f}")
 
     print(f"ACC: {np.average(points_y_acc):.2%} | CLU: {np.average(points_y_clu):.2f}")
     
 
-print("NeuralIRT Fisher Information Content")
-benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "MetricX-23", "max_epochs": 1000})
+print("PyIRT-score Fisher Information Content")
+benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
+
+# print("NeuralIRT Fisher Information Content")
+# benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "MetricX-23", "max_epochs": 1000})
