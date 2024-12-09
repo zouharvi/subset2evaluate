@@ -319,7 +319,7 @@ def eval_system_clusters(data: list, metric="human"):
             clusters[-1].append(sys_scores)
     return len(clusters)
 
-def eval_order_accuracy(data_new: list, data_old: list, metric="human"):
+def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
     # evaluates against ordering from data_old
     import itertools
     import numpy as np
@@ -328,6 +328,19 @@ def eval_order_accuracy(data_new: list, data_old: list, metric="human"):
 
     scores_old = get_sys_absolute(data_old, metric=metric)
     scores_new = get_sys_absolute(data_new, metric=metric)
+
+    result = []
+    for sys1, sys2 in itertools.combinations(systems, 2):
+        result.append((scores_old[sys1]<scores_old[sys2])==(scores_new[sys1]<scores_new[sys2]))
+
+    return np.average(result)
+
+def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, float]):
+    # evaluates against ordering from data_old
+    import itertools
+    import numpy as np
+    
+    systems = list(scores_old.keys())
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):

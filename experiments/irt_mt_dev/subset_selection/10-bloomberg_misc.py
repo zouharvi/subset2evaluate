@@ -53,18 +53,18 @@ for year, langs in [("wmt23", "en-de"), ("wmt23", "cs-uk"), ("wmt23", "en-cs"), 
         points_x.append(prop)
 
         points_y_var.append(
-            utils.eval_order_accuracy(data_old_var[-int(len(data_old_var) * prop):], data_old)
+            utils.eval_subset_accuracy(data_old_var[-int(len(data_old_var) * prop):], data_old)
         )
 
         points_y_len.append(
-            utils.eval_order_accuracy(data_old_len[-int(len(data_old_len) * prop):], data_old)
+            utils.eval_subset_accuracy(data_old_len[-int(len(data_old_len) * prop):], data_old)
         )
 
         points_y_rand_local = []
         for _ in range(10):
             data_local = random.choices(data_old, k=int(len(data_old) * prop))
             points_y_rand_local.append(
-                utils.eval_order_accuracy(data_local, data_old)
+                utils.eval_subset_accuracy(data_local, data_old)
             )
         points_y_rand.append(np.average(points_y_rand_local))
 
