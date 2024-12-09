@@ -17,22 +17,12 @@ data_irt_all = []
 
 data_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 for data_old in data_all:
-    _data, params = subset2evaluate.select_subset.run_select_subset(
+    _data, data_irt = subset2evaluate.select_subset.run_select_subset(
         data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
         return_model=True
     )
-    systems = list(data_old[0]["scores"].keys())
-    data_irt_all.append({
-        "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-        "items": [
-            {"disc": disc, "diff": diff, "feas": feas}
-            for disc, diff, feas in zip(
-                params["disc"],
-                params["diff"],
-                params["feas"],
-            )
-        ]
-    })
+    data_irt_all.append(data_irt)
+
 
 # %%
 data_x_all = [
@@ -108,9 +98,15 @@ def plot(ax, title, data_x_all, data_y_all):
         for data_y in data_y_all
     ]
 
-    # wmt23/en-cs
-    data_x = data_x_all[3]
-    data_y = data_y_all[3]
+    # wmt23/de-en
+    data_x = data_x_all[2]
+    data_y = data_y_all[2]
+
+    if "Information Content" in title:
+        # ax.set_yscale("log")
+        ax.set_ylim(
+            np.quantile(data_y, [0, 0.9]),
+        )
 
     ax.scatter(
         data_x,
@@ -127,9 +123,6 @@ def plot(ax, title, data_x_all, data_y_all):
         pad=-10,
     )
 
-    if "Information Content" in title:
-        ax.set_ylim(*np.quantile(data_y, [0.01, 0.9]))
-    # ax.set_yscale("log")
 
     ax.text(
         x=1.0,

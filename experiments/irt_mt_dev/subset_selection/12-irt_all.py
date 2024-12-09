@@ -24,7 +24,10 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
 
         while True:
             try:
-                _data, params = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_fic",       metric="MetricX-23", irt_model="4pl_score", epochs=1000, return_model=True)
+                _data, params = subset2evaluate.select_subset.run_select_subset(
+                    data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
+                    return_model=True
+                )
                 break
             except:
                 continue

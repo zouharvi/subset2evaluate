@@ -174,10 +174,8 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
 
     systems = list(data[0]["scores"].keys())
 
-
-    
     if load_model is not None:
-        params = load_model
+        data_irt = load_model
     else:
         # we need median binarization if we are not using 4pl_score model
         median = np.median([
@@ -222,43 +220,43 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
         params = trainer.best_params
     
 
-    # TODO: cross-check make sure that we do the predictions as the models were trained
-    # 3PL/4PL
-    if "feas" in params:
-        data_irt = {
-            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-            "items": [
-                {"disc": disc, "diff": diff, "feas": feas}
-                for disc, diff, feas in zip(
-                    params["disc"],
-                    params["diff"],
-                    params["feas"],
-                )
-            ]
-        }
-    elif "lambdas" in params:
-        data_irt = {
-            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-            "items": [
-                {"disc": disc, "diff": diff, "feas": feas}
-                for disc, diff, feas in zip(
-                    params["disc"],
-                    params["diff"],
-                    params["lambdas"],
-                )
-            ]
-        }
-    else:
-        data_irt = {
-            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-            "items": [
-                {"disc": disc, "diff": diff}
-                for disc, diff in zip(
-                    params["disc"],
-                    params["diff"],
-                )
-            ]
-        }
+        # TODO: cross-check make sure that we do the predictions as the models were trained
+        # 3PL/4PL
+        if "feas" in params:
+            data_irt = {
+                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "items": [
+                    {"disc": disc, "diff": diff, "feas": feas}
+                    for disc, diff, feas in zip(
+                        params["disc"],
+                        params["diff"],
+                        params["feas"],
+                    )
+                ]
+            }
+        elif "lambdas" in params:
+            data_irt = {
+                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "items": [
+                    {"disc": disc, "diff": diff, "feas": feas}
+                    for disc, diff, feas in zip(
+                        params["disc"],
+                        params["diff"],
+                        params["lambdas"],
+                    )
+                ]
+            }
+        else:
+            data_irt = {
+                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "items": [
+                    {"disc": disc, "diff": diff}
+                    for disc, diff in zip(
+                        params["disc"],
+                        params["diff"],
+                    )
+                ]
+            }
 
     def fn_irt_utility(item, system_thetas, fn_utility):
         if fn_utility == "fisher_information_content":
@@ -279,7 +277,7 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
     items = [x[0] for x in items_joint]
 
     if return_model:
-        return items, params
+        return items, data_irt
     else:
         return items
 
