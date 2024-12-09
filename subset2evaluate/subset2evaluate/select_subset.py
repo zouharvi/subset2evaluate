@@ -1,10 +1,21 @@
 import json
-from typing import List
+from typing import List, Any, Union, Tuple
 import subset2evaluate.utils as utils
 import subset2evaluate.methods as methods
 import copy
 
-def run_select_subset(data : List | str, method, metric=None, model=None, **kwargs):
+def run_select_subset(
+        data : List | str,
+        method : str,
+        metric=None,
+        model=None,
+        return_model=False,
+        load_model=None,
+        **kwargs
+    ) -> Union[List, Tuple[List, Any]]:
+    """
+    Returs list of ordered data and possibly also the model, if return_model=True. Not all methods support this though.
+    """
     # both list or descriptor is fine
     data = utils.load_data(data)
 
@@ -13,10 +24,15 @@ def run_select_subset(data : List | str, method, metric=None, model=None, **kwar
     method = methods.METHODS[method]
 
     # methods might mutate data, make sure we keep it clean
-    data_new = method(copy.deepcopy(data), model=model, metric=metric, **kwargs)
-
-    return data_new
-
+    data = copy.deepcopy(data)
+    return method(
+        data,
+        model=model,
+        metric=metric,
+        return_model=return_model,
+        load_model=load_model,
+        **kwargs
+    )
 
 if __name__ == "__main__":
     import argparse

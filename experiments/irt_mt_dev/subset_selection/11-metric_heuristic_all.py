@@ -74,7 +74,8 @@ points_y_clu_all = {
     for k,v in points_y_clu_all.items()
 }
 # %%
-
+from importlib import reload
+reload(irt_mt_dev.utils.fig)
 irt_mt_dev.utils.fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_acc_all["chrf_avg"], f"ChrF average {np.average(points_y_acc_all['chrf_avg']):.2%}"),
