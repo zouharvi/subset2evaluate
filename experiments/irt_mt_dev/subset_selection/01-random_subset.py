@@ -46,6 +46,8 @@ print(f"Average CLU {np.average(points_y_clu):.2f}")
 
 
 # %%
+from importlib import reload
+reload(irt_mt_dev.utils.fig)
 def plot_extra_acc(ax):
     for points_y_acc in points_y_acc_all:
         ax.plot(

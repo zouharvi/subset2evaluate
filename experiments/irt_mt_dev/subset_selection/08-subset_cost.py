@@ -1,14 +1,44 @@
+# %%
+
+import scipy.stats
 import irt_mt_dev.utils as utils
 import irt_mt_dev.utils.fig
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import subset2evaluate.select_subset
+import os
+
+os.chdir("/home/vilda/irt-mt-dev/")
 
 irt_mt_dev.utils.fig.matplotlib_default()
 
-data_irt = json.load(open("computed/irt_wmt_4pl_s0_pyirt.json", "r"))[-1]
-data_old = utils.load_data_wmt()
+data_irt_all = []
 
+data_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
+for data_old in data_all:
+    _data, params = subset2evaluate.select_subset.run_select_subset(
+        data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
+        return_model=True
+    )
+    systems = list(data_old[0]["scores"].keys())
+    data_irt_all.append({
+        "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+        "items": [
+            {"disc": disc, "diff": diff, "feas": feas}
+            for disc, diff, feas in zip(
+                params["disc"],
+                params["diff"],
+                params["feas"],
+            )
+        ]
+    })
+
+# %%
+data_x_all = [
+    [len(item["src"].split()) for item in data_old]
+    for data_old in data_all
+]
 def utility_metricx_avg(item):
     return -np.average(
         [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
@@ -19,10 +49,7 @@ def utility_metricx_var(item):
         [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
     )
 
-
-_, axs = plt.subplots(2, 2, figsize=(4, 3))
-
-def utility_fisher_information_content(item):
+def utility_irt_fic(item, data_irt):
     # aggregared fisher information content
     item = data_irt["items"][item["i"]]
 
@@ -35,35 +62,65 @@ def utility_fisher_information_content(item):
         information += prob*(1-prob)*(item["disc"]**2)
     return information
 
-def utility_irt(item):
+def utility_irt_diff(item, data_irt):
     item = data_irt["items"][item["i"]]
 
     # alternatives
     # return item["disc"]
     # return item["feas"]
-    # return item["diff"]
-    return item["diff"]+item["disc"]
+    return -item["diff"]
 
-def plot(ax, title, fn):
-    data = [
-        (
-            len(item["src"].split()),
-            fn(item)
-        )
-        for item in data_old
+data_y_all_metricx_avg = [
+    [utility_metricx_avg(item) for item in data_old]    
+    for data_old in data_all
+]
+data_y_all_metricx_var = [
+    [utility_metricx_var(item) for item in data_old]
+    for data_old in data_all
+]
+data_y_all_irt_fic = [
+    [utility_irt_fic(item, data_irt) for item in data_old]
+    for data_old, data_irt in zip(data_all, data_irt_all)
+]
+data_y_all_irt_diff = [
+    [utility_irt_diff(item, data_irt) for item in data_old]
+    for data_old, data_irt in zip(data_all, data_irt_all)
+]
+
+def z_normalize(data):
+    data = np.array(data)
+    return (data - np.mean(data)) / np.std(data)
+
+_, axs = plt.subplots(2, 2, figsize=(4, 3))
+
+def plot(ax, title, data_x_all, data_y_all):
+    # average pearson correlation
+    corr = np.average([
+        scipy.stats.pearsonr(data_x, data_y).correlation
+        for data_x, data_y in zip(data_x_all, data_y_all)
+    ])
+    data_x_all = [
+        z_normalize(data_x)
+        for data_x in data_x_all
     ]
-    # sort by cost
-    data.sort(key=lambda x: x[0], reverse=True)
+    data_y_all = [
+        z_normalize(data_y)
+        for data_y in data_y_all
+    ]
+
+    # wmt23/en-cs
+    data_x = data_x_all[3]
+    data_y = data_y_all[3]
 
     ax.scatter(
-        [x[0] for x in data],
-        [x[1] for x in data],
-        alpha=0.4,
+        data_x,
+        data_y,
+        alpha=0.2,
         linewidth=0,
-        s=5,
+        s=10,
         color="black"
     )
-    corr = np.corrcoef([x[0] for x in data], [x[1] for x in data])[0, 1]
+    # corr = np.corrcoef(data_x, data_y)[0, 1]
     ax.set_title(
         title,
         fontsize=9,
@@ -71,8 +128,8 @@ def plot(ax, title, fn):
     )
 
     if "Information Content" in title:
-        # ax.set_yscale("log")
-        ax.set_ylim(-0.05, 1)
+        ax.set_ylim(*np.quantile(data_y, [0.01, 0.9]))
+    # ax.set_yscale("log")
 
     ax.text(
         x=1.0,
@@ -89,10 +146,10 @@ def plot(ax, title, fn):
 
     ax.spines[["top", "right"]].set_visible(False)
 
-plot(axs[0, 0], "MetricX-23 avg", utility_metricx_avg)
-plot(axs[0, 1], "MetricX-23 var", utility_metricx_var)
-plot(axs[1, 0], "IRT Information Content", utility_fisher_information_content)
-plot(axs[1, 1], "IRT Difficulty+Discriminability", utility_irt)
+plot(axs[0, 0], "MetricX-23 avg", data_x_all, data_y_all_metricx_avg)
+plot(axs[0, 1], "MetricX-23 var", data_x_all, data_y_all_metricx_var)
+plot(axs[1, 0], "IRT Information Content", data_x_all, data_y_all_irt_fic)
+plot(axs[1, 1], "IRT Difficulty", data_x_all, data_y_all_irt_diff)
 
 axs[0, 0].set_ylabel("Utility")
 axs[1, 0].set_ylabel("Utility")

@@ -56,7 +56,7 @@ def _fn_information_content(item, system_thetas):
     return information
 
 
-def irt(data, **kwargs):
+def _our_irt(data, **kwargs):
     import torch
     import torch.utils
     import lightning as L
@@ -81,7 +81,7 @@ def irt(data, **kwargs):
         "scalar": IRTModelScalar,
         "tfidf": IRTModelTFIDF,
         "embd": IRTModelEmbd,
-    }[kwargs["model"]]
+    }[kwargs["irt_model"]]
     model = ModelClass(data, systems, data_old=data, **kwargs)
 
     data_flat = [
@@ -163,7 +163,7 @@ def irt(data, **kwargs):
 
     return [x[0] for x in items_joint]
 
-def pyirt(data, **kwargs):
+def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", dropout=0.25, **kwargs):
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -171,56 +171,72 @@ def pyirt(data, **kwargs):
     import py_irt.training
     import pandas as pd
 
-    median = np.median([
-        system_v[kwargs["metric"]]
-        for line in data
-        for system_v in line["scores"].values()
-    ])
 
     systems = list(data[0]["scores"].keys())
 
-    dataset = pd.DataFrame({
-        "system": systems,
-        **{
-            f"item_{line['i']}": [
-                line["scores"][system][kwargs["metric"]]
-                if "_score" in kwargs["model_type"] else
-                line["scores"][system][kwargs["metric"]] >= median
-                for system in systems
-            ]
+
+    
+    if load_model is not None:
+        params = load_model
+    else:
+        # we need median binarization if we are not using 4pl_score model
+        median = np.median([
+            system_v[kwargs["metric"]]
             for line in data
-        }
-    })
+            for system_v in line["scores"].values()
+        ])
+        dataset = pd.DataFrame({
+            "system": systems,
+            **{
+                f"item_{line['i']}": [
+                    line["scores"][system][kwargs["metric"]]
+                    if "_score" in irt_model else
+                    line["scores"][system][kwargs["metric"]] >= median
+                    for system in systems
+                ]
+                for line in data
+            }
+        })
+        dataset = py_irt.dataset.Dataset.from_pandas(
+            dataset,
+            subject_column="system",
+            item_columns=[f"item_{line['i']}" for line in data],
+        )
 
-    dataset = py_irt.dataset.Dataset.from_pandas(
-        dataset,
-        subject_column="system",
-        item_columns=[f"item_{line['i']}" for line in data],
-    )
+        config = py_irt.config.IrtConfig(
+            model_type=irt_model,
+            log_every=100,
+            dropout=dropout,
+            priors="hiearchical",
+            seed=0,
+            deterministic=True,
+        )
+        trainer = py_irt.training.IrtModelTrainer(
+            config=config,
+            data_path=None,
+            dataset=dataset,
+            verbose=False
+        )
+        trainer.train(epochs=kwargs["epochs"], device='cuda')
 
-    config = py_irt.config.IrtConfig(
-        model_type=kwargs["model_type"],
-        log_every=100,
-        dropout=kwargs["dropout"],
-        priors=kwargs["priors"],
-        seed=0,
-        deterministic=kwargs["deterministic"],
-    )
-    trainer = py_irt.training.IrtModelTrainer(
-        config=config,
-        data_path=None,
-        dataset=dataset,
-        verbose=False
-    )
-    trainer.train(epochs=kwargs["epochs"], device='cuda')
+        params = trainer.best_params
+    
 
-    params = trainer.best_params
-    # TODO: 4PL does not have an extra parameter?
-    # NOTE: we are probably doing prediction for 4PL incorrect
     # TODO: cross-check make sure that we do the predictions as the models were trained
-
     # 3PL/4PL
-    if "lambdas" in params:
+    if "feas" in params:
+        data_irt = {
+            "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+            "items": [
+                {"disc": disc, "diff": diff, "feas": feas}
+                for disc, diff, feas in zip(
+                    params["disc"],
+                    params["diff"],
+                    params["feas"],
+                )
+            ]
+        }
+    elif "lambdas" in params:
         data_irt = {
             "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
             "items": [
@@ -260,9 +276,14 @@ def pyirt(data, **kwargs):
         reverse=True
     )
 
-    return [x[0] for x in items_joint]
+    items = [x[0] for x in items_joint]
 
-def nnirt(data, **kwargs):
+    if return_model:
+        return items, params
+    else:
+        return items
+
+def _nn_irt(data, **kwargs):
     import neural_irt.train
     from neural_irt.lit_module import IrtLitModule
     from neural_irt.data import collators, datasets
@@ -432,13 +453,13 @@ METHODS = {
     "avg": metric_avg,
     "var": metric_var,
     "metric_consistency": metric_consistency,
-    "irt_diff": partial(irt, fn_utility="diff"),
-    "irt_disc": partial(irt, fn_utility="disc"),
-    "irt_feas": partial(irt, fn_utility="feas"),
-    "irt_fic": partial(irt, fn_utility="fisher_information_content"),
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
-    "nnirt_fic": partial(nnirt, fn_utility="fisher_information_content"),
+    "_our_irt_diff": partial(_our_irt, fn_utility="diff"),
+    "_our_irt_disc": partial(_our_irt, fn_utility="disc"),
+    "_our_irt_feas": partial(_our_irt, fn_utility="feas"),
+    "_our_irt_fic": partial(_our_irt, fn_utility="fisher_information_content"),
+    "_nn_irt_fic": partial(_nn_irt, fn_utility="fisher_information_content"),
 }

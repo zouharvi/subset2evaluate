@@ -4,7 +4,7 @@ from typing import Dict
 
 # PROPS = [x/100 for x in range(10, 90+1, 10)]
 import numpy as np
-PROPS = np.geomspace(0.05, 0.7, 10)
+PROPS = np.geomspace(0.05, 0.5, 10)
 
 def load_data_squad(n_items=1000, n_systems=161):
     import json

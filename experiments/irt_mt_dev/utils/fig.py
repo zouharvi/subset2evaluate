@@ -58,7 +58,8 @@ def plot_subset_selection(
             markersize=5,
             color=color,
             label=label,
-            clip_on=False if min(points_y) > 0.65 else True,
+            clip_on=True,
+            # clip_on=False if min(points_y) > 0.65 else True,
             linewidth=2,
         )
     for (points_x, points_y_low, points_y_high), color in zip(areas, colors):
@@ -96,9 +97,9 @@ def plot_subset_selection(
     )
 
     if IS_CLUSTERS:
-        plt.ylim(3, 7.2)
+        plt.ylim(1.2, 5.0)
     else:
-        plt.ylim(0.8, 1)
+        plt.ylim(0.77, 1)
     plt.tight_layout(pad=0.1)
     if filename:
         # save in files compatible with both LaTeX and Typst
