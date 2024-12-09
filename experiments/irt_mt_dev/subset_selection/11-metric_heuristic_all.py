@@ -41,19 +41,19 @@ for data_old in tqdm.tqdm(data_old_all):
     for prop in utils.PROPS:
 
         points_y_acc["metricx_avg"].append(
-            utils.eval_order_accuracy(data_metricx_avg[: int(len(data_old) * prop)], data_old)
+            utils.eval_subset_accuracy(data_metricx_avg[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["metricx_avg"].append(
             utils.eval_system_clusters(data_metricx_avg[: int(len(data_old) * prop)])
         )
         points_y_acc["chrf_avg"].append(
-            utils.eval_order_accuracy(data_chrf_avg[: int(len(data_old) * prop)], data_old)
+            utils.eval_subset_accuracy(data_chrf_avg[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["chrf_avg"].append(
             utils.eval_system_clusters(data_chrf_avg[: int(len(data_old) * prop)])
         )
         points_y_acc["metricx_var"].append(
-            utils.eval_order_accuracy(data_metricx_var[: int(len(data_old) * prop)], data_old)
+            utils.eval_subset_accuracy(data_metricx_var[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["metricx_var"].append(
             utils.eval_system_clusters(data_metricx_var[: int(len(data_old) * prop)])

@@ -49,8 +49,8 @@ for prop in utils.PROPS:
 
     data_old.sort(key=metric)
     
-    points_y_lo_acc.append(utils.eval_order_accuracy(data_old[:int(len(data_old)*prop)], data_old))
-    points_y_hi_acc.append(utils.eval_order_accuracy(data_old[-int(len(data_old)*prop):], data_old))
+    points_y_lo_acc.append(utils.eval_subset_accuracy(data_old[:int(len(data_old)*prop)], data_old))
+    points_y_hi_acc.append(utils.eval_subset_accuracy(data_old[-int(len(data_old)*prop):], data_old))
     points_y_lo_clu.append(utils.eval_system_clusters(data_old[:int(len(data_old)*prop)]))
     points_y_hi_clu.append(utils.eval_system_clusters(data_old[-int(len(data_old)*prop):]))
     

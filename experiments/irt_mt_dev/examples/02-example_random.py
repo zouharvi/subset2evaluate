@@ -7,4 +7,4 @@ data_full = utils.load_data_wmt()
 
 for k in range(50, 500, 50):
     data_subset_random = random.Random(0).sample(data_full, k=k)
-    print(k, utils.eval_order_accuracy(data_subset_random, data_full))
+    print(k, utils.eval_subset_accuracy(data_subset_random, data_full))

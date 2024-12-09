@@ -14,7 +14,7 @@ def run_evaluate_topk(data_old, data_new, metric="human"):
         k = int(len(data_old)*prop)
         clu_old.append(irt_mt_dev.utils.eval_system_clusters(data_old, metric=metric))
         clu_new.append(irt_mt_dev.utils.eval_system_clusters(data_new[:k], metric=metric))
-        acc_new.append(irt_mt_dev.utils.eval_order_accuracy(data_new[:k], data_old, metric=metric))
+        acc_new.append(irt_mt_dev.utils.eval_subset_accuracy(data_new[:k], data_old, metric=metric))
 
     return (clu_old, clu_new), acc_new
 
