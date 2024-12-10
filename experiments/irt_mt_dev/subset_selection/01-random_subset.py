@@ -28,8 +28,8 @@ for data_old in tqdm.tqdm(data_old_all):
     points_y_acc = []
     points_y_clu = []
 
-    # repeat each sampling 50 times to smooth it out
-    for _ in range(50):
+    # repeat each sampling 100 times to smooth it out
+    for _ in range(100):
         (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
             data_old,
             subset2evaluate.select_subset.run_select_subset(data_old, method="random"),
@@ -46,8 +46,6 @@ print(f"Average CLU {np.average(points_y_clu):.2f}")
 
 
 # %%
-from importlib import reload
-reload(irt_mt_dev.utils.fig)
 def plot_extra_acc(ax):
     for points_y_acc in points_y_acc_all:
         ax.plot(

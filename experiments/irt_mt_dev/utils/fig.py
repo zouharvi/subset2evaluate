@@ -75,7 +75,7 @@ def plot_subset_selection(
     if IS_CLUSTERS:
         plt.ylabel("Number of clusters" + " " * 5, labelpad=17)
     else:
-        plt.ylabel("Subset consistency acc." + " " * 5, labelpad=-5)
+        plt.ylabel("System accuracy" + " " * 5, labelpad=-5)
     plt.xlabel("Proportion of original data", labelpad=-2)
 
     ax = plt.gca()
