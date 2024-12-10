@@ -19,18 +19,10 @@ points_y_clu_all = collections.defaultdict(lambda: collections.defaultdict(list)
 for data_name, data_old in tqdm.tqdm(data_old_all):
     # run multiple times to smooth
     for _ in range(5):
-        # pyirt does not handle divergence well and just crashes
-        # on that occasion, let's just restart
-
-        while True:
-            try:
-                _data, params = subset2evaluate.select_subset.run_select_subset(
-                    data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
-                    return_model=True
-                )
-                break
-            except:
-                continue
+        _data, params = subset2evaluate.select_subset.run_select_subset(
+            data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
+            return_model=True, retry_on_error=True
+        )
         for method in ["pyirt_diff", "pyirt_disc", "pyirt_feas", "pyirt_fic"]:
             data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=params)
             (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
@@ -57,8 +49,6 @@ points_y_clu_all = {
 
 
 # %%
-from importlib import reload
-reload(irt_mt_dev.utils.fig)
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
