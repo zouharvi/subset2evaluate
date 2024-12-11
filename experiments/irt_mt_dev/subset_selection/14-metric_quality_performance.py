@@ -16,16 +16,15 @@ os.chdir("/home/vilda/irt-mt-dev")
 
 random.seed(0)
 
-data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
-# data_old_i_to_line = {line["i"]: line for line in data_old}
-# systems = list(data_old[0]["scores"].keys())
+# use ALL the data
+data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
 acc_random = []
 clu_random = []
 
 for data_old in data_old_all:
-    for _ in range(50):
+    for _ in range(10):
         data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
         (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
         acc_random.append(np.average(acc_new))
@@ -33,18 +32,9 @@ for data_old in data_old_all:
 print(f"{'random':>25} corr=00.0% | clu={np.average(clu_random):>.2f} | acc={np.average(acc_random):.2f}")
 
 # %%
-accs_all = collections.defaultdict(lambda: collections.defaultdict(list))
-clus_all = collections.defaultdict(lambda: collections.defaultdict(list))
-corrs_all = collections.defaultdict(list)
-
-# get intersection of all metrics
-metrics = set(data_old[0]["scores"]["NLLB_MBR_BLEU"].keys())
-metrics.remove("human")
-for data_old in data_old_all:
-    metrics_new = set(data_old[0]["scores"]["NLLB_MBR_BLEU"].keys())
-    metrics = metrics.intersection(metrics_new)
-metrics = list(metrics)
-print(metrics)
+accs_all = collections.defaultdict(list)
+clus_all = collections.defaultdict(list)
+corrs_all = []
 
 
 for data_old in tqdm.tqdm(data_old_all):
@@ -54,207 +44,124 @@ for data_old in tqdm.tqdm(data_old_all):
         for line in data_old
         for sys in systems
     ]
+    metrics = set(list(data_old[0]["scores"].values())[0])
+    if "human" not in metrics:
+        continue
+    metrics.remove("human")
+    print(metrics)
     for metric in tqdm.tqdm(metrics):
-        data_y_metric = [
-            line["scores"][sys][metric]
-            for line in data_old
-            for sys in systems
-        ]
-        corrs_all[metric].append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
-        
-        data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
-        clus_all['avg'][metric].append(np.average(clu_new))
-        accs_all['avg'][metric].append(np.average(acc_new))
+        try:
+            data_y_metric = [
+                line["scores"][sys][metric]
+                for line in data_old
+                for sys in systems
+            ]
+            corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
+            
+            data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
+            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
+            clus_all['avg'].append(np.average(clu_new))
+            accs_all['avg'].append(np.average(acc_new))
 
-        data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
-        clus_all['var'][metric].append(np.average(clu_new))
-        accs_all['var'][metric].append(np.average(acc_new))
+            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
+            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
+            clus_all['var'].append(np.average(clu_new))
+            accs_all['var'].append(np.average(acc_new))
 
-        data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_fic", model="scalar", epochs=1000, metric=metric, retry_on_error=True)
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_irt)
-        clus_all['irt'][metric].append(np.average(clu_new))
-        accs_all['irt'][metric].append(np.average(acc_new))
+            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_fic", model="scalar", epochs=1000, metric=metric, retry_on_error=True)
+            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_irt)
+            clus_all['irt'].append(np.average(clu_new))
+            accs_all['irt'].append(np.average(acc_new))
+        except Exception as e:
+            print(e)
+            print("Errored on", metric)
+            continue
 
-# average across all datasets
-corrs_all = {k: np.average(v) for k, v in corrs_all.items()}
-clus_all["avg"] = {k: np.average(v) for k, v in clus_all["avg"].items()}
-accs_all["avg"] = {k: np.average(v) for k, v in accs_all["avg"].items()}
-clus_all["var"] = {k: np.average(v) for k, v in clus_all["var"].items()}
-accs_all["var"] = {k: np.average(v) for k, v in accs_all["var"].items()}
-clus_all["irt"] = {k: np.average(v) for k, v in clus_all["irt"].items()}
-accs_all["irt"] = {k: np.average(v) for k, v in accs_all["irt"].items()}
 
 # %%
-fig_utils.matplotlib_default()
+
+data_x = np.linspace(0, 0.55, 10)
+def aggregate_data_y(data_y):
+    assert len(corrs_all) == len(data_y)
+    data_y_new = []
+    for x1, x2 in zip(data_x, list(data_x[1:])+[float("inf")]):
+        # add all data that are in [x1, x2) interval
+        data_y_new.append([y for x, y in zip(corrs_all, data_y) if x1 <= x < x2 and type(y) == np.float64])
+    return [np.average(l) for l in data_y_new]
 
 # figure for accuracy
+fig_utils.matplotlib_default()
+# TODO: or don't do the above if the plot looks nice without it
 
-plt.figure(figsize=(4, 2))
-data_x = [corrs_all[metric] for metric in metrics]
-data_y = [accs_all["avg"][metric] for metric in metrics]
-plt.scatter(
+fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
+data_y = aggregate_data_y(accs_all["avg"])
+axs[0].plot(
     data_x,
     data_y,
-    label=f"metric avg {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
+    label=f"metric avg",
+    linewidth=2,
 )
-poly1d_fn = np.poly1d(np.polyfit(
-    data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[0]
-)
-
-data_y = [accs_all["var"][metric] for metric in metrics]
-plt.scatter(
+data_y = aggregate_data_y(accs_all["var"])
+axs[0].plot(
     data_x,
     data_y,
-    label=f"metric var {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
+    label=f"metric var",
+    linewidth=2,
 )
-poly1d_fn = np.poly1d(np.polyfit(
+
+data_y = aggregate_data_y(accs_all["irt"])
+axs[0].plot(
     data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[1]
+    label=f"IRT information",
+    linewidth=2,
 )
 
-data_y = [accs_all["irt"][metric] for metric in metrics]
-plt.scatter(
-    data_x, data_y,
-    label=f"IRT information {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
-)
-poly1d_fn = np.poly1d(np.polyfit(
-    data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[2]
-)
-
-plt.hlines(
-    y=np.average(acc_random),
-    xmin=min(data_x),
-    xmax=max(data_x),
-    color="black",
-    linestyles='dashed',
-    label="Random",
-)
-plt.ylabel("Average accuracy")
-plt.xlabel("Metric correlation with human")
-plt.legend(
-    handletextpad=0.2,
-    handlelength=1.5,
-    labelspacing=0.2,
-    facecolor="#ccc",
-    loc="lower right",
-    fontsize=8
-)
-# show y-axis as percentage
-import matplotlib as mpl
-plt.gca().yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
-plt.gca().spines[['top', 'right']].set_visible(False)
-plt.tight_layout()
-plt.savefig("figures_pdf/14-metric_quality_performance_acc.pdf")
-plt.show()
-
-# %%
-
-# figure for clusters
-
-plt.figure(figsize=(4, 2))
-data_y = [clus_all["avg"][metric] for metric in metrics]
-plt.scatter(
-    data_x, data_y,
-    label=f"metric avg {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
-)
-poly1d_fn = np.poly1d(np.polyfit(
-    data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[0]
-)
-
-data_y = [clus_all["var"][metric] for metric in metrics]
-plt.scatter(
-    data_x, data_y,
-    label=f"metric var {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
-)
-poly1d_fn = np.poly1d(np.polyfit(
-    data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[1]
-)
-
-
-data_y = [clus_all["irt"][metric] for metric in metrics]
-plt.scatter(
-    data_x, data_y,
-    label=f"IRT information {scipy.stats.pearsonr(data_x, data_y)[0]:.2f}",
-    s=15,
-    alpha=0.5,
-    linewidth=0,
-)
-poly1d_fn = np.poly1d(np.polyfit(
-    data_x, data_y,
-1))
-plt.plot(
-    sorted(data_x),
-    poly1d_fn(sorted(data_x)),
-    linestyle='-',
-    color=fig_utils.COLORS[2]
-)
-
-
-plt.hlines(
-    y=np.average(clu_random),
-    xmin=min(data_x),
-    xmax=max(data_x),
-    color="black",
-    linestyles='dashed',
-    label="Random",
-)
-plt.ylabel("Average cluster count" + " "*10)
-plt.xlabel("Metric correlation with human")
-plt.legend(
-    handletextpad=0.2,
-    handlelength=1.5,
+axs[0].set_ylabel("Average accuracy", labelpad=-5)
+axs[0].set_xticks([0.0, 0.25, 0.5])
+axs[0].set_ylim(None, 1)
+axs[0].legend(
+    handletextpad=0.4,
+    handlelength=0.8,
     labelspacing=0.2,
     facecolor="#ccc",
     loc="upper left",
     fontsize=8
 )
-plt.gca().spines[['top', 'right']].set_visible(False)
+# show y-axis as percentage
+import matplotlib as mpl
+axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
+axs[0].spines[['top', 'right']].set_visible(False)
+
+
+# figure for clusters
+
+# plt.figure(figsize=(4, 2))
+data_y = aggregate_data_y(clus_all["avg"])
+axs[1].plot(
+    data_x, data_y,
+    label=f"metric avg",
+    linewidth=2,
+)
+
+data_y = aggregate_data_y(clus_all["var"])
+axs[1].plot(
+    data_x, data_y,
+    label=f"metric var",
+    linewidth=2,
+)
+
+
+data_y = aggregate_data_y(clus_all["irt"])
+axs[1].plot(
+    data_x, data_y,
+    label=f"IRT information",
+    linewidth=2,
+)
+
+axs[1].set_ylabel("Average cluster count")
+axs[1].set_xticks([0.0, 0.25, 0.5])
+axs[1].set_xlabel("Metric correlation with human" +" " *40)
+axs[1].spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
-plt.savefig("figures_pdf/14-metric_quality_performance_clu.pdf")
+plt.savefig("figures_pdf/14-metric_quality_performance.pdf")
 plt.show()
