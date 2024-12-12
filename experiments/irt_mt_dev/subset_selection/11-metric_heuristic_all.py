@@ -15,11 +15,11 @@ points_y_clu_all = collections.defaultdict(list)
 
 def heuristic_metricx_avg(line):
     return np.average(
-        [sys_v["MetricX-23"] for sys_v in line["scores"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )
 
 def heuristic_metricx_var(line):
-    return np.var([sys_v["MetricX-23"] for sys_v in line["scores"].values()])
+    return np.var([sys_v["MetricX-23-c"] for sys_v in line["scores"].values()])
 
 def heuristic_chrf_avg(line):
     return np.average(
