@@ -27,6 +27,8 @@ def load_data_squad(n_items=1000, n_systems=161):
 def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import glob
     import collections
+    import numpy as np
+
     lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
     lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
     lines_ref = None
@@ -99,25 +101,49 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
         # filter None on the whole row
         # TODO: maybe still consider segments with 0?
+        # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
         if any([lines_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
             continue
+        # metrics = set(lines_score[systems[0]][line_i].keys())
+        # # if we're missing some metric, skip the line
+        # if any([set(lines_score[sys][line_i].keys()) != metrics for sys in systems]):
+        #     continue
 
         line_domain, line_doc = line_doc.strip().split("\t")
+        # for CJK languages, we need to count characters
+        if "ja" in langs or "zh" in langs or "ko" in langs or "th" in langs:
+            word_count = len(line_src.strip())
+        else:
+            word_count = len(line_src.strip().split())
 
         data.append({
             "i": line_id_true,
             "src": line_src.strip(),
             "ref": line_ref.strip(),
             "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
+            # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
+            "time": 0.15 * word_count + 33.7,
             "domain": line_domain,
             "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
         })
         line_id_true += 1
+
+
+    # normalize times
+    if data:
+        data_flat = [line["time"] for line in data]
+        mean = np.average(data_flat)
+        std = np.std(data_flat)
+        for line in data:
+            # make it have var=1 and avg=0
+            # line["time"] = (line["time"]-data_flat[0])/(data_flat[1]-data_flat[0]) + 1
+            # z-normalize
+            line["time"] = (line["time"]-mean)/std + 1
     
 
+    # this is min-max normalization
     if normalize and not binarize:
         # if we are binarizing, none of this matters
-        import collections
         data_flat = collections.defaultdict(list)
         for line in data:
             for met_all in line["scores"].values():
@@ -137,8 +163,6 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
                     line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
 
     if binarize:
-        import collections
-        import numpy as np
         data_flat = collections.defaultdict(list)
         for line in data:
             for met_all in line["scores"].values():

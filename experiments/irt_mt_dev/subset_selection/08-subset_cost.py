@@ -18,8 +18,8 @@ data_irt_all = []
 data_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 for data_old in data_all:
     _data, data_irt = subset2evaluate.select_subset.run_select_subset(
-        data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
-        return_model=True
+        data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=1000,
+        return_model=True, retry_on_error=True,
     )
     data_irt_all.append(data_irt)
 
@@ -31,12 +31,12 @@ data_x_all = [
 ]
 def utility_metricx_avg(item):
     return -np.average(
-        [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
 def utility_metricx_var(item):
     return np.var(
-        [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
 def utility_irt_fic(item, data_irt):
@@ -101,11 +101,14 @@ def plot(ax, title, data_x_all, data_y_all):
     # wmt23/de-en
     data_x = data_x_all[2]
     data_y = data_y_all[2]
+    # flatten
+    # data_x = [item for data_x in data_x_all for item in data_x]
+    # data_y = [item for data_y in data_y_all for item in data_y]
 
     if "Information Content" in title:
         # ax.set_yscale("log")
         ax.set_ylim(
-            np.quantile(data_y, [0, 0.9]),
+            np.quantile(data_y, [0.05, 0.95]),
         )
 
     ax.scatter(

@@ -1,23 +1,18 @@
-import numpy as np
+
+# %%
+
+import irt_mt_dev.utils as utils
+import irt_mt_dev.utils.fig
+import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-from PIL import Image
-import json
-import cv2
-from multiprocessing import Pool
+import numpy as np
+import subset2evaluate.select_subset
 
-def fig2img(fig):
-	"""Convert a Matplotlib figure to a PIL Image and return it"""
-	import io
-	buf = io.BytesIO()
-	fig.savefig(buf, dpi=200)
-	buf.seek(0)
-	img = Image.open(buf)
-	return img
+import os
+os.chdir("/home/vilda/irt-mt-dev/")
 
-def plot_irt(x):
-	params_i, data = x
+def plot_irt(data):
 	cmap=cm.coolwarm_r
 	norm=mpl.colors.Normalize(
 		vmin=min([item["feas"] for item in data["items"]])-0.01,
@@ -72,7 +67,7 @@ def plot_irt(x):
 	)
 	axs[0, 1].axis("off")
 
-	plt.gcf().text(0.02, 0.9, f"epoch\n{params_i*100}", fontsize=11)
+	# plt.gcf().text(0.02, 0.9, f"epoch\n{params_i*100}", fontsize=11)
 
 	pos_theta_tick = axs[1, 0].get_ylim()[0]+(axs[1, 0].get_ylim()[1]-axs[1, 0].get_ylim()[0])*0.1
 	axs[1, 0].plot(
@@ -82,30 +77,22 @@ def plot_irt(x):
 		alpha=0.5,
 		color="black",
 	)
-
+      
 	plt.tight_layout()
-	img = fig2img(fig)
-	
-	return img
 
-# for seed in [0, 1, 2, 3, 4]:
-for seed in [0]:
-	# paralelize
-	with Pool(10) as pool:
-		imgs = pool.map(
-			plot_irt,
-			# skip zeroth epoch
-			enumerate(json.load(open(f"computed/irt_wmt_4pl_s{seed}_pyirt.json"))[1:])
-		)
 
-		# compute video
-		videodims = (imgs[0].width, imgs[0].height)
-		fourcc = cv2.VideoWriter_fourcc(*'mp4v')    
-		video = cv2.VideoWriter(f"computed/irt_squad_4pl_s{seed}_pyirt.mp4", fourcc, 4, videodims)
-		img = Image.new('RGB', videodims, color = 'darkred')
+# %%
 
-		for img in imgs:
-			# draw frame specific stuff here.
-			video.write(cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR))
+data_old = list(utils.load_data_wmt_all(normalize=True).values())[0]
+_, data_irt_score = subset2evaluate.select_subset.run_select_subset(
+    data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=1000,
+    return_model=True, retry_on_error=True,
+)
+# _, data_irt_bin = subset2evaluate.select_subset.run_select_subset(
+#     data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl", epochs=1000,
+#     return_model=True
+# )
 
-		video.release()
+# %%
+plot_irt(data_irt_score)
+plot_irt(data_irt_bin)

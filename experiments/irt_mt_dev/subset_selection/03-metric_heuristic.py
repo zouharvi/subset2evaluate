@@ -17,11 +17,11 @@ points_y_hi_clu = []
 def heuristic_avg(item):
     # np.max is also good
     return np.average(
-        [sys_v["MetricX-23"] for sys_v in item["scores"].values()]
+        [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
 def heuristic_var(item):
-    return np.var([sys_v["MetricX-23"] for sys_v in item["scores"].values()])
+    return np.var([sys_v["MetricX-23-c"] for sys_v in item["scores"].values()])
 
 def heuristic_max_diff(item):
     return max([sys["COMET"] for sys in item["scores"].values()])-min([sys["COMET"] for sys in item["scores"].values()])
@@ -32,7 +32,7 @@ def heuristic_moment(line, pow=3):
     # pow = 2: variance
     # pow = 1: abs diff
     return  np.average([
-        abs(sys_a_v["MetricX-23"]-sys_b_v["MetricX-23"])**pow
+        abs(sys_a_v["MetricX-23"]-sys_b_v["MetricX-23-c"])**pow
         for sys_a_v, sys_b_v in itertools.combinations(line["scores"].values(), 2)
     ])
 

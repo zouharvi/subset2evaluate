@@ -20,8 +20,8 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     # run multiple times to smooth
     for _ in range(5):
         _data, params = subset2evaluate.select_subset.run_select_subset(
-            data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl_score", epochs=1000,
-            return_model=True, retry_on_error=True
+            data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=1000,
+            return_model=True, retry_on_error=False
         )
         for method in ["pyirt_diff", "pyirt_disc", "pyirt_feas", "pyirt_fic"]:
             data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=params)
@@ -39,11 +39,11 @@ points_y_clu_all_backup = points_y_clu_all
 
 # %%
 points_y_acc_all = {
-    method: np.average(np.array(list(method_v.values())), axis=[0, 1])
+    method: np.average(np.array(list(method_v.values())), axis=(0, 1))
     for method, method_v in points_y_acc_all.items()
 }
 points_y_clu_all = {
-    method: np.average(np.array(list(method_v.values())), axis=[0, 1])
+    method: np.average(np.array(list(method_v.values())), axis=(0, 1))
     for method, method_v in points_y_clu_all.items()
 }
 
