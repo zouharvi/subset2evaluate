@@ -231,10 +231,10 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
         params = trainer.best_params
 
         # this flipping will not affect the predictions
-        # if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
-        #     params["disc"] = -np.array(params["disc"])
-        #     params["ability"] = -np.array(params["ability"])
-        #     params["diff"] = -np.array(params["diff"])
+        if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
+            params["disc"] = -np.array(params["disc"])
+            params["ability"] = -np.array(params["ability"])
+            params["diff"] = -np.array(params["diff"])
         
         # normalize naming
         if "lambdas" in params:
