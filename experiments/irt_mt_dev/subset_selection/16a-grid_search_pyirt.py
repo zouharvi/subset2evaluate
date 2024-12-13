@@ -20,20 +20,12 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
     for data_old_name, data_old in data_old_all:
         for _ in range(repetitions):
             print(f"Running {data_old_name}/{_+1}")
-            while True:
-                try:
-                    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-                        data_old,
-                        subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict),
-                        metric="human"
-                    )
-                    break
-                except Exception as e:
-                    print("ERROR")
-                    print(e)
-                    traceback.print_stack()
-                    print("Trying again..")
-                    pass
+            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+                data_old,
+                subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict),
+                metric="human",
+                retry_on_error=True,
+            )
             points_y_acc.append(acc_new)
             points_y_clu.append(clu_new)
 
