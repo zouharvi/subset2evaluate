@@ -45,14 +45,25 @@ def metric_consistency(data, **kwargs):
     return data
 
 
-def _fn_information_content(item, system_thetas):
+def _fn_information_content(item_irt, data_irt):
     information = 0
-    for theta in system_thetas.values():
+    for theta in data_irt["systems"].values():
         prob = utils.pred_irt(
             theta,
-            item
+            item_irt
         )
-        information += prob*(1-prob)*(item["disc"]**2)
+        information += prob*(1-prob)*(item_irt["disc"]**2)
+    return information
+
+def _fn_experimental(item_old, item_irt, data_irt):
+    information = 0
+    for system, theta in data_irt["systems"].items():
+        prob = utils.pred_irt(
+            theta,
+            item_irt
+        )
+        error = (item_old["scores"][system]["MetricX-23-c"] - prob)**2
+        information += prob*(1-prob)*(item_irt["disc"]**2)/error
     return information
 
 
@@ -222,7 +233,7 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
 
         # TODO: cross-check make sure that we do the predictions as the models were trained
         # 3PL/4PL
-        if "feas" in params:
+        if "feas" in params or "lambdas" in params:
             data_irt = {
                 "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
                 "items": [
@@ -230,19 +241,7 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
                     for disc, diff, feas in zip(
                         params["disc"],
                         params["diff"],
-                        params["feas"],
-                    )
-                ]
-            }
-        elif "lambdas" in params:
-            data_irt = {
-                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
-                "items": [
-                    {"disc": disc, "diff": diff, "feas": feas}
-                    for disc, diff, feas in zip(
-                        params["disc"],
-                        params["diff"],
-                        params["lambdas"],
+                        params["feas"] if "feas" in params else params["lambdas"],
                     )
                 ]
             }
@@ -258,19 +257,21 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
                 ]
             }
 
-    def fn_irt_utility(item, system_thetas, fn_utility):
-        if fn_utility == "fisher_information_content":
-            return _fn_information_content(item, system_thetas)
+    def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
+        if fn_utility == "experimental":
+            return _fn_experimental(item_old, item_irt, data_irt)
+        elif fn_utility == "fisher_information_content":
+            return _fn_information_content(item_irt, data_irt)
         elif fn_utility == "diff":
-            return -item["diff"]
+            return -item_irt["diff"]
         elif fn_utility == "disc":
-            return -item["disc"]
+            return -item_irt["disc"]
         elif fn_utility == "feas":
-            return item["feas"]
+            return item_irt["feas"]
 
     items_joint = list(zip(data, data_irt["items"]))
     items_joint.sort(
-        key=lambda x: fn_irt_utility(x[1], data_irt["systems"], kwargs["fn_utility"]),
+        key=lambda x: fn_irt_utility(x[0], x[1], data_irt, kwargs["fn_utility"]),
         reverse=True
     )
 
@@ -455,6 +456,7 @@ METHODS = {
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
+    "pyirt_exp": partial(pyirt, fn_utility="experimental"),
     "_our_irt_diff": partial(_our_irt, fn_utility="diff"),
     "_our_irt_disc": partial(_our_irt, fn_utility="disc"),
     "_our_irt_feas": partial(_our_irt, fn_utility="feas"),

@@ -8,7 +8,7 @@ import tqdm
 
 os.chdir("/home/vilda/irt-mt-dev")
 
-def benchmark_method(repetitions=10, kwargs_dict={}, retry_on_error=False):
+def benchmark_method(repetitions=10, kwargs_dict={}):
     data_old = utils.load_data_wmt(year="wmt23", langs="en-cs", normalize=True)
     points_y_acc = []
     points_y_clu = []
@@ -16,24 +16,11 @@ def benchmark_method(repetitions=10, kwargs_dict={}, retry_on_error=False):
     # run multiple times to smooth variance
 
     for _ in range(repetitions):
-        if retry_on_error:
-            while True:
-                try:
-                    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-                        data_old,
-                        subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict),
-                        metric="human"
-                    )
-                    break
-                except Exception as e:
-                    print(e)
-                    continue
-        else:
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-                data_old,
-                subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict), 
-                metric="human"
-            )
+        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            data_old,
+            subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict, retry_on_error=True),
+            metric="human"
+        )
         points_y_acc.append(acc_new)
         points_y_clu.append(clu_new)
         print(f"- ACC: {np.average(acc_new):.2%} | CLU: {np.average(clu_new):.2f}")
@@ -44,7 +31,7 @@ def benchmark_method(repetitions=10, kwargs_dict={}, retry_on_error=False):
 # benchmark_method(repetitions=10, retry_on_error=True, kwargs_dict={"method": "random"})    
 
 print("PyIRT-score Fisher Information Content")
-benchmark_method(repetitions=30, retry_on_error=True, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
+benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_exp", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
 
 # print("NeuralIRT Fisher Information Content")
 # benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "MetricX-23", "max_epochs": 1000})

@@ -96,5 +96,5 @@ def printrow(row):
     print(" & ".join([f"{x:.2f}" for x in row]) + r" \\")
 print(f"{np.average(clu_all_all['random']):.2f} \\\\")
 printrow(np.average(clu_all_all["metricavg"], axis=(0,)))
-printrow(np.average(clu_all_all["metricavg"], axis=(0,)))
+printrow(np.average(clu_all_all["metricvar"], axis=(0,)))
 printrow(np.average(clu_all_all["irt_fic"], axis=(0,)))

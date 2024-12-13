@@ -16,16 +16,11 @@ data_old = utils.load_data_wmt("wmt23", "en-de", normalize=True)
 systems_gold_all = []
 # run multiple times to average thetas
 for _ in tqdm.tqdm(range(20)):
-    while True:
-        try:        
-            _data, params = subset2evaluate.select_subset.run_select_subset(
-                data_old, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
-                return_model=True
-            )
-            break
-        except Exception as e:
-            print(e)
-            continue
+    _data, params = subset2evaluate.select_subset.run_select_subset(
+        data_old, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
+        return_model=True,
+        retry_on_error=True,
+    )
     systems_gold_all.append(params["systems"])
 
 # %%
@@ -67,17 +62,11 @@ for prop in tqdm.tqdm(utils.PROPS):
 
     systems_pred_all= []
     for _ in range(20):
-        while True:
-            try:
-                # train IRT on the random subset
-                _data, params = subset2evaluate.select_subset.run_select_subset(
-                    data_new, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
-                    return_model=True
-                )
-                break
-            except Exception as e:
-                print(e)
-                continue
+        # train IRT on the random subset
+        _data, params = subset2evaluate.select_subset.run_select_subset(
+            data_new, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
+            return_model=True, retry_on_error=True,
+        )
 
         systems_pred_all.append(params["systems"])
     systems_pred_all_multi.append(systems_pred_all)
