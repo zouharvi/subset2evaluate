@@ -229,11 +229,21 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
         trainer.train(epochs=kwargs["epochs"], device='cuda')
 
         params = trainer.best_params
+
+        # this flipping will not affect the predictions
+        # if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
+        #     params["disc"] = -np.array(params["disc"])
+        #     params["ability"] = -np.array(params["ability"])
+        #     params["diff"] = -np.array(params["diff"])
+        
+        # normalize naming
+        if "lambdas" in params:
+            params["feas"] = params.pop("lambdas")
     
 
         # TODO: cross-check make sure that we do the predictions as the models were trained
         # 3PL/4PL
-        if "feas" in params or "lambdas" in params:
+        if "feas" in params:
             data_irt = {
                 "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
                 "items": [
@@ -241,7 +251,7 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
                     for disc, diff, feas in zip(
                         params["disc"],
                         params["diff"],
-                        params["feas"] if "feas" in params else params["lambdas"],
+                        params["feas"],
                     )
                 ]
             }
@@ -266,6 +276,8 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
             return -item_irt["diff"]
         elif fn_utility == "disc":
             return -item_irt["disc"]
+        elif fn_utility == "diffdisc":
+            return item_irt["diff"]*item_irt["disc"]
         elif fn_utility == "feas":
             return item_irt["feas"]
 
@@ -454,6 +466,7 @@ METHODS = {
     "metric_consistency": metric_consistency,
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
+    "pyirt_diffdisc": partial(pyirt, fn_utility="diffdisc"),
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_exp": partial(pyirt, fn_utility="experimental"),

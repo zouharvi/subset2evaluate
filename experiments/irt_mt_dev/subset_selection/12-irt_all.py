@@ -8,6 +8,8 @@ import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import tqdm
 import collections
+import importlib
+importlib.reload(subset2evaluate.select_subset)
 
 os.chdir("/home/vilda/irt-mt-dev")
 
@@ -21,9 +23,9 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     for _ in range(5):
         _data, params = subset2evaluate.select_subset.run_select_subset(
             data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=1000,
-            return_model=True, retry_on_error=False
+            return_model=True, retry_on_error=True
         )
-        for method in ["pyirt_diff", "pyirt_disc", "pyirt_feas", "pyirt_fic"]:
+        for method in ["pyirt_diff", "pyirt_disc", "pyirt_feas", "pyirt_fic", "pyirt_diffdisc"]:
             data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=params)
             (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
                 data_old, data_new,
@@ -49,21 +51,24 @@ points_y_clu_all = {
 
 
 # %%
+
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_diff'], f"IRT difficulty {np.average(points_y_acc_all['pyirt_diff']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_disc'], f"IRT discriminability {np.average(points_y_acc_all['pyirt_disc']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_fic'], f"IRT information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
+        (utils.PROPS, points_y_acc_all['pyirt_diff'], f"difficulty {np.average(points_y_acc_all['pyirt_diff']):.2%}"),
+        (utils.PROPS, points_y_acc_all['pyirt_disc'], f"discriminability {np.average(points_y_acc_all['pyirt_disc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['pyirt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['pyirt_diffdisc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
     ],
     "12-irt_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_clu_all['pyirt_feas'], f"IRT feasability {np.average(points_y_clu_all['pyirt_feas']):.2f}"),
-        (utils.PROPS, points_y_clu_all['pyirt_diff'], f"IRT difficulty {np.average(points_y_clu_all['pyirt_diff']):.2f}"),
-        # (utils.PROPS, points_y_clu_all['pyirt_disc'], f"IRT discriminability {np.average(points_y_clu_all['pyirt_disc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['pyirt_fic'], f"IRT information {np.average(points_y_clu_all['pyirt_fic']):.2f}"),
+        # (utils.PROPS, points_y_clu_all['pyirt_feas'], f"IRT feasability {np.average(points_y_clu_all['pyirt_feas']):.2f}"),
+        (utils.PROPS, points_y_clu_all['pyirt_diff'], f"difficulty {np.average(points_y_clu_all['pyirt_diff']):.2f}"),
+        (utils.PROPS, points_y_clu_all['pyirt_disc'], f"discriminability {np.average(points_y_clu_all['pyirt_disc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['pyirt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['pyirt_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['pyirt_fic'], f"information {np.average(points_y_clu_all['pyirt_fic']):.2f}"),
     ],
     "12-irt_all",
 )

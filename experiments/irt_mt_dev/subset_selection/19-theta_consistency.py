@@ -15,7 +15,7 @@ data_old = utils.load_data_wmt("wmt23", "en-de", normalize=True)
 
 systems_gold_all = []
 # run multiple times to average thetas
-for _ in tqdm.tqdm(range(20)):
+for _ in tqdm.tqdm(range(5)):
     _data, params = subset2evaluate.select_subset.run_select_subset(
         data_old, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
         return_model=True,
@@ -61,7 +61,7 @@ for prop in tqdm.tqdm(utils.PROPS):
     data_new = data_random[:int(len(data_old)*prop)]
 
     systems_pred_all= []
-    for _ in range(20):
+    for _ in range(5):
         # train IRT on the random subset
         _data, params = subset2evaluate.select_subset.run_select_subset(
             data_new, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
