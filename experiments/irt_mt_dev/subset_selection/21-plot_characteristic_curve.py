@@ -76,11 +76,13 @@ def plot_item_curve(ax, data_irt, data_old, title, item_i=87):
 fig, axs = plt.subplots(1, 2, figsize=(4, 2))
 
 plot_item_curve(axs[0], data_irt_bin, data_old_bin, "Binary IRT", item_i=128)
-plot_item_curve(axs[1], data_irt_score, data_old, "Cont. IRT", item_i=128)
+plot_item_curve(axs[1], data_irt_score, data_old, "Continuous IRT", item_i=128)
 
-axs[0].set_ylabel("(Predicted) item success" + " " * 5)
-axs[0].set_xlabel(" " * 30 + "Difficulty ($a$), system ability ($\\theta$)")
+axs[0].set_ylabel("$\\bf Item$ success")
+axs[0].set_xlabel(" " * 40 + "System ability ($\\theta$)")
 axs[0].set_yticks([0, 1])
+axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
+axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
 plt.tight_layout()
 plt.savefig("figures_pdf/21-item_characteristic_curve.pdf")
 plt.show()
@@ -136,14 +138,17 @@ def plot_test_curve(ax, data_irt, data_old, title):
         color=figutils.COLORS[0] if "Cont" in title else figutils.COLORS[1],
     )
     ax.set_title(title, fontsize=10)
+    ax.spines[["top", "right"]].set_visible(False)
 
 fig, axs = plt.subplots(1, 2, figsize=(4, 2))
 plot_test_curve(axs[0], data_irt_bin, data_old_bin, "Binary IRT")
-plot_test_curve(axs[1], data_irt_score, data_old, "Cont. IRT")
+plot_test_curve(axs[1], data_irt_score, data_old, "Continuous IRT")
 
 
-axs[0].set_ylabel("(Predicted) test success" + " " * 5)
-axs[0].set_xlabel(" " * 30 + "Difficulty ($a$), system ability ($\\theta$)")
+axs[0].set_ylabel("$\\bf Test$ success")
+axs[0].set_xlabel(" " * 40 + "System ability ($\\theta$)")
+axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
+axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
 # axs[0].set_yticks([0, 1])
 plt.tight_layout()
 plt.savefig("figures_pdf/21-test_characteristic_curve.pdf")
