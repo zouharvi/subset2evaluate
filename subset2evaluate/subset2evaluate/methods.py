@@ -459,6 +459,20 @@ def _nn_irt(data, **kwargs):
     print(loaded_model)
     wandb.save()
 
+def comet(data, model_path, reverse=False, **kwargs):
+    import comet
+
+    model = comet.load_from_checkpoint(model_path)
+    scores = model.predict([
+        {"src": line["src"]}
+        for line in data
+    ]).scores
+
+    data_w_score = list(zip(data, scores))
+    data_w_score.sort(key=lambda x: x[1], reverse=reverse)
+
+    return [x[0] for x in data_w_score]
+
 METHODS = {
     "random": random,
     "avg": metric_avg,
@@ -475,4 +489,6 @@ METHODS = {
     "_our_irt_feas": partial(_our_irt, fn_utility="feas"),
     "_our_irt_fic": partial(_our_irt, fn_utility="fisher_information_content"),
     "_nn_irt_fic": partial(_nn_irt, fn_utility="fisher_information_content"),
+    "comet_var": partial(comet, model_path="/home/vilda/comet-src/lightning_logs/version_18/checkpoints/epoch=1-step=3124-val_pearson=0.024.ckpt", reverse=False),
+    "comet_avg": partial(comet, model_path="/home/vilda/comet-src/lightning_logs/version_19/checkpoints/epoch=3-step=6248-val_pearson=0.163.ckpt", reverse=False),
 }
