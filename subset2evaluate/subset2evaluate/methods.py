@@ -459,7 +459,7 @@ def _nn_irt(data, **kwargs):
     print(loaded_model)
     wandb.save()
 
-def comet(data, model_path, reverse=False, **kwargs):
+def cometsrc(data, model_path, reverse=False, **kwargs):
     import comet
 
     model = comet.load_from_checkpoint(model_path)
@@ -489,6 +489,7 @@ METHODS = {
     "_our_irt_feas": partial(_our_irt, fn_utility="feas"),
     "_our_irt_fic": partial(_our_irt, fn_utility="fisher_information_content"),
     "_nn_irt_fic": partial(_nn_irt, fn_utility="fisher_information_content"),
-    "comet_var": partial(comet, model_path="/home/vilda/comet-src/lightning_logs/version_18/checkpoints/epoch=1-step=3124-val_pearson=0.024.ckpt", reverse=False),
-    "comet_avg": partial(comet, model_path="/home/vilda/comet-src/lightning_logs/version_19/checkpoints/epoch=3-step=6248-val_pearson=0.163.ckpt", reverse=False),
+    # second epoch is always the best
+    "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_0/checkpoints/epoch=1-step=3124-val_pearson=0.024.ckpt", reverse=False),
+    "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=1-step=3124-val_pearson=0.047.ckpt", reverse=False),
 }
