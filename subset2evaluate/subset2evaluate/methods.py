@@ -174,7 +174,7 @@ def _our_irt(data, **kwargs):
 
     return [x[0] for x in items_joint]
 
-def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", dropout=0.25, **kwargs):
+def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=0.25, **kwargs):
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -199,21 +199,31 @@ def pyirt(data, return_model=False, load_model=None, irt_model="4pl_score", drop
             **{
                 f"item_{line['i']}": [
                     line["scores"][system][kwargs["metric"]]
-                    if "_score" in irt_model else
+                    if "_score" in model else
                     line["scores"][system][kwargs["metric"]] >= median
                     for system in systems
                 ]
                 for line in data
             }
         })
+
+        embeddings = None
+        if "amortized_" in model:
+            import sentence_transformers
+            embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
+            embeddings = embd_model.encode([line["src"] for line in data])
+            embeddings = {f"item_{line['i']}": emb.tolist() for line, emb in zip(data, embeddings)}
+            del embd_model
+
         dataset = py_irt.dataset.Dataset.from_pandas(
             dataset,
             subject_column="system",
             item_columns=[f"item_{line['i']}" for line in data],
+            embeddings=embeddings,
         )
 
         config = py_irt.config.IrtConfig(
-            model_type=irt_model,
+            model_type=model,
             log_every=100,
             dropout=dropout,
             priors="hiearchical",

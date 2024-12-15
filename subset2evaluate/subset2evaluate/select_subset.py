@@ -9,7 +9,6 @@ def run_select_subset(
     data: List | str,
     method: str,
     metric=None,
-    model=None,
     return_model=False,
     load_model=None,
     retry_on_error=False,
@@ -27,7 +26,6 @@ def run_select_subset(
 
     out_fn = lambda: method(
         data,
-        model=model,
         metric=metric,
         return_model=return_model,
         load_model=load_model,
