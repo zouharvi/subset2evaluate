@@ -162,13 +162,13 @@ data_old = list(utils.load_data_wmt_all(normalize=True).values())[2]
 
 # %%
 _, data_irt_score = subset2evaluate.select_subset.run_select_subset(
-    data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=2000,
+    data_old, method="pyirt_fic", metric="MetricX-23-c", model="4pl_score", epochs=2000,
     return_model=True, retry_on_error=True,
 )
 plot_irt(data_irt_score)
 # %%
 _, data_irt_bin = subset2evaluate.select_subset.run_select_subset(
-    data_old, method="pyirt_fic", metric="MetricX-23", irt_model="4pl", epochs=1000,
+    data_old, method="pyirt_fic", metric="MetricX-23", model="4pl", epochs=1000,
     return_model=True
 )
 plot_irt(data_irt_bin)

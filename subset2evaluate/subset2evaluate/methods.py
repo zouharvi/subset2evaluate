@@ -1,5 +1,4 @@
 import torch
-import neural_irt.train
 import numpy as np
 import irt_mt_dev.utils as utils
 from functools import partial
@@ -92,7 +91,7 @@ def _our_irt(data, **kwargs):
         "scalar": IRTModelScalar,
         "tfidf": IRTModelTFIDF,
         "embd": IRTModelEmbd,
-    }[kwargs["irt_model"]]
+    }[kwargs["model"]]
     model = ModelClass(data, systems, data_old=data, **kwargs)
 
     data_flat = [
@@ -241,10 +240,10 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
         params = trainer.best_params
 
         # this flipping will not affect the predictions
-        if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
-            params["disc"] = -np.array(params["disc"])
-            params["ability"] = -np.array(params["ability"])
-            params["diff"] = -np.array(params["diff"])
+        # if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
+        #     params["disc"] = -np.array(params["disc"])
+        #     params["ability"] = -np.array(params["ability"])
+        #     params["diff"] = -np.array(params["diff"])
         
         # normalize naming
         if "lambdas" in params:
