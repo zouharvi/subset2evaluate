@@ -16,6 +16,7 @@ import pickle
 import os
 os.chdir("/home/vilda/irt-mt-dev/")
 
+# %%
 data_old = list(utils.load_data_wmt_all(normalize=True).values())[3]
 data_old_bin = list(utils.load_data_wmt_all(normalize=True, binarize=True).values())[3]
 _, data_irt_score = subset2evaluate.select_subset.run_select_subset(
@@ -55,7 +56,7 @@ def plot_item_curve(ax, data_irt, data_old, title, item_i=87):
     theta_max = max(list(data_irt["systems"].values()))
 
     
-    data_x = np.linspace(theta_min-0.1, theta_max+0.1, 100)
+    data_x = np.linspace(theta_min, theta_max, 100)
     data_y = [pred_irt_4pl(theta, data_irt_item) for theta in data_x]
     ax.plot(
         data_x,
@@ -83,6 +84,7 @@ axs[0].set_xlabel(" " * 40 + "System ability ($\\theta$)")
 axs[0].set_yticks([0, 1])
 axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
 axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
+axs[1].set_xlim(0.22, 0.78)
 plt.tight_layout()
 plt.savefig("figures_pdf/21-item_characteristic_curve.pdf")
 plt.show()
@@ -149,7 +151,7 @@ axs[0].set_ylabel("$\\bf Test$ success")
 axs[0].set_xlabel(" " * 40 + "System ability ($\\theta$)")
 axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
 axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:.1f}"))
-# axs[0].set_yticks([0, 1])
+axs[1].set_xlim(0.22, 0.78)
 plt.tight_layout()
 plt.savefig("figures_pdf/21-test_characteristic_curve.pdf")
 plt.show()

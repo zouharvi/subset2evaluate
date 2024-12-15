@@ -51,3 +51,38 @@ print("Human-var")
 benchmark_method(repetitions=1, kwargs_dict={"method": "var", "metric": "human"})
 print("Human-avg")
 benchmark_method(repetitions=1, kwargs_dict={"method": "avg", "metric": "human"})
+
+
+# %%
+print("Reverse False")
+print("COMET-avg e1")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=0-step=1562-val_pearson=0.029.ckpt", "reverse": False})
+
+print("COMET-avg e2")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=1-step=3124-val_pearson=0.047.ckpt", "reverse": False})
+
+print("COMET-avg e3")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=2-step=4686-val_pearson=0.161.ckpt", "reverse": False})
+
+print("COMET-avg e4")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=3-step=6248-val_pearson=0.163.ckpt", "reverse": False})
+
+print("COMET-avg e5")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=4-step=7810-val_pearson=0.202.ckpt", "reverse": False})
+
+
+print("Reverse True")
+print("COMET-avg e1")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=0-step=1562-val_pearson=0.029.ckpt", "reverse": True})
+
+print("COMET-avg e2")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=1-step=3124-val_pearson=0.047.ckpt", "reverse": True})
+
+print("COMET-avg e3")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=2-step=4686-val_pearson=0.161.ckpt", "reverse": True})
+
+print("COMET-avg e4")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=3-step=6248-val_pearson=0.163.ckpt", "reverse": True})
+
+print("COMET-avg e5")
+benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg", "model_path": "/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=4-step=7810-val_pearson=0.202.ckpt", "reverse": True})

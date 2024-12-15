@@ -29,7 +29,8 @@ def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
         filename=None,
         areas: List[Tuple[List, List, List]] = [],
-        fn_extra: Callable = lambda _: None
+        fn_extra: Callable = lambda _: None,
+        colors: List[str] = COLORS,
     ):
     import os
     import matplotlib.pyplot as plt
@@ -47,8 +48,6 @@ def plot_subset_selection(
 
     if len(points) == 1:
         colors = ["black"]
-    else:
-        colors = COLORS
 
     for (points_x, points_y, label), color in zip(points, colors):
         plt.plot(
