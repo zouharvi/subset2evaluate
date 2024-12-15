@@ -17,7 +17,7 @@ systems_gold_all = []
 # run multiple times to average thetas
 for _ in tqdm.tqdm(range(5)):
     _data, params = subset2evaluate.select_subset.run_select_subset(
-        data_old, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
+        data_old, method="pyirt_fic", metric="human", model="4pl_score", epochs=1000,
         return_model=True,
         retry_on_error=True,
     )
@@ -64,7 +64,7 @@ for prop in tqdm.tqdm(utils.PROPS):
     for _ in range(5):
         # train IRT on the random subset
         _data, params = subset2evaluate.select_subset.run_select_subset(
-            data_new, method="pyirt_fic", metric="human", irt_model="4pl_score", epochs=1000,
+            data_new, method="pyirt_fic", metric="human", model="4pl_score", epochs=1000,
             return_model=True, retry_on_error=True,
         )
 

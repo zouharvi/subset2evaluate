@@ -20,11 +20,11 @@ os.chdir("/home/vilda/irt-mt-dev/")
 data_old = list(utils.load_data_wmt_all(normalize=True).values())[3]
 data_old_bin = list(utils.load_data_wmt_all(normalize=True, binarize=True).values())[3]
 _, data_irt_score = subset2evaluate.select_subset.run_select_subset(
-    data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=2000,
+    data_old, method="pyirt_fic", metric="MetricX-23-c", model="4pl_score", epochs=2000,
     return_model=True, retry_on_error=True,
 )
 _, data_irt_bin = subset2evaluate.select_subset.run_select_subset(
-    data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl", epochs=1000,
+    data_old, method="pyirt_fic", metric="MetricX-23-c", model="4pl", epochs=1000,
     return_model=True
 )
 

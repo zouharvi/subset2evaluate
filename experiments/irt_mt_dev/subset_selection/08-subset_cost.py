@@ -18,7 +18,7 @@ data_irt_all = []
 data_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 for data_old in data_all:
     _data, data_irt = subset2evaluate.select_subset.run_select_subset(
-        data_old, method="pyirt_fic", metric="MetricX-23-c", irt_model="4pl_score", epochs=1000,
+        data_old, method="pyirt_fic", metric="MetricX-23-c", model="4pl_score", epochs=1000,
         return_model=True, retry_on_error=True,
     )
     data_irt_all.append(data_irt)
