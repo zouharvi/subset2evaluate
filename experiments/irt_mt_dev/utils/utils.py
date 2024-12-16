@@ -28,6 +28,14 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import glob
     import collections
     import numpy as np
+    import os
+    import pickle
+    os.makedirs("data/cache/", exist_ok=True)
+    cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
+
+    # load cache if exists
+    if os.path.exists(cache_f):
+        return pickle.load(open(cache_f, "rb"))
 
     lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
     lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
@@ -181,8 +189,9 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
                     line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
     
-    # import sys
-    # print("Loaded", len(data), "lines of", len(systems), "systems", file=sys.stderr)
+    # save cache
+    pickle.dump(data, open(cache_f, "wb"))
+    
     return data
 
 def load_data_wmt_all(min_segments=500, **kwargs):
