@@ -42,15 +42,15 @@ for subset_size in tqdm.tqdm(range(1, len(systems)+1)):
         data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="irt_fic", model="scalar", metric="MetricX-23")
 
         # we dropped some systems but we can recover them with the same ordering from data_old
-        (_, clu_new_avg), acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        clu_new_avg, acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_avg
         ])
-        (_, clu_new_var), acc_new_var = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        clu_new_var, acc_new_var = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_var
         ])
-        (_, clu_new_irt), acc_new_irt = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+        clu_new_irt, acc_new_irt = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
             data_old_i_to_line[line["i"]]
             for line in data_new_irt
         ])
@@ -77,7 +77,7 @@ acc_random = []
 clu_random = []
 for _ in range(50):
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-    (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new)
+    clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new)
     acc_random.append(np.average(acc_new))
     clu_random.append(np.average(clu_new))
 

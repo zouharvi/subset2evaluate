@@ -30,7 +30,7 @@ for data_old in tqdm.tqdm(data_old_all):
 
     # repeat each sampling 100 times to smooth it out
     for _ in range(100):
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
             data_old,
             subset2evaluate.select_subset.run_select_subset(data_old, method="random"),
             metric="human"

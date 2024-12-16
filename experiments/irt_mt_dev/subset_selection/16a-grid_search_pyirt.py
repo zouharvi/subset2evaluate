@@ -20,7 +20,7 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
     for data_old_name, data_old in data_old_all:
         for _ in range(repetitions):
             print(f"Running {data_old_name}/{_+1}")
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
                 data_old,
                 subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict),
                 metric="human",

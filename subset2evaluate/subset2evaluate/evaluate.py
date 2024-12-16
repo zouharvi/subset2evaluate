@@ -7,26 +7,22 @@ def run_evaluate_topk(data_old, data_new, metric="human"):
     data_old = utils.load_data(data_old)
     data_new = utils.load_data(data_new)
 
-    clu_old = []
     clu_new = []
     acc_new = []
-    clu_old.append(irt_mt_dev.utils.eval_system_clusters(data_old, metric=metric))
     for prop in irt_mt_dev.utils.PROPS:
         k = int(len(data_old)*prop)
         clu_new.append(irt_mt_dev.utils.eval_system_clusters(data_new[:k], metric=metric))
         acc_new.append(irt_mt_dev.utils.eval_subset_accuracy(data_new[:k], data_old, metric=metric))
 
-    return (clu_old, clu_new), acc_new
+    return clu_new, acc_new
 
 def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
     # both list or descriptor is fine
     data_old = utils.load_data(data_old)
     data_new = utils.load_data(data_new)
 
-    clu_old = []
     clu_new = []
     acc_new = []
-    clu_old.append(irt_mt_dev.utils.eval_system_clusters(data_old, metric=metric))
     for prop in irt_mt_dev.utils.PROPS:
         k = int(len(data_old)*prop)
         data_new_inbudget = []
@@ -40,7 +36,7 @@ def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
         clu_new.append(irt_mt_dev.utils.eval_system_clusters(data_new_inbudget, metric=metric))
         acc_new.append(irt_mt_dev.utils.eval_subset_accuracy(data_new_inbudget, data_old, metric=metric))
 
-    return (clu_old, clu_new), acc_new
+    return clu_new, acc_new
 
 if __name__ == "__main__":
     import argparse
@@ -51,7 +47,8 @@ if __name__ == "__main__":
     args.add_argument('--metric', type=str, default='human')
     args = args.parse_args()
 
-    (clu_old, clu_new), acc_new = run_evaluate_topk(args.data_old, args.data_new, args.metric)
+    clu_new, acc_new = run_evaluate_topk(args.data_old, args.data_new, args.metric)
+    clu_old, _ = run_evaluate_topk(args.data_old, args.data_old, args.metric)
 
     print(f"Clusters (old->new): {np.average(clu_old):.3f} -> {np.average(clu_new):.3f}")
     print(f"Accuracy (new): {np.average(acc_new):.2%}")

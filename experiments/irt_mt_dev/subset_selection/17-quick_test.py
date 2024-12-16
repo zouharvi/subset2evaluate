@@ -14,7 +14,7 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 
     # run multiple times to smooth variance
     for _ in range(repetitions):
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
             data_old,
             subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict, retry_on_error=False),
             metric="human"
@@ -28,7 +28,6 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 # %%
 benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diff", "model": "amortized_1pl_score", "metric": "MetricX-23-c", "epochs": 100})
 benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diffdisc", "model": "amortized_4pl_score", "metric": "MetricX-23-c", "epochs": 100})
-
 
 # %%
 print("Random")
@@ -45,7 +44,6 @@ benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "M
 # %%
 print("COMET-var")
 benchmark_method(repetitions=1, kwargs_dict={"method": "comet_var"})
-
 
 # %%
 print("COMET-avg")

@@ -29,7 +29,7 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
 # %%
 data_old = utils.load_data_wmt(year="wmt23", langs="en-cs", normalize=True)
 data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_unseen_diffdisc", data_train=data_train)
-(_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
 print(np.average(clu_new))
 print(np.average(acc_new))
 
@@ -37,6 +37,6 @@ print(np.average(acc_new))
 # %%
 # %%
 data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random", data_train=data_train)
-(_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
 print(np.average(clu_new))
 print(np.average(acc_new))
