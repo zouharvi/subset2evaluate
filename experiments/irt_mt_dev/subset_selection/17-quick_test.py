@@ -28,7 +28,7 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 # %%
 
 # benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diff", "model": "amortized_1pl_score", "metric": "MetricX-23-c", "epochs": 100})
-benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diffdisc", "model": "amortized_4pl_score", "metric": "MetricX-23-c", "epochs": 50})
+benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diffdisc", "model": "amortized_4pl_score", "metric": "MetricX-23-c", "epochs": 100})
 exit()
 
 # %%

@@ -264,13 +264,23 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
                     )
                 ]
             }
-        else:
+        elif "disc" in params:
             data_irt = {
                 "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
                 "items": [
                     {"disc": disc, "diff": diff}
                     for disc, diff in zip(
                         params["disc"],
+                        params["diff"],
+                    )
+                ]
+            }
+        else:
+            data_irt = {
+                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "items": [
+                    {"diff": diff}
+                    for diff in zip(
                         params["diff"],
                     )
                 ]
