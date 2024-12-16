@@ -39,7 +39,7 @@ benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_exp", "metric": "
 
 # %%
 print("NeuralIRT Fisher Information Content")
-benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "MetricX-23", "max_epochs": 1000})
+benchmark_method(repetitions=3, kwargs_dict={"method": "nnirt_fic", "metric": "MetricX-23-c", "max_epochs": 1000})
 
 # %%
 print("COMET-var")
