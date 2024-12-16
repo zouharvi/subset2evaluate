@@ -223,7 +223,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
 
         config = py_irt.config.IrtConfig(
             model_type=model,
-            log_every=100,
+            log_every=10,
             dropout=dropout,
             priors="hiearchical",
             seed=0,
@@ -233,7 +233,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
             config=config,
             data_path=None,
             dataset=dataset,
-            verbose=False
+            verbose=True
         )
         trainer.train(epochs=kwargs["epochs"], device='cuda')
 
