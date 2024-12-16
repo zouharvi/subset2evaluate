@@ -1,3 +1,4 @@
+from typing import Callable
 import torch
 import numpy as np
 import irt_mt_dev.utils as utils
@@ -11,22 +12,22 @@ def random(data, **kwargs):
     return data
 
 
-def metric_avg(data, **kwargs):
+def metric_avg(data, metric, **kwargs):
     data.sort(key=lambda item: np.average(
-        [sys_v[kwargs["metric"]] for sys_v in item["scores"].values()]
+        [sys_v[metric] for sys_v in item["scores"].values()]
     ))
     return data
 
 
-def metric_var(data, **kwargs):
+def metric_var(data, metric, **kwargs):
     data.sort(key=lambda item: np.var(
-        [sys_v[kwargs["metric"]] for sys_v in item["scores"].values()]
+        [sys_v[metric] for sys_v in item["scores"].values()]
     ), reverse=True)
     return data
 
 
-def metric_consistency(data, **kwargs):
-    metric_scores = utils.get_sys_absolute(data, metric=kwargs["metric"])
+def metric_consistency(data, metric, **kwargs):
+    metric_scores = utils.get_sys_absolute(data, metric=metric)
     rank_correlation = {}
     sys_names = list(metric_scores.keys())
     for example in data:
@@ -34,7 +35,7 @@ def metric_consistency(data, **kwargs):
         total = 0
         for i in range(len(sys_names)):
             for j in range(i+1, len(sys_names)):
-                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][kwargs["metric"]] - example['scores'][sys_names[j]][kwargs["metric"]]) > 0:
+                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][metric] - example['scores'][sys_names[j]][metric]) > 0:
                     consistency += 1
                 else:
                     consistency -= 1
@@ -43,6 +44,31 @@ def metric_consistency(data, **kwargs):
     data.sort(key=lambda item: rank_correlation[item['i']], reverse=True)
     return data
 
+
+def unseen_metric_avgvar(data, data_train, metric, utility_fn: Callable, **kwargs):
+    # turn off warnings from sentence-transformers
+    import warnings
+    warnings.filterwarnings('ignore')
+    import sentence_transformers
+    import sklearn.neural_network
+
+    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
+    data_x_train = embd_model.encode([line["src"] for line in data_train])
+    data_y_train = [utility_fn(line) for line in data_train]
+
+    model = sklearn.neural_network.MLPRegressor(
+        hidden_layer_sizes=(32, 32),
+        max_iter=1000,
+        verbose=False,
+    )
+    model.fit(data_x_train, data_y_train)
+    data_x_test = embd_model.encode([line["src"] for line in data])
+    data_y_test = model.predict(data_x_test)
+
+    data_w_score = list(zip(data, data_y_test))
+    data_w_score.sort(key=lambda x: x[1], reverse=True)
+
+    return data
 
 def _fn_information_content(item_irt, data_irt):
     information = 0
@@ -65,8 +91,21 @@ def _fn_experimental(item_old, item_irt, data_irt):
         information += prob*(1-prob)*(item_irt["disc"]**2)/error
     return information
 
+def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
+    if fn_utility == "experimental":
+        return _fn_experimental(item_old, item_irt, data_irt)
+    elif fn_utility == "fisher_information_content":
+        return _fn_information_content(item_irt, data_irt)
+    elif fn_utility == "diff":
+        return -item_irt["diff"]
+    elif fn_utility == "disc":
+        return -item_irt["disc"]
+    elif fn_utility == "diffdisc":
+        return item_irt["diff"]*item_irt["disc"]
+    elif fn_utility == "feas":
+        return item_irt["feas"]
 
-def _our_irt(data, **kwargs):
+def _our_irt(data, metric, **kwargs):
     import torch
     import torch.utils
     import lightning as L
@@ -95,7 +134,7 @@ def _our_irt(data, **kwargs):
     model = ModelClass(data, systems, data_old=data, **kwargs)
 
     data_flat = [
-        ((sent_i, sys_i), sent["scores"][sys][kwargs["metric"]])
+        ((sent_i, sys_i), sent["scores"][sys][metric])
         for sent_i, sent in enumerate(data)
         for sys_i, sys in enumerate(systems)
     ]
@@ -173,7 +212,7 @@ def _our_irt(data, **kwargs):
 
     return [x[0] for x in items_joint]
 
-def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=0.25, enforce_positive_disc=False, **kwargs):
+def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, enforce_positive_disc=False, **kwargs):
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -189,7 +228,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
     else:
         # we need median binarization if we are not using 4pl_score model
         median = np.median([
-            system_v[kwargs["metric"]]
+            system_v[metric]
             for line in data
             for system_v in line["scores"].values()
         ])
@@ -197,9 +236,9 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
             "system": systems,
             **{
                 f"item_{line['i']}": [
-                    line["scores"][system][kwargs["metric"]]
+                    line["scores"][system][metric]
                     if "_score" in model else
-                    line["scores"][system][kwargs["metric"]] >= median
+                    line["scores"][system][metric] >= median
                     for system in systems
                 ]
                 for line in data
@@ -284,20 +323,6 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
                 ]
             }
 
-    def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
-        if fn_utility == "experimental":
-            return _fn_experimental(item_old, item_irt, data_irt)
-        elif fn_utility == "fisher_information_content":
-            return _fn_information_content(item_irt, data_irt)
-        elif fn_utility == "diff":
-            return -item_irt["diff"]
-        elif fn_utility == "disc":
-            return -item_irt["disc"]
-        elif fn_utility == "diffdisc":
-            return item_irt["diff"]*item_irt["disc"]
-        elif fn_utility == "feas":
-            return item_irt["feas"]
-
     items_joint = list(zip(data, data_irt["items"]))
     items_joint.sort(
         key=lambda x: fn_irt_utility(x[0], x[1], data_irt, kwargs["fn_utility"]),
@@ -311,7 +336,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
     else:
         return items
 
-def _nn_irt(data, **kwargs):
+def _nn_irt(data, metric, **kwargs):
     import neural_irt.train
     from neural_irt.lit_module import IrtLitModule
     from neural_irt.data import collators, datasets
@@ -338,7 +363,7 @@ def _nn_irt(data, **kwargs):
                     "agent_type": "general",
                     "query_id": line["i"],
                     "query_rep": torch.nn.functional.one_hot(torch.tensor([line["i"]]), num_classes=len(data)).float(),
-                    "ruling": sys_v[kwargs["metric"]],
+                    "ruling": sys_v[metric],
                 })
         return data_out
     
@@ -476,51 +501,46 @@ def _nn_irt(data, **kwargs):
     print(loaded_model)
     wandb.save()
 
-def pyirt_unseen(data, data_train, **kwargs):
+def pyirt_unseen(data, data_train, load_model=None, return_model=False, **kwargs):
     import sklearn.neural_network
     import sentence_transformers
+
+    # turn off warnings from sentence-transformers
+    import warnings
+    warnings.filterwarnings('ignore')
+
     embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
     data_x_train = embd_model.encode([line["src"] for line in data_train])
 
     model_fn = lambda: sklearn.neural_network.MLPRegressor(
-        hidden_layer_sizes=(32, 32),
+        # diff*disc: 91.05% / 2.33
+        # hidden_layer_sizes=(32, 32),
+        hidden_layer_sizes=(128, 16),
         max_iter=1000,
         verbose=False,
     )
-    model_diff = model_fn()
-    model_disc = model_fn()
-    model_feas = model_fn()
 
-    data_y_diff = [line["irt"]["diff"] for line in data_train]
-    data_y_disc = [line["irt"]["disc"] for line in data_train]
-    data_y_feas = [line["irt"]["feas"] for line in data_train]
+    if load_model is not None:
+        print("LOADING MODEL")
+        model_diff, model_disc = load_model
+    else:
+        model_diff = model_fn()
+        model_disc = model_fn()
 
-    model_diff.fit(data_x_train, data_y_diff)
-    model_disc.fit(data_x_train, data_y_disc)
-    model_feas.fit(data_x_train, data_y_feas)
+        data_y_diff = [line["irt"]["diff"] for line in data_train]
+        data_y_disc = [line["irt"]["disc"] for line in data_train]
+
+        model_diff.fit(data_x_train, data_y_diff)
+        model_disc.fit(data_x_train, data_y_disc)
 
     data_x_test = embd_model.encode([line["src"] for line in data])
     data_y_diff = model_diff.predict(data_x_test)
     data_y_disc = model_disc.predict(data_x_test)
-    data_y_feas = model_feas.predict(data_x_test)
 
-    def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
-        if fn_utility == "experimental":
-            return _fn_experimental(item_old, item_irt, data_irt)
-        elif fn_utility == "fisher_information_content":
-            return _fn_information_content(item_irt, data_irt)
-        elif fn_utility == "diff":
-            return -item_irt["diff"]
-        elif fn_utility == "disc":
-            return -item_irt["disc"]
-        elif fn_utility == "diffdisc":
-            return item_irt["diff"]*item_irt["disc"]
-        elif fn_utility == "feas":
-            return item_irt["feas"]
         
     data_irt_items = [
-        {"diff": diff, "disc": disc, "feas": feas}
-        for diff, disc, feas in zip(data_y_diff, data_y_disc, data_y_feas)
+        {"diff": diff, "disc": disc}
+        for diff, disc in zip(data_y_diff, data_y_disc)
     ]
 
 
@@ -532,7 +552,10 @@ def pyirt_unseen(data, data_train, **kwargs):
 
     items = [x[0] for x in items_joint]
 
-    return items
+    if return_model:
+        return items, (model_diff, model_disc)
+    else:
+        return items
 
 def cometsrc(data, model_path, reverse=False, **kwargs):
     import comet
@@ -560,6 +583,8 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_exp": partial(pyirt, fn_utility="experimental"),
     "pyirt_unseen_diffdisc": partial(pyirt_unseen, fn_utility="diffdisc"),
+    "pyirt_unseen_diff": partial(pyirt_unseen, fn_utility="diff"),
+    "pyirt_unseen_disc": partial(pyirt_unseen, fn_utility="disc"),
     "_our_irt_diff": partial(_our_irt, fn_utility="diff"),
     "_our_irt_disc": partial(_our_irt, fn_utility="disc"),
     "_our_irt_feas": partial(_our_irt, fn_utility="feas"),
