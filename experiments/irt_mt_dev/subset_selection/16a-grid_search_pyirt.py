@@ -33,4 +33,4 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
     
 
 kwargs = json.loads(sys.argv[1].replace("'", '"'))
-benchmark_method(repetitions=2, kwargs_dict={**kwargs, "method": "pyirt_fic", "metric": "MetricX-23"})
+benchmark_method(repetitions=2, kwargs_dict={**kwargs, "method": "pyirt_fic", "metric": "MetricX-23-c"})

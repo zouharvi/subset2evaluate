@@ -212,7 +212,7 @@ def _our_irt(data, metric, **kwargs):
 
     return [x[0] for x in items_joint]
 
-def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, enforce_positive_disc=False, **kwargs):
+def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs):
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -274,7 +274,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
             dataset=dataset,
             verbose=False
         )
-        trainer.train(epochs=kwargs["epochs"], device='cuda')
+        trainer.train(epochs=epochs, device='cuda')
 
         params = trainer.best_params
 

@@ -56,7 +56,7 @@ if __name__ == "__main__":
     args.add_argument('data', type=str, default='wmt23/en-cs')
     args.add_argument('--method', default="var",
                       choices=methods.METHODS.keys())
-    args.add_argument('--metric', default="MetricX-23")
+    args.add_argument('--metric', default="MetricX-23-c")
     args.add_argument('--model', default=None,
                       choices=["scalar", "tfidf", "embd"])
     args = args.parse_args()

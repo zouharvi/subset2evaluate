@@ -32,7 +32,7 @@ def heuristic_moment(line, pow=3):
     # pow = 2: variance
     # pow = 1: abs diff
     return  np.average([
-        abs(sys_a_v["MetricX-23"]-sys_b_v["MetricX-23-c"])**pow
+        abs(sys_a_v["MetricX-23-c"]-sys_b_v["MetricX-23-c"])**pow
         for sys_a_v, sys_b_v in itertools.combinations(line["scores"].values(), 2)
     ])
 

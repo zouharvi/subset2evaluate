@@ -13,7 +13,7 @@ points_y = []
 
 def run_simulation(k):
     data_new = random.sample(data_old, k=k)
-    clusters = utils.eval_system_clusters(data_new, metric="MetricX-23")
+    clusters = utils.eval_system_clusters(data_new, metric="MetricX-23-c")
     return data_new, clusters
 
 for prop in tqdm.tqdm(utils.PROPS):
