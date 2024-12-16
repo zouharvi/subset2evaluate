@@ -173,7 +173,7 @@ def _our_irt(data, **kwargs):
 
     return [x[0] for x in items_joint]
 
-def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=0.25, **kwargs):
+def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=0.25, enforce_positive_disc=False, **kwargs):
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -223,7 +223,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
 
         config = py_irt.config.IrtConfig(
             model_type=model,
-            log_every=10,
+            log_every=100,
             dropout=dropout,
             priors="hiearchical",
             seed=0,
@@ -233,17 +233,17 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
             config=config,
             data_path=None,
             dataset=dataset,
-            verbose=True
+            verbose=False
         )
         trainer.train(epochs=kwargs["epochs"], device='cuda')
 
         params = trainer.best_params
 
-        # this flipping will not affect the predictions
-        # if np.average(params["disc"]) < 0 and np.average(params["ability"]) < 0:
-        #     params["disc"] = -np.array(params["disc"])
-        #     params["ability"] = -np.array(params["ability"])
-        #     params["diff"] = -np.array(params["diff"])
+        # this flipping should not affect the predictions
+        if enforce_positive_disc and np.average(params["disc"]) < 0:
+            params["disc"] = -np.array(params["disc"])
+            params["ability"] = -np.array(params["ability"])
+            params["diff"] = -np.array(params["diff"])
         
         # normalize naming
         if "lambdas" in params:
@@ -280,9 +280,7 @@ def pyirt(data, return_model=False, load_model=None, model="4pl_score", dropout=
                 "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
                 "items": [
                     {"diff": diff}
-                    for diff in zip(
-                        params["diff"],
-                    )
+                    for diff in params["diff"]
                 ]
             }
 
@@ -478,6 +476,64 @@ def _nn_irt(data, **kwargs):
     print(loaded_model)
     wandb.save()
 
+def pyirt_unseen(data, data_train, **kwargs):
+    import sklearn.neural_network
+    import sentence_transformers
+    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
+    data_x_train = embd_model.encode([line["src"] for line in data_train])
+
+    model_fn = lambda: sklearn.neural_network.MLPRegressor(
+        hidden_layer_sizes=(32, 32),
+        max_iter=1000,
+        verbose=False,
+    )
+    model_diff = model_fn()
+    model_disc = model_fn()
+    model_feas = model_fn()
+
+    data_y_diff = [line["irt"]["diff"] for line in data_train]
+    data_y_disc = [line["irt"]["disc"] for line in data_train]
+    data_y_feas = [line["irt"]["feas"] for line in data_train]
+
+    model_diff.fit(data_x_train, data_y_diff)
+    model_disc.fit(data_x_train, data_y_disc)
+    model_feas.fit(data_x_train, data_y_feas)
+
+    data_x_test = embd_model.encode([line["src"] for line in data])
+    data_y_diff = model_diff.predict(data_x_test)
+    data_y_disc = model_disc.predict(data_x_test)
+    data_y_feas = model_feas.predict(data_x_test)
+
+    def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
+        if fn_utility == "experimental":
+            return _fn_experimental(item_old, item_irt, data_irt)
+        elif fn_utility == "fisher_information_content":
+            return _fn_information_content(item_irt, data_irt)
+        elif fn_utility == "diff":
+            return -item_irt["diff"]
+        elif fn_utility == "disc":
+            return -item_irt["disc"]
+        elif fn_utility == "diffdisc":
+            return item_irt["diff"]*item_irt["disc"]
+        elif fn_utility == "feas":
+            return item_irt["feas"]
+        
+    data_irt_items = [
+        {"diff": diff, "disc": disc, "feas": feas}
+        for diff, disc, feas in zip(data_y_diff, data_y_disc, data_y_feas)
+    ]
+
+
+    items_joint = list(zip(data, data_irt_items))
+    items_joint.sort(
+        key=lambda x: fn_irt_utility(x[0], x[1], None, kwargs["fn_utility"]),
+        reverse=True
+    )
+
+    items = [x[0] for x in items_joint]
+
+    return items
+
 def cometsrc(data, model_path, reverse=False, **kwargs):
     import comet
 
@@ -503,6 +559,7 @@ METHODS = {
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_exp": partial(pyirt, fn_utility="experimental"),
+    "pyirt_unseen_diffdisc": partial(pyirt_unseen, fn_utility="diffdisc"),
     "_our_irt_diff": partial(_our_irt, fn_utility="diff"),
     "_our_irt_disc": partial(_our_irt, fn_utility="disc"),
     "_our_irt_feas": partial(_our_irt, fn_utility="feas"),
