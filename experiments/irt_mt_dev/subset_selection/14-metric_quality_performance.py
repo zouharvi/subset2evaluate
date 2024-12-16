@@ -26,7 +26,7 @@ clu_random = []
 for data_old in data_old_all:
     for _ in range(10):
         data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
         acc_random.append(np.average(acc_new))
         clu_random.append(np.average(clu_new))
 print(f"{'random':>25} corr=00.0% | clu={np.average(clu_random):>.2f} | acc={np.average(acc_random):.2f}")
@@ -59,17 +59,17 @@ for data_old in tqdm.tqdm(data_old_all):
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
             
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
             clus_all['avg'].append(np.average(clu_new))
             accs_all['avg'].append(np.average(acc_new))
 
             data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
             clus_all['var'].append(np.average(clu_new))
             accs_all['var'].append(np.average(acc_new))
 
             data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_fic", model="scalar", epochs=1000, metric=metric, retry_on_error=True)
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_irt)
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_irt)
             clus_all['irt'].append(np.average(clu_new))
             accs_all['irt'].append(np.average(acc_new))
         except Exception as e:

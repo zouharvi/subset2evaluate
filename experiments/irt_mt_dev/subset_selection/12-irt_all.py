@@ -27,7 +27,7 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         )
         for method in ["pyirt_diff", "pyirt_disc", "pyirt_feas", "pyirt_fic", "pyirt_diffdisc"]:
             data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=params)
-            (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_topk(
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
                 data_old, data_new,
                 metric="human"
             )
