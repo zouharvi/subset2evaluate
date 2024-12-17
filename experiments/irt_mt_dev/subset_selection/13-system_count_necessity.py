@@ -96,8 +96,8 @@ plt.plot(
     **plot_kwargs
 )
 plt.plot(
-    points_x,
-    [np.average(x[1]) for x in accs_all],
+    points_x[1:],
+    [np.average(x[1]) for x in accs_all[1:]],
     # savgol_filter([x[1] for x in accs_all[1:]], 2, 1),
     label="Heuristics var",
     **plot_kwargs
@@ -115,7 +115,7 @@ plt.hlines(
     color="black",
     label="Random",
 )
-# plt.ylim(0.91, None)
+# plt.ylim(0.77, 1)
 plt.ylabel("Average accuracy")
 plt.xlabel("Number of systems in training data" + " " * 5)
 plt.xticks(range(min(points_x), max(points_x), 3))
@@ -124,7 +124,7 @@ plt.legend(
     handlelength=1,
     labelspacing=0.2,
     facecolor="#ccc",
-    loc="upper left",
+    loc="lower right",
     fontsize=8,
 )
 plt.gca().spines[['top', 'right']].set_visible(False)
@@ -143,8 +143,8 @@ plt.plot(
     **plot_kwargs
 )
 plt.plot(
-    points_x,
-    [np.average(x[1]) for x in clus_all],
+    points_x[1:],
+    [np.average(x[1]) for x in clus_all[1:]],
     label="MetricX-23 var",
     **plot_kwargs
 )
@@ -164,7 +164,14 @@ plt.hlines(
 plt.ylabel("Average cluster count" + " "*10, labelpad=10)
 plt.xlabel("Number of systems in training data" + " " * 5)
 plt.xticks(range(min(points_x), max(points_x), 3))
-# plt.legend()
+plt.legend(
+    handletextpad=0.2,
+    handlelength=1,
+    labelspacing=0.2,
+    facecolor="#ccc",
+    loc="lower right",
+    fontsize=8,
+)
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
 plt.savefig("figures_pdf/13-system_count_necessity_clu.pdf")
