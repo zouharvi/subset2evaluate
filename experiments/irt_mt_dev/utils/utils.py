@@ -132,6 +132,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
             # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
             "time": 0.15 * word_count + 33.7,
             "domain": line_domain,
+            "doc": line_doc,
             "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
         })
         line_id_true += 1

@@ -26,6 +26,11 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
     print(f"ACC: {np.average(points_y_acc):.2%} | CLU: {np.average(points_y_clu):.2f}")
 
 # %%
+print("PyIRT-score Fisher Information Content")
+benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
+exit()
+
+# %%
 benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diff", "model": "amortized_1pl_score", "metric": "MetricX-23-c", "epochs": 100})
 benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diffdisc", "model": "amortized_4pl_score", "metric": "MetricX-23-c", "epochs": 100})
 
@@ -35,7 +40,7 @@ benchmark_method(repetitions=10, kwargs_dict={"method": "random"})
 
 # %%
 print("PyIRT-score Fisher Information Content")
-benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_exp", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
+benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
 
 # %%
 print("NeuralIRT Fisher Information Content")
