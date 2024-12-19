@@ -27,8 +27,13 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 
 # %%
 print("PyIRT-score Fisher Information Content")
-benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
-exit()
+benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score"})
+
+# %%
+# works a bit worse
+print("PyIRT-score Fisher Information Content with enforced positive discrimination")
+benchmark_method(repetitions=10, kwargs_dict={"enforce_positive_disc": True, "method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score"})
+
 
 # %%
 benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diff", "model": "amortized_1pl_score", "metric": "MetricX-23-c", "epochs": 100})
@@ -37,10 +42,6 @@ benchmark_method(repetitions=1, kwargs_dict={"method": "pyirt_diffdisc", "model"
 # %%
 print("Random")
 benchmark_method(repetitions=10, kwargs_dict={"method": "random"})    
-
-# %%
-print("PyIRT-score Fisher Information Content")
-benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score", "dropout": 0.5, "priors": "hiearchical", "deterministic": True})
 
 # %%
 print("NeuralIRT Fisher Information Content")
