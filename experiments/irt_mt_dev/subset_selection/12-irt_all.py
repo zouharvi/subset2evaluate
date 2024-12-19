@@ -59,6 +59,7 @@ irt_mt_dev.utils.fig.plot_subset_selection(
         (utils.PROPS, points_y_acc_all['pyirt_disc'], f"discriminability {np.average(points_y_acc_all['pyirt_disc']):.2%}"),
         (utils.PROPS, points_y_acc_all['pyirt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['pyirt_diffdisc']):.2%}"),
         (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_experiment'], f"experiment {np.average(points_y_acc_all['pyirt_experiment']):.2%}"),
     ],
     "12-irt_all",
 )
@@ -69,6 +70,7 @@ irt_mt_dev.utils.fig.plot_subset_selection(
         (utils.PROPS, points_y_clu_all['pyirt_disc'], f"discriminability {np.average(points_y_clu_all['pyirt_disc']):.2f}"),
         (utils.PROPS, points_y_clu_all['pyirt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['pyirt_diffdisc']):.2f}"),
         (utils.PROPS, points_y_clu_all['pyirt_fic'], f"information {np.average(points_y_clu_all['pyirt_fic']):.2f}"),
+        # (utils.PROPS, points_y_clu_all['pyirt_experiment'], f"experiment {np.average(points_y_clu_all['pyirt_experiment']):.2f}"),
     ],
     "12-irt_all",
 )
