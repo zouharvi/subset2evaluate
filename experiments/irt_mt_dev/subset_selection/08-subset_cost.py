@@ -54,10 +54,6 @@ def utility_irt_fic(item, data_irt):
 
 def utility_irt_diff(item, data_irt):
     item = data_irt["items"][item["i"]]
-
-    # alternatives
-    # return item["disc"]
-    # return item["feas"]
     return -item["diff"]
 
 data_y_all_metricx_avg = [
@@ -105,7 +101,7 @@ def plot(ax, title, data_x_all, data_y_all):
     # data_x = [item for data_x in data_x_all for item in data_x]
     # data_y = [item for data_y in data_y_all for item in data_y]
 
-    if "Information Content" in title:
+    if "Information" in title:
         # ax.set_yscale("log")
         ax.set_ylim(
             np.quantile(data_y, [0.05, 0.95]),
@@ -142,9 +138,9 @@ def plot(ax, title, data_x_all, data_y_all):
 
     ax.spines[["top", "right"]].set_visible(False)
 
-plot(axs[0, 0], "MetricX-23 avg", data_x_all, data_y_all_metricx_avg)
-plot(axs[0, 1], "MetricX-23 var", data_x_all, data_y_all_metricx_var)
-plot(axs[1, 0], "IRT Information Content", data_x_all, data_y_all_irt_fic)
+plot(axs[0, 0], "MetricX-23 avg.", data_x_all, data_y_all_metricx_avg)
+plot(axs[0, 1], "MetricX-23 var.", data_x_all, data_y_all_metricx_var)
+plot(axs[1, 0], "IRT Information", data_x_all, data_y_all_irt_fic)
 plot(axs[1, 1], "IRT Difficulty", data_x_all, data_y_all_irt_diff)
 
 axs[0, 0].set_ylabel("Utility")

@@ -1,9 +1,7 @@
 from typing import Callable
-import torch
 import numpy as np
 import irt_mt_dev.utils as utils
 from functools import partial
-
 
 def random(data, **kwargs):
     import random
@@ -24,7 +22,6 @@ def metric_var(data, metric, **kwargs):
         [sys_v[metric] for sys_v in item["scores"].values()]
     ), reverse=True)
     return data
-
 
 def metric_consistency(data, metric, **kwargs):
     metric_scores = utils.get_sys_absolute(data, metric=metric)
@@ -70,7 +67,8 @@ def unseen_metric_avgvar(data, data_train, metric, utility_fn: Callable, **kwarg
 
     return data
 
-def _fn_information_content(item_irt, data_irt):
+def _fn_information_content_old(item_irt, data_irt):
+    # This formula is based on the simplified formula of Rodriquez et al 2021
     information = 0
     for theta in data_irt["systems"].values():
         prob = utils.pred_irt(
@@ -80,22 +78,29 @@ def _fn_information_content(item_irt, data_irt):
         information += prob*(1-prob)*(item_irt["disc"]**2)
     return information
 
-def _fn_experimental(item_old, item_irt, data_irt):
+def _fn_information_content(item_old, item_irt, data_irt):
     information = 0
-    for system, theta in data_irt["systems"].items():
-        prob = utils.pred_irt(
-            theta,
-            item_irt
-        )
-        error = (item_old["scores"][system]["MetricX-23-c"] - prob)**2
-        information += prob*(1-prob)*(item_irt["disc"]**2)/error
+    for theta in data_irt["systems"].values():
+        x1 = np.exp(item_irt["disc"]*(theta+item_irt["diff"]))
+        x2 = np.exp(item_irt["disc"]*item_irt["diff"])
+        x3 = np.exp(item_irt["disc"]*theta)
+        information += (item_irt["disc"]**2)*x1/(x2+x3)**2
+    return information
+
+def _fn_experiment(item_old, item_irt, data_irt):
+    information = 0
+    for theta in data_irt["systems"].values():
+        x1 = np.exp(item_irt["disc"]*(theta+item_irt["diff"]))
+        x2 = np.exp(item_irt["disc"]*item_irt["diff"])
+        x3 = np.exp(item_irt["disc"]*theta)
+        information += (item_irt["disc"]**2)*x1/(x2+x3)**2
     return information
 
 def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
-    if fn_utility == "experimental":
-        return _fn_experimental(item_old, item_irt, data_irt)
+    if fn_utility == "experiment":
+        return _fn_experiment(item_old, item_irt, data_irt)
     elif fn_utility == "fisher_information_content":
-        return _fn_information_content(item_irt, data_irt)
+        return _fn_information_content(item_old, item_irt, data_irt)
     elif fn_utility == "diff":
         return -item_irt["diff"]
     elif fn_utility == "disc":
@@ -337,6 +342,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
         return items
 
 def _nn_irt(data, metric, **kwargs):
+    import torch
     import neural_irt.train
     from neural_irt.lit_module import IrtLitModule
     from neural_irt.data import collators, datasets
@@ -581,7 +587,7 @@ METHODS = {
     "pyirt_diffdisc": partial(pyirt, fn_utility="diffdisc"),
     "pyirt_feas": partial(pyirt, fn_utility="feas"),
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
-    "pyirt_exp": partial(pyirt, fn_utility="experimental"),
+    "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
     "pyirt_unseen_diffdisc": partial(pyirt_unseen, fn_utility="diffdisc"),
     "pyirt_unseen_diff": partial(pyirt_unseen, fn_utility="diff"),
     "pyirt_unseen_disc": partial(pyirt_unseen, fn_utility="disc"),
