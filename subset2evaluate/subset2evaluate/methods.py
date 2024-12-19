@@ -3,10 +3,9 @@ import numpy as np
 import irt_mt_dev.utils as utils
 from functools import partial
 
-def random(data, **kwargs):
+def random(data, seed=None, **kwargs):
     import random
-    # random.Random(0).shuffle(data)
-    random.shuffle(data)
+    random.Random(seed).shuffle(data)
     return data
 
 
