@@ -68,8 +68,8 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     ]
     # NOTE: deeper MLP doesn't really work
     for _ in range(2):
-        _data_new, model = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_unseen_diffdisc", data_train=data_train_flat, return_model=True)
-        for method in ["pyirt_unseen_diffdisc", "pyirt_unseen_disc", "pyirt_unseen_diff"]:
+        _data_new, model = subset2evaluate.select_subset.run_select_subset(data_old, method="premlp_irt_diffdisc", data_train=data_train_flat, return_model=True)
+        for method in ["premlp_irt_diffdisc", "premlp_irt_disc", "premlp_irt_diff"]:
             data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, data_train=data_train_flat, load_model=model)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
 
@@ -93,9 +93,9 @@ points_y_clu_all = {
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
         # (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_unseen_diff'], f"difficulty {np.average(points_y_acc_all['pyirt_unseen_diff']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_unseen_disc'], f"discriminability {np.average(points_y_acc_all['pyirt_unseen_disc']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_unseen_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['pyirt_unseen_diffdisc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['premlp_irt_diff'], f"difficulty {np.average(points_y_acc_all['premlp_irt_diff']):.2%}"),
+        (utils.PROPS, points_y_acc_all['premlp_irt_disc'], f"discriminability {np.average(points_y_acc_all['premlp_irt_disc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['premlp_irt_diffdisc']):.2%}"),
         # (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
     ],
     "23-irt_unseen_all",
@@ -103,9 +103,9 @@ irt_mt_dev.utils.fig.plot_subset_selection(
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
         # (utils.PROPS, points_y_clu_all['pyirt_feas'], f"IRT feasability {np.average(points_y_clu_all['pyirt_feas']):.2f}"),
-        (utils.PROPS, points_y_clu_all['pyirt_unseen_diff'], f"difficulty {np.average(points_y_clu_all['pyirt_unseen_diff']):.2f}"),
-        (utils.PROPS, points_y_clu_all['pyirt_unseen_disc'], f"discriminability {np.average(points_y_clu_all['pyirt_unseen_disc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['pyirt_unseen_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['pyirt_unseen_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['premlp_irt_diff'], f"difficulty {np.average(points_y_clu_all['premlp_irt_diff']):.2f}"),
+        (utils.PROPS, points_y_clu_all['premlp_irt_disc'], f"discriminability {np.average(points_y_clu_all['premlp_irt_disc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['premlp_irt_diffdisc']):.2f}"),
         # (utils.PROPS, points_y_clu_all['pyirt_fic'], f"information {np.average(points_y_clu_all['pyirt_fic']):.2f}"),
     ],
     "23-irt_unseen_all",
