@@ -2,10 +2,11 @@ from typing import Callable
 import numpy as np
 import irt_mt_dev.utils as utils
 from functools import partial
+import random
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-def random(data, seed=None, **kwargs):
+def random_subset(data, seed=None, **kwargs):
     import random
     random.Random(seed).shuffle(data)
     return data
@@ -287,10 +288,74 @@ def cometsrc(data, model_path, reverse=False, **kwargs):
 
     return [x[0] for x in data_w_score]
 
+def cometsrc2(data, model_path1, model_path2, reverse=False, **kwargs):
+    import comet
+
+    model1 = comet.load_from_checkpoint(model_path1)
+    scores1 = model1.predict([
+        {"src": line["src"]}
+        for line in data
+    ]).scores
+    model2 = comet.load_from_checkpoint(model_path2)
+    scores2 = model2.predict([
+        {"src": line["src"]}
+        for line in data
+    ]).scores
+    scores = [s1*s2 for s1, s2 in zip(scores1, scores2)]
+
+    data_w_score = list(zip(data, scores))
+    data_w_score.sort(key=lambda x: x[1], reverse=reverse)
+
+    return [x[0] for x in data_w_score]
+
+
+def output_text_variance(data, **kwargs):
+    import itertools
+    import collections
+
+    def _f(line):
+        out = []
+        for text_a, text_b in itertools.combinations(line["tgt"].values(), 2):
+            text_a = collections.Counter(text_a.split())
+            text_b = collections.Counter(text_b.split())
+            if text_a.total() == 0 or text_b.total() == 0:
+                out.append(1)
+            else:
+                out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
+        return np.average(out)
+
+    # sort from smallest similarity
+    data.sort(key=lambda line: _f(line), reverse=False)
+    return data
+
+def _run_simulation(args):
+    data_old, data_prior = args
+    data_new = random.sample(data_old, k=min(len(data_old), 20))
+    clusters = utils.eval_system_clusters(data_new+data_prior, metric="MetricX-23-c")
+    return data_new+data_prior, clusters
+
+def synthetic_simulation(data, **kwargs):
+    import multiprocessing
+
+    data_new = []
+    while len(data) > 0:
+        print("Remaining", len(data))
+        with multiprocessing.Pool(20) as pool:
+            results = pool.map(_run_simulation, [[data, data_new]]*1000)
+
+        # take best clustering but evaluate on human data
+        data_new = max(results, key=lambda x: x[1])[0]
+        data_best_i = {line["i"] for line in data_new}
+        data = [line for line in data if line["i"] not in data_best_i]
+    
+    return data_new
+
 METHODS = {
-    "random": random,
+    "random": random_subset,
     "avg": metric_avg,
     "var": metric_var,
+    "output_text_var": output_text_variance,
+    "synthetic_simulation": synthetic_simulation,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
@@ -309,4 +374,12 @@ METHODS = {
     # second epoch is always the best
     "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_0/checkpoints/epoch=1-step=3124-val_pearson=0.024.ckpt", reverse=False),
     "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=1-step=3124-val_pearson=0.047.ckpt", reverse=False),
+    "precomet_diff": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817024/checkpoints/epoch=1-step=1944-val_pearson=0.405.ckpt", reverse=False),
+    "precomet_disc": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817064/checkpoints/epoch=1-step=1944-val_pearson=0.510.ckpt", reverse=False),
+    "precomet_diffdisc": partial(
+        cometsrc2,
+        model_path1="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817024/checkpoints/epoch=1-step=1944-val_pearson=0.405.ckpt",
+        model_path2="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817064/checkpoints/epoch=1-step=1944-val_pearson=0.510.ckpt",
+        reverse=False
+    ),
 }

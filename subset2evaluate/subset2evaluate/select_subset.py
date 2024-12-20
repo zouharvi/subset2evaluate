@@ -6,7 +6,7 @@ import copy
 import sys
 
 def run_select_subset(
-    data: List | str,
+    data: Union[List, str],
     method: str,
     metric=None,
     return_model=False,

@@ -20,7 +20,7 @@ data_train = collections.defaultdict(list)
 for data_name, data_old in tqdm.tqdm(data_old_all):
     # run multiple times and average item parameters
     for _ in range(5):
-        _data, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True, enforce_positive_disc=True)
+        _data, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="human", epochs=1000, retry_on_error=True, enforce_positive_disc=True)
         data_train[data_name].append([
             {**line, "irt": line_irt}
             for line, line_irt in zip(data_old, params["items"])
@@ -92,28 +92,17 @@ points_y_clu_all = {
 
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        # (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
         (utils.PROPS, points_y_acc_all['premlp_irt_diff'], f"difficulty {np.average(points_y_acc_all['premlp_irt_diff']):.2%}"),
         (utils.PROPS, points_y_acc_all['premlp_irt_disc'], f"discriminability {np.average(points_y_acc_all['premlp_irt_disc']):.2%}"),
         (utils.PROPS, points_y_acc_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['premlp_irt_diffdisc']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
     ],
     "23-irt_unseen_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        # (utils.PROPS, points_y_clu_all['pyirt_feas'], f"IRT feasability {np.average(points_y_clu_all['pyirt_feas']):.2f}"),
         (utils.PROPS, points_y_clu_all['premlp_irt_diff'], f"difficulty {np.average(points_y_clu_all['premlp_irt_diff']):.2f}"),
         (utils.PROPS, points_y_clu_all['premlp_irt_disc'], f"discriminability {np.average(points_y_clu_all['premlp_irt_disc']):.2f}"),
         (utils.PROPS, points_y_clu_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['premlp_irt_diffdisc']):.2f}"),
-        # (utils.PROPS, points_y_clu_all['pyirt_fic'], f"information {np.average(points_y_clu_all['pyirt_fic']):.2f}"),
     ],
     "23-irt_unseen_all",
 )
-
-
-# # %%
-# data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-# clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
-# print(np.average(clu_new))
-# print(np.average(acc_new))
