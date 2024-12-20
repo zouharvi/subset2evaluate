@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Union
 
-def load_data(data: List | str):
+def load_data(data: Union[List, str]):
     import irt_mt_dev.utils as utils
     import os
     import json
@@ -13,7 +13,7 @@ def load_data(data: List | str):
     elif os.path.exists(data):
         data = [json.loads(x) for x in open(data, "r")]
         
-        # TODO: REMOVE ME!!
+        # TODO: REMOVE ME
         systems = set(data[0]["scores"].keys())
         for line in data:
             systems = systems.intersection(set(line["scores"].keys()))
