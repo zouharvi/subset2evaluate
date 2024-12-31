@@ -58,23 +58,23 @@ for data_old in data_old_all:
 
     acc_all = collections.defaultdict(list)
     clu_all = collections.defaultdict(list)
-    for beta in [0, 0.5, 1, float("inf")]:
+    for beta in [0, 1, 3]:
         # random is independent of beta but let's average it!
         data_random = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-        (_, clu_new), acc_new = subset2evaluate.evaluate.run_evaluate_top_timebudget(data_old, data_random, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_top_timebudget(data_old, data_random, metric="human")
         acc_all["random"].append(np.average(acc_new))
         clu_all["random"].append(np.average(clu_new))
 
-        (_, clu_new), acc_new = beta_searcher_evaluate(utility_fn=utility_metricx_avg, beta=beta)
+        clu_new, acc_new = beta_searcher_evaluate(utility_fn=utility_metricx_avg, beta=beta)
         acc_all["metricavg"].append(np.average(acc_new))
         clu_all["metricavg"].append(np.average(clu_new))
 
 
-        (_, clu_new), acc_new = beta_searcher_evaluate(utility_fn=utility_metricx_var, beta=beta)
+        clu_new, acc_new = beta_searcher_evaluate(utility_fn=utility_metricx_var, beta=beta)
         acc_all["metricvar"].append(np.average(acc_new))
         clu_all["metricvar"].append(np.average(clu_new))
 
-        (_, clu_new), acc_new = beta_searcher_evaluate(utility_fn=lambda x: utility_irt_fic(x, irt_params), beta=beta)
+        clu_new, acc_new = beta_searcher_evaluate(utility_fn=lambda x: utility_irt_fic(x, irt_params), beta=beta)
         acc_all["irt_fic"].append(np.average(acc_new))
         clu_all["irt_fic"].append(np.average(clu_new))
 
@@ -82,7 +82,6 @@ for data_old in data_old_all:
         acc_all_all[key].append(value)
     for key, value in clu_all.items():
         clu_all_all[key].append(value)
-
 
 # %%
 def printrow(row):
