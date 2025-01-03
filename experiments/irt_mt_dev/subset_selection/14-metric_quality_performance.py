@@ -20,18 +20,6 @@ random.seed(0)
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
-acc_random = []
-clu_random = []
-
-for data_old in data_old_all:
-    for _ in range(10):
-        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
-        acc_random.append(np.average(acc_new))
-        clu_random.append(np.average(clu_new))
-print(f"{'random':>25} corr=00.0% | clu={np.average(clu_random):>.2f} | acc={np.average(acc_random):.2f}")
-
-# %%
 accs_all = collections.defaultdict(list)
 clus_all = collections.defaultdict(list)
 corrs_all = []
@@ -58,6 +46,11 @@ for data_old in tqdm.tqdm(data_old_all):
             ]
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
             
+            data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="random", metric=metric)
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
+            clus_all['random'].append(np.average(clu_new))
+            accs_all['random'].append(np.average(acc_new))
+
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
             clus_all['avg'].append(np.average(clu_new))
@@ -68,10 +61,16 @@ for data_old in tqdm.tqdm(data_old_all):
             clus_all['var'].append(np.average(clu_new))
             accs_all['var'].append(np.average(acc_new))
 
-            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_fic", model="scalar", epochs=1000, metric=metric, retry_on_error=True)
+            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="output_text_var", metric=metric)
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
+            clus_all['diversity'].append(np.average(clu_new))
+            accs_all['diversity'].append(np.average(acc_new))
+
+            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", model="4pl_score", epochs=1000, metric=metric, retry_on_error=True)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_irt)
             clus_all['irt'].append(np.average(clu_new))
             accs_all['irt'].append(np.average(acc_new))
+
         except Exception as e:
             print(e)
             print("Errored on", metric)
@@ -91,28 +90,37 @@ def aggregate_data_y(data_y):
 
 # figure for accuracy
 fig_utils.matplotlib_default()
-# TODO: or don't do the above if the plot looks nice without it
 
 fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
-data_y = aggregate_data_y(accs_all["avg"])
 axs[0].plot(
     data_x,
-    data_y,
+    aggregate_data_y(accs_all["random"]),
+    label=f"random",
+    linewidth=2,
+)
+axs[0].plot(
+    data_x,
+    aggregate_data_y(accs_all["avg"]),
     label=f"metric avg",
     linewidth=2,
 )
-data_y = aggregate_data_y(accs_all["var"])
 axs[0].plot(
     data_x,
-    data_y,
+    aggregate_data_y(accs_all["var"]),
     label=f"metric var",
+    linewidth=2,
+)
+axs[0].plot(
+    data_x,
+    aggregate_data_y(accs_all["diversity"]),
+    label=f"diversity",
     linewidth=2,
 )
 
 data_y = aggregate_data_y(accs_all["irt"])
 axs[0].plot(
     data_x, data_y,
-    label=f"IRT information",
+    label=f"IRT diff.$\\times$disc.",
     linewidth=2,
 )
 
@@ -134,27 +142,35 @@ axs[0].spines[['top', 'right']].set_visible(False)
 
 
 # figure for clusters
-
-# plt.figure(figsize=(4, 2))
-data_y = aggregate_data_y(clus_all["avg"])
 axs[1].plot(
-    data_x, data_y,
+    data_x,
+    aggregate_data_y(clus_all["random"]),
+    label=f"random",
+    linewidth=2,
+)
+axs[1].plot(
+    data_x,
+    aggregate_data_y(clus_all["avg"]),
     label=f"metric avg",
     linewidth=2,
 )
-
-data_y = aggregate_data_y(clus_all["var"])
 axs[1].plot(
-    data_x, data_y,
+    data_x,
+    aggregate_data_y(clus_all["var"]),
     label=f"metric var",
     linewidth=2,
 )
-
-
-data_y = aggregate_data_y(clus_all["irt"])
 axs[1].plot(
-    data_x, data_y,
-    label=f"IRT information",
+    data_x,
+    aggregate_data_y(clus_all["diversity"]),
+    label=f"diversity",
+    linewidth=2,
+)
+
+axs[1].plot(
+    data_x,
+    aggregate_data_y(clus_all["irt"]),
+    label=f"IRT diff.$\\times$disc.",
     linewidth=2,
 )
 

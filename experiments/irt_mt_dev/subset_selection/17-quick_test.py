@@ -1,4 +1,5 @@
 # %%
+import tqdm
 import irt_mt_dev.utils as utils
 import numpy as np
 import os
@@ -31,7 +32,7 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
     points_y_acc = []
     points_y_clu = []
 
-    for data_old in data_old_all:
+    for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
@@ -78,9 +79,8 @@ benchmark_method(repetitions=1, kwargs_dict={"method": "avg", "metric": "human"}
 
 # %%
 print("PreCOMET variants")
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diff", "reverse": False})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diff", "reverse": True})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_disc", "reverse": False})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_disc", "reverse": True})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diffdisc", "reverse": False})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diffdisc", "reverse": True})
+benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_var"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_avg"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diff"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_disc"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diffdisc"})

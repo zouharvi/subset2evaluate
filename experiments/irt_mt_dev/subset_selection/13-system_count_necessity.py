@@ -77,8 +77,6 @@ for data_old in data_old_all:
         clu_random.append(np.average(clu_new))
 
 # %%
-# TODO: remove filter
-from scipy.signal import savgol_filter
 
 plot_kwargs = dict(
     marker="o",

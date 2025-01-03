@@ -27,13 +27,12 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         ])
 
 
-pickle.dump(data_train, open("computed/tmp.pkl", "wb"))
-
-# %%
-data_train = pickle.load(open("computed/tmp.pkl", "rb"))
+pickle.dump(data_train, open("computed/test_irt_unseen.pkl", "wb"))
 
 # %%
 # part II
+
+data_train = pickle.load(open("computed/test_irt_unseen.pkl", "rb"))
 def average_irt_params(data_train):
     # the old data (e.g. line src) is the same everywhere
     data_new = [l for l in data_train[0]]
@@ -66,16 +65,22 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         if data_name != data_local_name
         for line in data_local
     ]
-    # NOTE: deeper MLP doesn't really work
     for _ in range(2):
-        _data_new, model = subset2evaluate.select_subset.run_select_subset(data_old, method="premlp_irt_diffdisc", data_train=data_train_flat, return_model=True)
-        for method in ["premlp_irt_diffdisc", "premlp_irt_disc", "premlp_irt_diff"]:
-            data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, data_train=data_train_flat, load_model=model)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
-
-            points_y_acc_all[method][data_name].append(acc_new)
-            points_y_clu_all[method][data_name].append(clu_new)
+        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="premlp_irt_diffdisc", data_train=data_train_flat)
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+        points_y_acc_all["premlp_irt_diffdisc"][data_name].append(acc_new)
+        points_y_clu_all["premlp_irt_diffdisc"][data_name].append(clu_new)
         # train multiple times, there is some variance as well
+    for _ in range(1):
+        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="precomet_div")
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+
+        points_y_acc_all["precomet_div"][data_name].append(acc_new)
+        points_y_clu_all["precomet_div"][data_name].append(clu_new)
+
+# %%
+points_y_acc_all_backup = points_y_acc_all
+points_y_clu_all_backup = points_y_clu_all
 
 # %%
 # average results
@@ -90,19 +95,20 @@ points_y_clu_all = {
 
 # %%
 
+
+# %%
+
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_acc_all['premlp_irt_diff'], f"difficulty {np.average(points_y_acc_all['premlp_irt_diff']):.2%}"),
-        (utils.PROPS, points_y_acc_all['premlp_irt_disc'], f"discriminability {np.average(points_y_acc_all['premlp_irt_disc']):.2%}"),
         (utils.PROPS, points_y_acc_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['premlp_irt_diffdisc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['precomet_div'], f"PreCOMET div. {np.average(points_y_acc_all['precomet_div']):.2%}"),
     ],
     "23-irt_unseen_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_clu_all['premlp_irt_diff'], f"difficulty {np.average(points_y_clu_all['premlp_irt_diff']):.2f}"),
-        (utils.PROPS, points_y_clu_all['premlp_irt_disc'], f"discriminability {np.average(points_y_clu_all['premlp_irt_disc']):.2f}"),
         (utils.PROPS, points_y_clu_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['premlp_irt_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['precomet_div'], f"PreCOMET div. {np.average(points_y_clu_all['precomet_div']):.2f}"),
     ],
     "23-irt_unseen_all",
 )

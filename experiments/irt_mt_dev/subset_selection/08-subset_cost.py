@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subset2evaluate.select_subset
 import os
+import itertools
+import sacrebleu
 
 os.chdir("/home/vilda/irt-mt-dev/")
 
@@ -18,7 +20,7 @@ data_irt_all = []
 data_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 for data_old in data_all:
     _data, data_irt = subset2evaluate.select_subset.run_select_subset(
-        data_old, method="pyirt_fic", metric="MetricX-23-c", model="4pl_score", epochs=1000,
+        data_old, method="pyirt_diffdisc", metric="MetricX-23-c", model="4pl_score", epochs=1000,
         return_model=True, retry_on_error=True,
     )
     data_irt_all.append(data_irt)
@@ -39,22 +41,20 @@ def utility_metricx_var(item):
         [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
-def utility_irt_fic(item, data_irt):
-    # aggregared fisher information content
-    item = data_irt["items"][item["i"]]
+def utility_irt_diffdisc(item, data_irt):
+    item_irt = data_irt["items"][item["i"]]
+    return item_irt["diff"]*item_irt["disc"]
 
-    information = 0
-    for theta in data_irt["systems"].values():
-        prob = utils.pred_irt(
-            theta,
-            item
-        )
-        information += prob*(1-prob)*(item["disc"]**2)
-    return information
+metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+def utility_diversity(line):
+    return -np.average([
+        metric_bleu.sentence_score(
+            text_a,
+            [text_b],
+        ).score
+        for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
+    ])
 
-def utility_irt_diff(item, data_irt):
-    item = data_irt["items"][item["i"]]
-    return -item["diff"]
 
 data_y_all_metricx_avg = [
     [utility_metricx_avg(item) for item in data_old]    
@@ -64,15 +64,16 @@ data_y_all_metricx_var = [
     [utility_metricx_var(item) for item in data_old]
     for data_old in data_all
 ]
-data_y_all_irt_fic = [
-    [utility_irt_fic(item, data_irt) for item in data_old]
-    for data_old, data_irt in zip(data_all, data_irt_all)
+data_y_all_irt_diversity = [
+    [utility_diversity(item,) for item in data_old]
+    for data_old in data_all
 ]
-data_y_all_irt_diff = [
-    [utility_irt_diff(item, data_irt) for item in data_old]
+data_y_all_irt_diffdisc = [
+    [utility_irt_diffdisc(item, data_irt) for item in data_old]
     for data_old, data_irt in zip(data_all, data_irt_all)
 ]
 
+# %%
 def z_normalize(data):
     data = np.array(data)
     return (data - np.mean(data)) / np.std(data)
@@ -101,7 +102,7 @@ def plot(ax, title, data_x_all, data_y_all):
     # data_x = [item for data_x in data_x_all for item in data_x]
     # data_y = [item for data_y in data_y_all for item in data_y]
 
-    if "Information" in title:
+    if "IRT" in title:
         # ax.set_yscale("log")
         ax.set_ylim(
             np.quantile(data_y, [0.05, 0.95]),
@@ -122,7 +123,6 @@ def plot(ax, title, data_x_all, data_y_all):
         pad=-10,
     )
 
-
     ax.text(
         x=1.0,
         y=1.0,
@@ -140,8 +140,8 @@ def plot(ax, title, data_x_all, data_y_all):
 
 plot(axs[0, 0], "MetricX-23 avg.", data_x_all, data_y_all_metricx_avg)
 plot(axs[0, 1], "MetricX-23 var.", data_x_all, data_y_all_metricx_var)
-plot(axs[1, 0], "IRT Information", data_x_all, data_y_all_irt_fic)
-plot(axs[1, 1], "IRT Difficulty", data_x_all, data_y_all_irt_diff)
+plot(axs[1, 0], "Diversity", data_x_all, data_y_all_irt_diversity)
+plot(axs[1, 1], "IRT diff.$\\times$disc.", data_x_all, data_y_all_irt_diffdisc)
 
 axs[0, 0].set_ylabel("Utility")
 axs[1, 0].set_ylabel("Utility")
