@@ -238,7 +238,6 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs):
     )
 
     if load_model is not None:
-        print("LOADING MODEL")
         model_diff, model_disc = load_model
     else:
         model_diff = model_fn()
@@ -309,7 +308,7 @@ def cometsrc2(data, model_path1, model_path2, reverse=False, **kwargs):
     return [x[0] for x in data_w_score]
 
 
-def output_text_variance(data, **kwargs):
+def output_text_variance_unigram(data, **kwargs):
     import itertools
     import collections
 
@@ -323,6 +322,25 @@ def output_text_variance(data, **kwargs):
             else:
                 out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
         return np.average(out)
+
+    # sort from smallest similarity
+    data.sort(key=lambda line: _f(line), reverse=False)
+    return data
+
+def output_text_variance_bleu(data, **kwargs):
+    import itertools
+    import sacrebleu
+    metric = sacrebleu.metrics.BLEU(effective_order=True)
+
+    def _f(line):
+        score = np.average([
+            metric.sentence_score(
+                text_a,
+                [text_b],
+            ).score
+            for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
+        ])
+        return score
 
     # sort from smallest similarity
     data.sort(key=lambda line: _f(line), reverse=False)
@@ -354,7 +372,8 @@ METHODS = {
     "random": random_subset,
     "avg": metric_avg,
     "var": metric_var,
-    "output_text_var": output_text_variance,
+    "output_text_var": output_text_variance_bleu,
+    "diversity": output_text_variance_bleu,
     "synthetic_simulation": synthetic_simulation,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
@@ -371,9 +390,10 @@ METHODS = {
     "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([sys_v["human"] for sys_v in line["scores"].values()])),
     "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([sys_v["human"] for sys_v in line["scores"].values()])),
 
-    # second epoch is always the best
-    "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_0/checkpoints/epoch=1-step=3124-val_pearson=0.024.ckpt", reverse=False),
-    "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_1/checkpoints/epoch=1-step=3124-val_pearson=0.047.ckpt", reverse=False),
+    # precomet_var val_pearson is semi-random, see comment in comet-src/experiments/03-generate_comet_data.py 
+    "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777971/checkpoints/epoch=8-step=3519-val_pearson=0.009.ckpt", reverse=False),
+    "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777972/checkpoints/epoch=9-step=3910-val_pearson=0.150.ckpt", reverse=False),
+    "precomet_div": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777784/checkpoints/epoch=5-step=2346-val_pearson=0.451.ckpt", reverse=False),
     "precomet_diff": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817024/checkpoints/epoch=1-step=1944-val_pearson=0.405.ckpt", reverse=False),
     "precomet_disc": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817064/checkpoints/epoch=1-step=1944-val_pearson=0.510.ckpt", reverse=False),
     "precomet_diffdisc": partial(
