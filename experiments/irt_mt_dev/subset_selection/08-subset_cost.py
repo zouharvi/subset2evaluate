@@ -3,7 +3,6 @@
 import scipy.stats
 import irt_mt_dev.utils as utils
 import irt_mt_dev.utils.fig
-import json
 import numpy as np
 import matplotlib.pyplot as plt
 import subset2evaluate.select_subset

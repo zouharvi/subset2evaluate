@@ -97,6 +97,14 @@ axs[0].plot(
     aggregate_data_y(accs_all["random"]),
     label=f"random",
     linewidth=2,
+    color="black",
+)
+axs[0].plot(
+    data_x,
+    aggregate_data_y(accs_all["diversity"]),
+    label=f"diversity",
+    linewidth=2,
+    color="gray",
 )
 axs[0].plot(
     data_x,
@@ -108,12 +116,6 @@ axs[0].plot(
     data_x,
     aggregate_data_y(accs_all["var"]),
     label=f"metric var",
-    linewidth=2,
-)
-axs[0].plot(
-    data_x,
-    aggregate_data_y(accs_all["diversity"]),
-    label=f"diversity",
     linewidth=2,
 )
 
@@ -147,6 +149,14 @@ axs[1].plot(
     aggregate_data_y(clus_all["random"]),
     label=f"random",
     linewidth=2,
+    color="black",
+)
+axs[1].plot(
+    data_x,
+    aggregate_data_y(clus_all["diversity"]),
+    label=f"diversity",
+    linewidth=2,
+    color="gray",
 )
 axs[1].plot(
     data_x,
@@ -158,12 +168,6 @@ axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["var"]),
     label=f"metric var",
-    linewidth=2,
-)
-axs[1].plot(
-    data_x,
-    aggregate_data_y(clus_all["diversity"]),
-    label=f"diversity",
     linewidth=2,
 )
 
