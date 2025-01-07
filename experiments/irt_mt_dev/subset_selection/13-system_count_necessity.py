@@ -45,7 +45,8 @@ for subset_size in tqdm.tqdm(points_x):
 
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old_local, method="avg", metric="MetricX-23-c")
             data_new_var = subset2evaluate.select_subset.run_select_subset(data_old_local, method="var", metric="MetricX-23-c")
-            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="pyirt_fic", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
+            data_new_div = subset2evaluate.select_subset.run_select_subset(data_old_local, method="output_text_var")
+            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
 
             # we dropped some systems but we can recover them with the same ordering from data_old
             clu_new_avg, acc_new_avg = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
@@ -56,12 +57,16 @@ for subset_size in tqdm.tqdm(points_x):
                 data_old_i_to_line[line["i"]]
                 for line in data_new_var
             ])
+            clu_new_div, acc_new_div = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
+                data_old_i_to_line[line["i"]]
+                for line in data_new_div
+            ])
             clu_new_irt, acc_new_irt = subset2evaluate.evaluate.run_evaluate_topk(data_old, [
                 data_old_i_to_line[line["i"]]
                 for line in data_new_irt
             ])
-            clus_new.append((clu_new_avg, clu_new_var, clu_new_irt))
-            accs_new.append((acc_new_avg, acc_new_var, acc_new_irt))
+            clus_new.append((clu_new_avg, clu_new_var, clu_new_irt, clu_new_div))
+            accs_new.append((acc_new_avg, acc_new_var, acc_new_irt, acc_new_div))
     
     accs_all.append(np.average(accs_new, axis=0))
     clus_all.append(np.average(clus_new, axis=0))
@@ -89,22 +94,25 @@ plt.figure(figsize=(4, 2.5))
 plt.plot(
     points_x,
     [np.average(x[0]) for x in accs_all],
-    # savgol_filter([x[0] for x in accs_all[1:]], 2, 1),
-    label="Heuristics avg",
+    label="MetricX avg.",
     **plot_kwargs
 )
 plt.plot(
     points_x[1:],
     [np.average(x[1]) for x in accs_all[1:]],
-    # savgol_filter([x[1] for x in accs_all[1:]], 2, 1),
-    label="Heuristics var",
+    label="MetricX var.",
     **plot_kwargs
 )
 plt.plot(
     points_x,
     [np.average(x[2]) for x in accs_all],
-    # savgol_filter([x[2] for x in accs_all[1:]], 2, 1),
-    label="IRT information",
+    label="IRT diff$\\times$disc",
+    **plot_kwargs
+)
+plt.plot(
+    points_x,
+    [np.average(x[3]) for x in accs_all],
+    label="Diversity",
     **plot_kwargs
 )
 plt.hlines(
@@ -137,19 +145,25 @@ plt.figure(figsize=(4, 2.5))
 plt.plot(
     points_x,
     [np.average(x[0]) for x in clus_all],
-    label="MetricX-23 avg",
+    label="MetricX-23 avg.",
     **plot_kwargs
 )
 plt.plot(
     points_x[1:],
     [np.average(x[1]) for x in clus_all[1:]],
-    label="MetricX-23 var",
+    label="MetricX-23 var.",
     **plot_kwargs
 )
 plt.plot(
     points_x,
     [np.average(x[2]) for x in clus_all],
-    label="IRT information",
+    label="IRT diff$\\times$disc",
+    **plot_kwargs
+)
+plt.plot(
+    points_x,
+    [np.average(x[3]) for x in clus_all],
+    label="Diversity",
     **plot_kwargs
 )
 plt.hlines(

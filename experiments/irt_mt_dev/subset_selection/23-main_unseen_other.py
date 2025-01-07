@@ -79,10 +79,6 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         points_y_clu_all["precomet_div"][data_name].append(clu_new)
 
 # %%
-points_y_acc_all_backup = points_y_acc_all
-points_y_clu_all_backup = points_y_clu_all
-
-# %%
 # average results
 points_y_acc_all = {
     method: np.average(np.array(list(method_v.values())), axis=(0, 1))
@@ -95,19 +91,16 @@ points_y_clu_all = {
 
 # %%
 
-
-# %%
-
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_acc_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_acc_all['premlp_irt_diffdisc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['premlp_irt_diffdisc'], f"IRT diff.$\\times$disc. {np.average(points_y_acc_all['premlp_irt_diffdisc']):.2%}"),
         (utils.PROPS, points_y_acc_all['precomet_div'], f"PreCOMET div. {np.average(points_y_acc_all['precomet_div']):.2%}"),
     ],
     "23-irt_unseen_all",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_clu_all['premlp_irt_diffdisc'], f"diff.$\\times$disc. {np.average(points_y_clu_all['premlp_irt_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['premlp_irt_diffdisc'], f"IRT diff.$\\times$disc. {np.average(points_y_clu_all['premlp_irt_diffdisc']):.2f}"),
         (utils.PROPS, points_y_clu_all['precomet_div'], f"PreCOMET div. {np.average(points_y_clu_all['precomet_div']):.2f}"),
     ],
     "23-irt_unseen_all",

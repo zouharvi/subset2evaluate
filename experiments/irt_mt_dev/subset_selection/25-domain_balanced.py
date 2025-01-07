@@ -7,6 +7,7 @@ import numpy as np
 import os
 import tqdm
 import itertools
+import sacrebleu
 
 os.chdir("/home/vilda/irt-mt-dev")
 
@@ -14,6 +15,18 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
 acc_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
+
+
+metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+def utility_diversity(line):
+    return -np.average([
+        metric_bleu.sentence_score(
+            text_a,
+            [text_b],
+        ).score
+        for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
+    ])
+
 
 for data_old in tqdm.tqdm(data_old_all):
     def evaluate_balanced_domains(data_y):
@@ -40,13 +53,18 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["avg"].append(acc_new)
         clu_new_all["avg"].append(clu_new)
+        
+        data_y = [utility_diversity(line) for line in data_old]
+        clu_new, acc_new = evaluate_balanced_domains(data_y)
+        acc_new_all["diversity"].append(acc_new)
+        clu_new_all["diversity"].append(clu_new)
 
     for _ in range(5):
         _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
-        data_y = [subset2evaluate.select_subset.methods._fn_information_content(line_old, line_irt, params) for line_old, line_irt in zip(data_old, params["items"])]
+        data_y = [line_irt["diff"]*line_irt["disc"] for line_irt in params["items"]]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
-        acc_new_all["pyirt_fic"].append(acc_new)
-        clu_new_all["pyirt_fic"].append(clu_new)
+        acc_new_all["pyirt_diffdisc"].append(acc_new)
+        clu_new_all["pyirt_diffdisc"].append(clu_new)
 
     for _ in range(100):
         data_y = [np.random.random() for line in data_old]
