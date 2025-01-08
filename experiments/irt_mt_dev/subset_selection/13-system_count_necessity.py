@@ -109,11 +109,11 @@ plt.plot(
     label="IRT diff$\\times$disc",
     **plot_kwargs
 )
-plt.plot(
-    points_x,
-    [np.average(x[3]) for x in accs_all],
+plt.hlines(
+    y=np.average(accs_all[0][3]),
+    xmin=min(points_x,), xmax=max(points_x,),
     label="Diversity",
-    **plot_kwargs
+    color=fig_utils.COLORS[3],
 )
 plt.hlines(
     y=np.average(acc_random),
@@ -160,11 +160,11 @@ plt.plot(
     label="IRT diff$\\times$disc",
     **plot_kwargs
 )
-plt.plot(
-    points_x,
-    [np.average(x[3]) for x in clus_all],
+plt.hlines(
+    y=np.average(clus_all[0][3]),
+    xmin=min(points_x,), xmax=max(points_x,),
     label="Diversity",
-    **plot_kwargs
+    color=fig_utils.COLORS[3],
 )
 plt.hlines(
     y=np.average(clu_random),
