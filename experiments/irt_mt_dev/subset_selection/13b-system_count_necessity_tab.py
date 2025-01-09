@@ -102,6 +102,8 @@ def method_formatter(method):
         "avg": "MetricX avg.",
         "output_text_var": "Diversity",
         "pyirt_diffdisc": r"IRT diff.$\times$disc.",
+        "precomet_diff_precomet_disc": r"PreCOMET\textsuperscript{diff.$\times$disc}",
+        "precomet_diffdisc": r"PreCOMET\textsuperscript{diff.$\times$disc} (direct)",
     }
     if method in DICT:
         return DICT[method]

@@ -45,17 +45,17 @@ points_y_clu_all = {
 
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_acc_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_acc_all['precomet_diffdisc']):.2%}"),
-        (utils.PROPS, points_y_acc_all['precomet_diff_precomet_disc'], f"PreC.$^\\mathrm{{diff.}}{{\\times}}$PreC.$^\\mathrm{{diff.}}$ {np.average(points_y_acc_all['precomet_diff_precomet_disc']):.2%}"),
         (utils.PROPS, points_y_acc_all['precomet_div'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_acc_all['precomet_div']):.2%}"),
+        (utils.PROPS, points_y_acc_all['precomet_diff_precomet_disc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_acc_all['precomet_diff_precomet_disc']):.2%}"),
+        (utils.PROPS, points_y_acc_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times disc.}}$ $\\hspace{{-4.5}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_acc_all['precomet_diffdisc']):.2%}"),
     ],
     "23-main_sourcebased_other",
 )
 irt_mt_dev.utils.fig.plot_subset_selection(
     [
-        (utils.PROPS, points_y_clu_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_clu_all['precomet_diffdisc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['precomet_diff_precomet_disc'], f"PreC.$^\\mathrm{{diff.}}{{\\times}}$PreC.$^\\mathrm{{diff.}}$ {np.average(points_y_clu_all['precomet_diff_precomet_disc']):.2f}"),
         (utils.PROPS, points_y_clu_all['precomet_div'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_clu_all['precomet_div']):.2f}"),
+        (utils.PROPS, points_y_clu_all['precomet_diff_precomet_disc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_clu_all['precomet_diff_precomet_disc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times disc.}}$ $\\hspace{{-4.5}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu_all['precomet_diffdisc']):.2f}"),
     ],
     "23-main_sourcebased_other",
 )
