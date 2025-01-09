@@ -109,6 +109,8 @@ plt.plot(
     label="IRT diff$\\times$disc",
     **plot_kwargs
 )
+# TODO: this is incorrect, diversity shouldn't be constant!
+# should be fixed by also filtering the "tgt"
 plt.hlines(
     y=np.average(accs_all[0][3]),
     xmin=min(points_x,), xmax=max(points_x,),
@@ -160,6 +162,8 @@ plt.plot(
     label="IRT diff$\\times$disc",
     **plot_kwargs
 )
+# TODO: this is incorrect, diversity shouldn't be constant!
+# should be fixed by also filtering the "tgt"
 plt.hlines(
     y=np.average(clus_all[0][3]),
     xmin=min(points_x,), xmax=max(points_x,),
