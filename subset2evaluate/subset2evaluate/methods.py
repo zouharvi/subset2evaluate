@@ -273,10 +273,13 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs):
     else:
         return items
 
-def cometsrc(data, model_path, reverse=False, **kwargs):
+def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs):
     import comet
 
-    model = comet.load_from_checkpoint(model_path)
+    if load_model is not None:
+        model = load_model
+    else:
+        model = comet.load_from_checkpoint(model_path)
     scores = model.predict([
         {"src": line["src"]}
         for line in data
@@ -285,17 +288,23 @@ def cometsrc(data, model_path, reverse=False, **kwargs):
     data_w_score = list(zip(data, scores))
     data_w_score.sort(key=lambda x: x[1], reverse=reverse)
 
-    return [x[0] for x in data_w_score]
+    if return_model:
+        return [x[0] for x in data_w_score], model
+    else:
+        return [x[0] for x in data_w_score]
 
-def cometsrc2(data, model_path1, model_path2, reverse=False, **kwargs):
+def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs):
     import comet
 
-    model1 = comet.load_from_checkpoint(model_path1)
+    if load_model is not None:
+        model1, model2 = load_model
+    else:
+        model1 = comet.load_from_checkpoint(model_path1)
+        model2 = comet.load_from_checkpoint(model_path2)
     scores1 = model1.predict([
         {"src": line["src"]}
         for line in data
     ]).scores
-    model2 = comet.load_from_checkpoint(model_path2)
     scores2 = model2.predict([
         {"src": line["src"]}
         for line in data
@@ -305,7 +314,10 @@ def cometsrc2(data, model_path1, model_path2, reverse=False, **kwargs):
     data_w_score = list(zip(data, scores))
     data_w_score.sort(key=lambda x: x[1], reverse=reverse)
 
-    return [x[0] for x in data_w_score]
+    if return_model:
+        return [x[0] for x in data_w_score], (model1, model2)
+    else:
+        return [x[0] for x in data_w_score]
 
 
 def output_text_variance_unigram(data, **kwargs):
@@ -394,12 +406,15 @@ METHODS = {
     "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777971/checkpoints/epoch=8-step=3519-val_pearson=0.009.ckpt", reverse=False),
     "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777972/checkpoints/epoch=9-step=3910-val_pearson=0.150.ckpt", reverse=False),
     "precomet_div": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777784/checkpoints/epoch=5-step=2346-val_pearson=0.451.ckpt", reverse=False),
-    "precomet_diff": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817024/checkpoints/epoch=1-step=1944-val_pearson=0.405.ckpt", reverse=False),
-    "precomet_disc": partial(cometsrc, model_path="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817064/checkpoints/epoch=1-step=1944-val_pearson=0.510.ckpt", reverse=False),
-    "precomet_diffdisc": partial(
+
+    "precomet_diff": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt", reverse=False),
+    "precomet_disc": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt", reverse=True),
+
+    "precomet_diffdisc": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20442554/checkpoints/epoch=9-step=2430-val_pearson=0.509.ckpt", reverse=True),
+    "precomet_diff_precomet_disc": partial(
         cometsrc2,
-        model_path1="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817024/checkpoints/epoch=1-step=1944-val_pearson=0.405.ckpt",
-        model_path2="/cluster/work/sachan/vilem/comet-src/lightning_logs/version_18817064/checkpoints/epoch=1-step=1944-val_pearson=0.510.ckpt",
-        reverse=False
+        model_path1="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt",
+        model_path2="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt",
+        reverse=True
     ),
 }

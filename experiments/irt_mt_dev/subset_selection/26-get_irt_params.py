@@ -39,7 +39,6 @@ def average_irt_params(data_train):
 
     for i in range(len(data_train)):
         for k, v in irt_params[i].items():
-            # TODO: try median?
             data_new[i]["irt"][k] = np.average(v)
 
     return data_new
