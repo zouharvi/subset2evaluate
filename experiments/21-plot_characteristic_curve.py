@@ -12,9 +12,6 @@ import subset2evaluate.select_subset
 import pickle
 figutils.matplotlib_default()
 
-import os
-os.chdir("/home/vilda/irt-mt-dev/")
-
 # %%
 data_old = list(utils.load_data_wmt_all(normalize=True).values())[3]
 data_old_bin = list(utils.load_data_wmt_all(normalize=True, binarize=True).values())[3]

@@ -11,8 +11,6 @@ import subset2evaluate.utils as utils
 import utils_fig as fig_utils
 import matplotlib.pyplot as plt
 import collections
-import os
-os.chdir("/home/vilda/irt-mt-dev")
 
 random.seed(0)
 
@@ -61,7 +59,7 @@ for data_old in tqdm.tqdm(data_old_all):
             clus_all['var'].append(np.average(clu_new))
             accs_all['var'].append(np.average(acc_new))
 
-            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="output_text_var", metric=metric)
+            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
             clus_all['diversity'].append(np.average(clu_new))
             accs_all['diversity'].append(np.average(acc_new))

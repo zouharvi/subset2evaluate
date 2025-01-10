@@ -3,15 +3,12 @@
 import tqdm
 import subset2evaluate.utils as utils
 import numpy as np
-import os
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import collections
 import copy
 import itertools
 import sacrebleu
-
-os.chdir("/home/vilda/irt-mt-dev")
 
 def utility_metricx_avg(item):
     return -np.average(

@@ -7,8 +7,6 @@ import random
 import tqdm
 import numpy as np
 import subset2evaluate.utils as utils
-import os
-os.chdir("/home/vilda/irt-mt-dev")
 
 random.seed(0)
 
@@ -74,7 +72,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 (True,  dict(method="precomet_diff_precomet_disc")),
                 (False, dict(method="var", metric="MetricX-23-c")),
                 (False, dict(method="avg", metric="MetricX-23-c")),
-                (False, dict(method="output_text_var")),
+                (False, dict(method="diversity")),
                 (False, dict(method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c")),
             ]:
                 if cache and (method_kwargs["method"], data_old_name) in cache_data:
@@ -100,7 +98,7 @@ def method_formatter(method):
         "precomet_div": r"PreCOMET\textsuperscript{div}",
         "var": "MetricX var.",
         "avg": "MetricX avg.",
-        "output_text_var": "Diversity",
+        "diversity": "Diversity",
         "pyirt_diffdisc": r"IRT diff.$\times$disc.",
         "precomet_diff_precomet_disc": r"PreCOMET\textsuperscript{diff.$\times$disc}",
         "precomet_diffdisc": r"PreCOMET\textsuperscript{diff.$\times$disc} (direct)",

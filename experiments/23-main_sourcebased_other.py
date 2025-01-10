@@ -5,10 +5,7 @@ import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import numpy as np
-import os
 import utils_fig
-
-os.chdir("/home/vilda/irt-mt-dev")
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).items())[:9]
 

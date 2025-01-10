@@ -13,7 +13,7 @@ dependencies = [
   "torch",
   "lightning",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 authors = [
   {name = "Vilém Zouhar", email = "vilem.zouhar@gmail.com"},
 ]

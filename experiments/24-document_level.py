@@ -4,12 +4,9 @@ import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import numpy as np
-import os
 import tqdm
 import itertools
 import sacrebleu
-
-os.chdir("/home/vilda/irt-mt-dev")
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
@@ -62,7 +59,7 @@ for data_old in tqdm.tqdm(data_old_all):
         dict(method="random"),
         dict(method="avg"),
         dict(method="var"),
-        dict(method="output_text_var"),
+        dict(method="diversity"),
         dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000),
     ]:
         # run multiple times to average out the effect
@@ -135,8 +132,8 @@ for data_old in tqdm.tqdm(data_old_all):
 
         data_y = [utility_diversity(line) for line in data_old]
         clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["output_text_var"].append(acc_new)
-        clu_new_all["output_text_var"].append(clu_new)
+        acc_new_all["diversity"].append(acc_new)
+        clu_new_all["diversity"].append(clu_new)
 
     for _ in range(5):
         _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)

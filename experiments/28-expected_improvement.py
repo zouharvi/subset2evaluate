@@ -4,11 +4,8 @@ import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import numpy as np
-import os
 import tqdm
 import matplotlib.pyplot as plt
-
-os.chdir("/home/vilda/irt-mt-dev")
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
@@ -25,7 +22,7 @@ for data_old in tqdm.tqdm(data_old_all):
         dict(method="random"),
         dict(method="avg"),
         dict(method="var"),
-        dict(method="output_text_var"),
+        dict(method="diversity"),
         # dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000),
     ]:
         # run multiple times to average out the effect

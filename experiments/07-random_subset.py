@@ -2,12 +2,9 @@
 
 import subset2evaluate.utils as utils
 import utils_fig
-import random
 import numpy as np
 import tqdm
 import scipy.stats as st
-import os
-os.chdir("/home/vilda/irt-mt-dev")
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 
@@ -69,11 +66,11 @@ def plot_extra_clu(ax):
 
 utils_fig.plot_subset_selection(
     points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.2%}")],
-    filename="07-random_subset",
+    filename="0007-random_subset",
     fn_extra=plot_extra_acc,
 )
 utils_fig.plot_subset_selection(
     points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_clu).T], f"Random {np.average(points_y_clu):.2f}")],
-    filename="07-random_subset",
+    filename="0007-random_subset",
     fn_extra=plot_extra_clu,
 )
