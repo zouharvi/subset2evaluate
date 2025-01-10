@@ -1,6 +1,6 @@
 from typing import Callable
 import numpy as np
-import irt_mt_dev.utils as utils
+import utils
 from functools import partial
 import random
 import os
@@ -11,21 +11,17 @@ def random_subset(data, seed=None, **kwargs):
     random.Random(seed).shuffle(data)
     return data
 
-
 def metric_avg(data, metric, **kwargs):
     data.sort(key=lambda item: np.average(
         [sys_v[metric] for sys_v in item["scores"].values()]
     ))
     return data
 
-
 def metric_var(data, metric, **kwargs):
     data.sort(key=lambda item: np.var(
         [sys_v[metric] for sys_v in item["scores"].values()]
     ), reverse=True)
     return data
-
-
 
 def _fn_information_content_old(item_irt, data_irt):
     # This formula is based on the simplified formula of Rodriquez et al 2021
@@ -194,7 +190,6 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     else:
         return items
 
-
 def premlp_other(data, data_train, fn_utility: Callable, **kwargs):
     # turn off warnings from sentence-transformers
     import warnings
@@ -318,7 +313,6 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
         return [x[0] for x in data_w_score], (model1, model2)
     else:
         return [x[0] for x in data_w_score]
-
 
 def output_text_variance_unigram(data, **kwargs):
     import itertools

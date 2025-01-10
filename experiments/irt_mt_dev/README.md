@@ -1,1 +1,0 @@
-This pseudo-package is for experiments only.
