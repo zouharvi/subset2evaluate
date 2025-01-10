@@ -1,6 +1,6 @@
 import json
 from sklearn.model_selection import train_test_split
-import utils
+import subset2evaluate.utils as utils
 import numpy as np
 
 data_wmt = utils.load_data_wmt(normalize=True, binarize=False)

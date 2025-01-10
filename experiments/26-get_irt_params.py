@@ -2,7 +2,7 @@
 import collections
 
 import tqdm
-import utils
+import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import numpy as np

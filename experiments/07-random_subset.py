@@ -1,6 +1,6 @@
 # %%
 
-import utils
+import subset2evaluate.utils as utils
 import utils_fig
 import random
 import numpy as np

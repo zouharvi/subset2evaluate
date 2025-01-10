@@ -6,7 +6,7 @@ import copy
 import random
 import tqdm
 import numpy as np
-import utils
+import subset2evaluate.utils as utils
 import utils_fig as fig_utils
 import matplotlib.pyplot as plt
 import os

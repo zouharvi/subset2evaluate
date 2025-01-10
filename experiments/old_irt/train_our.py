@@ -1,4 +1,4 @@
-import utils
+import subset2evaluate.utils as utils
 import torch
 import torch.utils
 import lightning as L

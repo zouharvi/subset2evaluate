@@ -6,7 +6,7 @@ import numpy as np
 
 import subset2evaluate.utils
 os.chdir("/home/vilda/irt-mt-dev")
-import utils
+import subset2evaluate.utils as utils
 import subset2evaluate.select_subset
 import tqdm
 import numpy as np

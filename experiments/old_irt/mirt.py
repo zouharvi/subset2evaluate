@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 from sentence_transformers import SentenceTransformer
-import utils
+import subset2evaluate.utils as utils
 import logging, argparse
 import numpy as np
 

@@ -1,4 +1,4 @@
-import utils
+import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
 import random

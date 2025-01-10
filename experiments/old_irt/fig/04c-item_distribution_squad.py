@@ -4,7 +4,7 @@ Look at individual segments and how they correspond to system averages.
 
 import json
 import utils_fig
-import utils
+import subset2evaluate.utils as utils
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit

@@ -3,7 +3,7 @@ import torch
 import torch.utils
 import lightning as L
 import json
-import utils
+import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 
 class IRTModelBase(L.LightningModule):

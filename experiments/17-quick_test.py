@@ -1,6 +1,6 @@
 # %%
 import tqdm
-import utils
+import subset2evaluate.utils as utils
 import numpy as np
 import os
 import subset2evaluate.evaluate

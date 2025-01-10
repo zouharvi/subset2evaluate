@@ -1,7 +1,7 @@
 # %%
 
 import scipy.stats
-import utils
+import subset2evaluate.utils as utils
 import utils_fig
 import numpy as np
 import matplotlib.pyplot as plt
