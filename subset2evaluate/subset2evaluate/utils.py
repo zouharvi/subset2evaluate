@@ -1,7 +1,7 @@
 from typing import List, Union
 
 def load_data(data: Union[List, str]):
-    import irt_mt_dev.utils as utils
+    import utils
     import os
     import json
 

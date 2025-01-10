@@ -1,5 +1,5 @@
 # These are some subset selection methods that are not polished enough to be used in practice
-import irt_mt_dev.utils as utils
+import utils
 
 
 def metric_consistency(data, metric, **kwargs):
