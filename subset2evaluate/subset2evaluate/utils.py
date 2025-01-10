@@ -395,20 +395,6 @@ def get_ord_accuracy(ord1, ord2):
 
     return np.average(result)
 
-def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
-    import numpy as np
-    order_full = get_sys_ordering(data_old, metric=metric)
-
-    print(f"Previous average accuracy: {np.average([get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
-
-    while len(data_old) > target_size:
-        order_full = get_sys_ordering(data_old, metric=metric)
-        data_old.sort(key=lambda line: get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)))
-        data_old = data_old[step_size:]
-
-    print(f"New average accuracy: {np.average([get_ord_accuracy(order_full, get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
-    return data_old
-
 def pred_irt(system_theta, item):
     import numpy as np
     if "feas" in item:

@@ -1,9 +1,6 @@
 # %% 
 import numpy as np
-import pyro
-import pyro.distributions
 import matplotlib.pyplot as plt
-import torch
 from matplotlib.lines import Line2D
 import utils_fig as figutils
 

@@ -12,7 +12,7 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
 
-def utility_diversity(tgts):
+def utility_diversity(line):
     score = -np.average([
         metric_bleu.sentence_score(
             text_a,
