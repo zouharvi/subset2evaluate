@@ -27,168 +27,172 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import numpy as np
     import os
     import pickle
-    os.makedirs("data/cache/", exist_ok=True)
-    cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
+    import contextlib
 
-    # load cache if exists
-    if os.path.exists(cache_f):
-        return pickle.load(open(cache_f, "rb"))
+    # temporarily change to the root directory
+    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../"):
+        os.makedirs("data/cache/", exist_ok=True)
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
 
-    lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
-    lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
-    lines_ref = None
-    for fname in [
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
-        f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
-    ]:
-        if os.path.exists(fname):
-            lines_ref = open(fname, "r").readlines()
-            break
-    if lines_ref is None:
-        return []
+        # load cache if exists
+        if os.path.exists(cache_f):
+            return pickle.load(open(cache_f, "rb"))
 
-    line_sys = {}
-    for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
-        sys = f.split("/")[-1].removesuffix(".txt")
-        if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
+        lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
+        lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
+        lines_ref = None
+        for fname in [
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
+        ]:
+            if os.path.exists(fname):
+                lines_ref = open(fname, "r").readlines()
+                break
+        if lines_ref is None:
+            return []
+
+        line_sys = {}
+        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
+            sys = f.split("/")[-1].removesuffix(".txt")
+            if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
+                    continue
+
+            line_sys[sys] = open(f, "r").readlines()
+
+        systems = list(line_sys.keys())
+
+        lines_score = collections.defaultdict(list)
+        for fname in [
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
+            False
+        ]:
+            if fname and os.path.exists(fname):
+                break
+        
+        if not fname:
+            # did not find human scores
+            return []
+        
+        for line_raw in open(fname, "r").readlines():
+            sys, score = line_raw.strip().split()
+            lines_score[sys].append({"human": score})
+
+
+        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
+            metric = f.split("/")[-1].removesuffix("-refA.seg.score")
+            for line_i, line_raw in enumerate(open(f, "r").readlines()):
+                sys, score = line_raw.strip().split("\t")
+                # for refA, refB, synthetic_ref, and other "systems" not evaluated
+                # TODO: maybe remove those from the systems list?
+                if sys not in lines_score:
+                    continue
+                # NOTE: there's no guarantee that this indexing is correct
+                lines_score[sys][line_i % len(lines_src)][metric] = float(score)
+
+        # filter out lines that have no human score
+        lines_score = {k:v for k,v in lines_score.items() if len(v) > 0}
+        systems = [sys for sys in systems if sys in lines_score]
+
+        # putting it all together
+        data = []
+        line_id_true = 0
+
+        for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
+            # filter None on the whole row
+            # TODO: maybe still consider segments with 0?
+            # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
+            if any([lines_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
                 continue
+            # metrics = set(lines_score[systems[0]][line_i].keys())
+            # # if we're missing some metric, skip the line
+            # if any([set(lines_score[sys][line_i].keys()) != metrics for sys in systems]):
+            #     continue
 
-        line_sys[sys] = open(f, "r").readlines()
+            line_domain, line_doc = line_doc.strip().split("\t")
+            # for CJK languages, we need to count characters
+            if "ja" in langs or "zh" in langs or "ko" in langs or "th" in langs:
+                word_count = len(line_src.strip())
+            else:
+                word_count = len(line_src.strip().split())
 
-    systems = list(line_sys.keys())
-
-    lines_score = collections.defaultdict(list)
-    for fname in [
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
-        f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
-        False
-    ]:
-        if fname and os.path.exists(fname):
-            break
-    
-    if not fname:
-        # did not find human scores
-        return []
-    
-    for line_raw in open(fname, "r").readlines():
-        sys, score = line_raw.strip().split()
-        lines_score[sys].append({"human": score})
-
-
-    for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
-        metric = f.split("/")[-1].removesuffix("-refA.seg.score")
-        for line_i, line_raw in enumerate(open(f, "r").readlines()):
-            sys, score = line_raw.strip().split("\t")
-            # for refA, refB, synthetic_ref, and other "systems" not evaluated
-            # TODO: maybe remove those from the systems list?
-            if sys not in lines_score:
-                continue
-            # NOTE: there's no guarantee that this indexing is correct
-            lines_score[sys][line_i % len(lines_src)][metric] = float(score)
-
-    # filter out lines that have no human score
-    lines_score = {k:v for k,v in lines_score.items() if len(v) > 0}
-    systems = [sys for sys in systems if sys in lines_score]
-
-    # putting it all together
-    data = []
-    line_id_true = 0
-
-    for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
-        # filter None on the whole row
-        # TODO: maybe still consider segments with 0?
-        # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
-        if any([lines_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
-            continue
-        # metrics = set(lines_score[systems[0]][line_i].keys())
-        # # if we're missing some metric, skip the line
-        # if any([set(lines_score[sys][line_i].keys()) != metrics for sys in systems]):
-        #     continue
-
-        line_domain, line_doc = line_doc.strip().split("\t")
-        # for CJK languages, we need to count characters
-        if "ja" in langs or "zh" in langs or "ko" in langs or "th" in langs:
-            word_count = len(line_src.strip())
-        else:
-            word_count = len(line_src.strip().split())
-
-        data.append({
-            "i": line_id_true,
-            "src": line_src.strip(),
-            "ref": line_ref.strip(),
-            "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
-            # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
-            "time": 0.15 * word_count + 33.7,
-            "domain": line_domain,
-            "doc": line_doc,
-            "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
-        })
-        line_id_true += 1
+            data.append({
+                "i": line_id_true,
+                "src": line_src.strip(),
+                "ref": line_ref.strip(),
+                "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
+                # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
+                "time": 0.15 * word_count + 33.7,
+                "domain": line_domain,
+                "doc": line_doc,
+                "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
+            })
+            line_id_true += 1
 
 
-    # normalize times
-    if data:
-        data_flat = [line["time"] for line in data]
-        mean = np.average(data_flat)
-        std = np.std(data_flat)
-        for line in data:
-            # make it have var=1 and avg=0
-            # line["time"] = (line["time"]-data_flat[0])/(data_flat[1]-data_flat[0]) + 1
-            # z-normalize
-            line["time"] = (line["time"]-mean)/std + 1
-    
+        # normalize times
+        if data:
+            data_flat = [line["time"] for line in data]
+            mean = np.average(data_flat)
+            std = np.std(data_flat)
+            for line in data:
+                # make it have var=1 and avg=0
+                # line["time"] = (line["time"]-data_flat[0])/(data_flat[1]-data_flat[0]) + 1
+                # z-normalize
+                line["time"] = (line["time"]-mean)/std + 1
+        
 
-    # this is min-max normalization
-    if normalize and not binarize:
-        # if we are binarizing, none of this matters
-        data_flat = collections.defaultdict(list)
-        for line in data:
-            for met_all in line["scores"].values():
-                for met_k, met_v in met_all.items():
-                    data_flat[met_k].append(met_v)
+        # this is min-max normalization
+        if normalize and not binarize:
+            # if we are binarizing, none of this matters
+            data_flat = collections.defaultdict(list)
+            for line in data:
+                for met_all in line["scores"].values():
+                    for met_k, met_v in met_all.items():
+                        data_flat[met_k].append(met_v)
 
-        # normalize
-        data_flat = {
-            k: (min(v), max(v))
-            for k,v in data_flat.items()
-        }
+            # normalize
+            data_flat = {
+                k: (min(v), max(v))
+                for k,v in data_flat.items()
+            }
 
-        for line in data:
-            for sys, met_all in line["scores"].items():
-                for met_k, met_v in met_all.items():
-                    # (x-min)/(max-min) normalize
-                    line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
+            for line in data:
+                for sys, met_all in line["scores"].items():
+                    for met_k, met_v in met_all.items():
+                        # (x-min)/(max-min) normalize
+                        line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
 
-    if binarize:
-        data_flat = collections.defaultdict(list)
-        for line in data:
-            for met_all in line["scores"].values():
-                for met_k, met_v in met_all.items():
-                    data_flat[met_k].append(met_v)
+        if binarize:
+            data_flat = collections.defaultdict(list)
+            for line in data:
+                for met_all in line["scores"].values():
+                    for met_k, met_v in met_all.items():
+                        data_flat[met_k].append(met_v)
 
-        # normalize
-        data_flat = {
-            k: np.median(v)
-            for k,v in data_flat.items()
-        }
+            # normalize
+            data_flat = {
+                k: np.median(v)
+                for k,v in data_flat.items()
+            }
 
-        for line in data:
-            for sys, met_all in line["scores"].items():
-                for met_k, met_v in met_all.items():
-                    line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
+            for line in data:
+                for sys, met_all in line["scores"].items():
+                    for met_k, met_v in met_all.items():
+                        line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
-    
-    # save cache
-    pickle.dump(data, open(cache_f, "wb"))
+        
+        # save cache
+        pickle.dump(data, open(cache_f, "wb"))
     
     return data
 

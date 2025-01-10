@@ -9,8 +9,6 @@ import numpy as np
 import subset2evaluate.utils as utils
 import utils_fig as fig_utils
 import matplotlib.pyplot as plt
-import os
-os.chdir("/home/vilda/irt-mt-dev")
 
 random.seed(0)
 
@@ -45,7 +43,7 @@ for subset_size in tqdm.tqdm(points_x):
 
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old_local, method="avg", metric="MetricX-23-c")
             data_new_var = subset2evaluate.select_subset.run_select_subset(data_old_local, method="var", metric="MetricX-23-c")
-            data_new_div = subset2evaluate.select_subset.run_select_subset(data_old_local, method="output_text_var")
+            data_new_div = subset2evaluate.select_subset.run_select_subset(data_old_local, method="diversity")
             data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
 
             # we dropped some systems but we can recover them with the same ordering from data_old

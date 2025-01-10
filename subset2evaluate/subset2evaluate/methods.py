@@ -1,6 +1,6 @@
 from typing import Callable
 import numpy as np
-import utils
+import subset2evaluate.utils as utils
 from functools import partial
 import random
 import os
@@ -314,7 +314,7 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
     else:
         return [x[0] for x in data_w_score]
 
-def output_text_variance_unigram(data, **kwargs):
+def diversity_variance_unigram(data, **kwargs):
     import itertools
     import collections
 
@@ -333,7 +333,7 @@ def output_text_variance_unigram(data, **kwargs):
     data.sort(key=lambda line: _f(line), reverse=False)
     return data
 
-def output_text_variance_bleu(data, **kwargs):
+def diversity_variance_bleu(data, **kwargs):
     import itertools
     import sacrebleu
     metric = sacrebleu.metrics.BLEU(effective_order=True)
@@ -378,8 +378,7 @@ METHODS = {
     "random": random_subset,
     "avg": metric_avg,
     "var": metric_var,
-    "output_text_var": output_text_variance_bleu,
-    "diversity": output_text_variance_bleu,
+    "diversity": diversity_variance_bleu,
     "synthetic_simulation": synthetic_simulation,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),

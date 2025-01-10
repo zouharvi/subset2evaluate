@@ -32,9 +32,10 @@ def plot_subset_selection(
         fn_extra: Callable = lambda _: None,
         colors: List[str] = COLORS,
     ):
-    import os
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
+    import contextlib
+    import os
 
     # either it's accuracy or clusters
     IS_CLUSTERS = any(
@@ -100,8 +101,14 @@ def plot_subset_selection(
     else:
         plt.ylim(0.77, 1)
     plt.tight_layout(pad=0.1)
+
     if filename:
-        # save in files compatible with both LaTeX and Typst
-        plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
-        plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
+        # temporarily change to the root directory
+        with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/.."):
+            os.makedirs("figures_pdf", exist_ok=True)
+            os.makedirs("figures_svg", exist_ok=True)
+
+            # save in files compatible with both LaTeX and Typst
+            plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
+            plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
     plt.show()

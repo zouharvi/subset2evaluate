@@ -5,8 +5,6 @@ import subset2evaluate.utils as utils
 import utils_fig
 import numpy as np
 import tqdm
-import os
-os.chdir("/home/vilda/irt-mt-dev")
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 

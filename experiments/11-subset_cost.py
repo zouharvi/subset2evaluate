@@ -6,11 +6,8 @@ import utils_fig
 import numpy as np
 import matplotlib.pyplot as plt
 import subset2evaluate.select_subset
-import os
 import itertools
 import sacrebleu
-
-os.chdir("/home/vilda/irt-mt-dev/")
 
 utils_fig.matplotlib_default()
 
