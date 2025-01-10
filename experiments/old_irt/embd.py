@@ -2,7 +2,7 @@ import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 import torch.utils
-from irt_mt_dev.irt.base import IRTModelBase
+from base import IRTModelBase
 from sentence_transformers import SentenceTransformer
 
 class IRTModelEmbd(IRTModelBase):

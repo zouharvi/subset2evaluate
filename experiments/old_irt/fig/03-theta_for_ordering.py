@@ -1,4 +1,4 @@
-import utils
+import subset2evaluate.utils as utils
 import json
 
 data_old = utils.load_data_wmt()

@@ -2,7 +2,7 @@
 Look at individual segments and how they correspond to system averages.
 """
 
-import utils
+import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
 import numpy as np

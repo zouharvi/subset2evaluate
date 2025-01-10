@@ -1,6 +1,6 @@
 import torch
 import torch.utils
-from irt_mt_dev.irt.base import IRTModelBase
+from base import IRTModelBase
 
 class IRTModelScalar(IRTModelBase):
     def __init__(self, data, systems, **kwargs):

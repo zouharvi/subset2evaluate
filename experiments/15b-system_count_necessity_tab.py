@@ -6,7 +6,7 @@ import subset2evaluate.utils
 import random
 import tqdm
 import numpy as np
-import utils
+import subset2evaluate.utils as utils
 import os
 os.chdir("/home/vilda/irt-mt-dev")
 

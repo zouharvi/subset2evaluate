@@ -2,7 +2,7 @@
 # %%
 
 import copy
-import utils
+import subset2evaluate.utils as utils
 import utils_fig as figutils
 import matplotlib.pyplot as plt
 import matplotlib as mpl

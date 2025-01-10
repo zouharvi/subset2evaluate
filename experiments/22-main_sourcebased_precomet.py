@@ -1,7 +1,7 @@
 # %%
 
 import collections
-import utils
+import subset2evaluate.utils as utils
 import utils_fig
 import subset2evaluate.select_subset
 import subset2evaluate.evaluate

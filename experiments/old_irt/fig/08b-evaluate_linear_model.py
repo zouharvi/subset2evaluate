@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
-import utils
+import subset2evaluate.utils as utils
 import numpy as np
 
 data_wmt = utils.load_data_wmt(normalize=True, binarize=False)

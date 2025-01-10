@@ -3,15 +3,14 @@
 
 # %%
 
-import copy
-import utils
+import subset2evaluate.utils as utils
 import utils_fig as figutils
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.cm as cm
 import numpy as np
 import subset2evaluate.select_subset
 import pickle
+figutils.matplotlib_default()
 
 import os
 os.chdir("/home/vilda/irt-mt-dev/")
@@ -39,11 +38,6 @@ with open("computed/21-plot_characteristic_curve.pkl", "rb") as f:
     data_irt_score, data_irt_bin, data_old, data_old_bin = pickle.load(f)
 
 # %%
-
-import importlib
-import irt_mt_dev.utils
-importlib.reload(irt_mt_dev.utils)
-figutils.matplotlib_default()
 
 def pred_irt_4pl(theta, item):
     return item["feas"] / (1 + np.exp(-item["disc"] * (theta - item["diff"])))
