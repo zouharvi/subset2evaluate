@@ -35,7 +35,7 @@ points_y_pred = [
     ])
     for sys_i in systems_i
 ]
-print(f"Correlation: {np.corrcoef(points_y_true, points_y_pred)[0,1]:.2%}")
+print(f"Correlation: {np.corrcoef(points_y_true, points_y_pred)[0,1]:.1%}")
 
 # plot empirical
 plt.scatter(

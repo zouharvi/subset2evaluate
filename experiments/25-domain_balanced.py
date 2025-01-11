@@ -72,7 +72,7 @@ for data_old in tqdm.tqdm(data_old_all):
 
 print("Aggregate utility:")
 for method, acc_new in acc_new_all.items():
-    print(method, f"ACC: {np.average(acc_new):.2%}")
+    print(method, f"ACC: {np.average(acc_new):.1%}")
 
 for method, clu_new in clu_new_all.items():
     print(method, f"CLU: {np.average(clu_new):.2f}")

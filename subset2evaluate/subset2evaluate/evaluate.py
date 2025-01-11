@@ -50,4 +50,4 @@ if __name__ == "__main__":
     clu_old, _ = run_evaluate_topk(args.data_old, args.data_old, args.metric)
 
     print(f"Clusters (old->new): {np.average(clu_old):.3f} -> {np.average(clu_new):.3f}")
-    print(f"Accuracy (new): {np.average(acc_new):.2%}")
+    print(f"Accuracy (new): {np.average(acc_new):.1%}")

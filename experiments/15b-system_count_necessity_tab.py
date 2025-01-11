@@ -115,14 +115,14 @@ for method, subset_kv in accs_all.items():
         print(
             r"\multicolumn{2}{c}{",
             "------",
-            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.2%}".replace("%", r"\%"),
+            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.1%}".replace("%", r"\%"),
             "------",
             "}",
             end=" \\\\\n"
         )
     else:
         print(
-            *[f"{np.average(subset_kv[subset_size]):.2%}".replace("%", r"\%") for subset_size in SUBSET_SIZE],
+            *[f"{np.average(subset_kv[subset_size]):.1%}".replace("%", r"\%") for subset_size in SUBSET_SIZE],
             sep=" & ",
             end=" \\\\\n"
         )

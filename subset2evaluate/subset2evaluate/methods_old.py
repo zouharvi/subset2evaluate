@@ -300,12 +300,12 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
     import numpy as np
     order_full = utils.get_sys_ordering(data_old, metric=metric)
 
-    print(f"Previous average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
+    print(f"Previous average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
 
     while len(data_old) > target_size:
         order_full = utils.get_sys_ordering(data_old, metric=metric)
         data_old.sort(key=lambda line: utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)))
         data_old = data_old[step_size:]
 
-    print(f"New average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.2%}")
+    print(f"New average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
     return data_old

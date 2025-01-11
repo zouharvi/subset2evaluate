@@ -294,6 +294,7 @@ def load_data_wmt_all(min_segments=500, **kwargs):
 
 def load_data_summeval(normalize=False):
     from datasets import load_dataset
+    from functools import reduce
     import collections
     data_raw = load_dataset("KnutJaegersberg/summeval_pairs")["train"]
 
@@ -306,7 +307,11 @@ def load_data_summeval(normalize=False):
         for line in expert_annotations:
             for k, v in line.items():
                 scores[k].append(v)
-        return {"human_" + k: sum(v) / len(v) for k, v in scores.items()}
+        scores = {"human_" + k: sum(v) / len(v) for k, v in scores.items()}
+
+        # multiply all human
+        scores["human_all"] = reduce(lambda x, y: x * y, scores.values())
+        return scores
 
 
     data = []

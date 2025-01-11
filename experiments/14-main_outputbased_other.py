@@ -62,13 +62,13 @@ points_y_clu_all = {
 
 utils_fig.plot_subset_selection(
     [
-        # (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_diff'], f"difficulty {np.average(points_y_acc_all['pyirt_diff']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_disc'], f"discriminability {np.average(points_y_acc_all['pyirt_disc']):.2%}"),
-        (utils.PROPS, points_y_acc_all['pyirt_diffdisc'], f"IRT diff.$\\times$disc. {np.average(points_y_acc_all['pyirt_diffdisc']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.2%}"),
-        # (utils.PROPS, points_y_acc_all['pyirt_experiment'], f"experiment {np.average(points_y_acc_all['pyirt_experiment']):.2%}"),
-        (utils.PROPS, points_y_acc_all['diversity'], f"Diversity {np.average(points_y_acc_all['diversity']):.2%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_feas'], f"IRT feasability {np.average(points_y_acc_all['pyirt_feas']):.1%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_diff'], f"difficulty {np.average(points_y_acc_all['pyirt_diff']):.1%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_disc'], f"discriminability {np.average(points_y_acc_all['pyirt_disc']):.1%}"),
+        (utils.PROPS, points_y_acc_all['pyirt_diffdisc'], f"IRT diff.$\\times$disc. {np.average(points_y_acc_all['pyirt_diffdisc']):.1%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_fic'], f"information {np.average(points_y_acc_all['pyirt_fic']):.1%}"),
+        # (utils.PROPS, points_y_acc_all['pyirt_experiment'], f"experiment {np.average(points_y_acc_all['pyirt_experiment']):.1%}"),
+        (utils.PROPS, points_y_acc_all['diversity'], f"Diversity {np.average(points_y_acc_all['diversity']):.1%}"),
     ],
     "14-main_outputbased_other",
 )
