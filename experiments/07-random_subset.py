@@ -38,7 +38,7 @@ for data_old in tqdm.tqdm(data_old_all):
     points_y_acc_all.append(np.average(points_y_acc, axis=0))
     points_y_clu_all.append(np.average(points_y_clu, axis=0))
 
-print(f"Average ACC {np.average(points_y_acc):.2%}")
+print(f"Average ACC {np.average(points_y_acc):.1%}")
 print(f"Average CLU {np.average(points_y_clu):.2f}")
 
 
@@ -65,7 +65,7 @@ def plot_extra_clu(ax):
         )
 
 utils_fig.plot_subset_selection(
-    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.2%}")],
+    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.1%}")],
     filename="0007-random_subset",
     fn_extra=plot_extra_acc,
 )

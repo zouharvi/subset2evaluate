@@ -19,10 +19,10 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
         )
         points_y_acc.append(acc_new)
         points_y_clu.append(clu_new)
-        print(f"- ACC: {np.average(acc_new):.2%} | CLU: {np.average(clu_new):.2f}")
+        print(f"- ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
     if repetitions > 1:
-        print(f"ACC: {np.average(points_y_acc):.2%} | CLU: {np.average(points_y_clu):.2f}")
+        print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 def benchmark_method_all(repetitions=10, kwargs_dict={}):
@@ -40,7 +40,7 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
             points_y_acc.append(acc_new)
             points_y_clu.append(clu_new)
 
-    print(f"ACC: {np.average(points_y_acc):.2%} | CLU: {np.average(points_y_clu):.2f}")
+    print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")
 
 # with step size 20 and 10 samplings
 # - ACC: 87.71% | CLU: 1.10

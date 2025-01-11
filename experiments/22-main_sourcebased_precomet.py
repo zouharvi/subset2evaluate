@@ -38,8 +38,8 @@ points_y_clu = {
 # %%
 utils_fig.plot_subset_selection(
     points=[
-        (utils.PROPS, points_y_acc["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_acc['precomet_avg']):.2%}"),
-        (utils.PROPS, points_y_acc["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_acc['precomet_var']):.2%}"),
+        (utils.PROPS, points_y_acc["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_acc['precomet_avg']):.1%}"),
+        (utils.PROPS, points_y_acc["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_acc['precomet_var']):.1%}"),
     ],
     filename="22-main_sourcebased_precomet",
     colors=utils_fig.COLORS,

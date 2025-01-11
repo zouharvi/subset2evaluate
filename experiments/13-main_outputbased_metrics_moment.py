@@ -74,9 +74,9 @@ points_y_clu_all = {
 # %%
 utils_fig.plot_subset_selection(
     points=[
-        (utils.PROPS, points_y_acc_all["chrf_avg"], f"ChrF average {np.average(points_y_acc_all['chrf_avg']):.2%}"),
-        (utils.PROPS, points_y_acc_all["metricx_avg"], f"MetricX average {np.average(points_y_acc_all['metricx_avg']):.2%}"),
-        (utils.PROPS, points_y_acc_all["metricx_var"], f"MetricX variance {np.average(points_y_acc_all['metricx_var']):.2%}"),
+        (utils.PROPS, points_y_acc_all["chrf_avg"], f"ChrF average {np.average(points_y_acc_all['chrf_avg']):.1%}"),
+        (utils.PROPS, points_y_acc_all["metricx_avg"], f"MetricX average {np.average(points_y_acc_all['metricx_avg']):.1%}"),
+        (utils.PROPS, points_y_acc_all["metricx_var"], f"MetricX variance {np.average(points_y_acc_all['metricx_var']):.1%}"),
     ],
     filename="13-main_outputbased_metrics_moment",
 )

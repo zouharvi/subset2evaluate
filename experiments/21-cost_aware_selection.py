@@ -86,8 +86,8 @@ for data_old in tqdm.tqdm(data_old_all):
 
 # %%
 def printrow(row):
-    print(" & ".join([f"{x:.2%}".replace("%", r"\%") for x in row]) + r" \\")
-print(f"{np.average(acc_all_all['random']):.2%} \\\\")
+    print(" & ".join([f"{x:.1%}".replace("%", r"\%") for x in row]) + r" \\")
+print(f"{np.average(acc_all_all['random']):.1%} \\\\")
 printrow(np.average(acc_all_all["metricavg"], axis=(0,)))
 printrow(np.average(acc_all_all["metricvar"], axis=(0,)))
 printrow(np.average(acc_all_all["diversity"], axis=(0,)))
