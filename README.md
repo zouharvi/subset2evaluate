@@ -5,7 +5,7 @@ Package to select informative samples to human-evaluate for NLG tasks such as ma
 > TODO abstract
 
 
-# Example for Machine Translation
+## Example for Machine Translation
 
 Install the package and download WMT data:
 ```bash
@@ -29,7 +29,7 @@ data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="var
 print(utils.eval_subset_accuracy(data_new, data_full))
 ```
 
-# Example for Custom Dataset
+## Example for Custom Dataset
 
 TODO process this
 

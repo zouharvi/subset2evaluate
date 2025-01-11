@@ -58,7 +58,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
     import contextlib
 
     # temporarily change to the root directory
-    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../../"):
+    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
         os.makedirs("data/cache/", exist_ok=True)
         cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
 
