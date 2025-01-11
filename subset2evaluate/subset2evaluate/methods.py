@@ -1,5 +1,6 @@
 from typing import Callable
 import numpy as np
+import py_irt.models.abstract_model
 import subset2evaluate.utils as utils
 from functools import partial
 import random
@@ -72,8 +73,11 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     import py_irt.dataset
     import py_irt.io
     import py_irt.training
+    import py_irt.models
     import pandas as pd
 
+    if model not in py_irt.models.abstract_model._IRT_REGISTRY:
+        raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
 
     systems = list(data[0]["scores"].keys())
 
@@ -268,8 +272,15 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs):
     else:
         return items
 
+
+def _assert_comet_version():
+    import comet
+    if "HypothesislessRegression" not in dir(comet.models):
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
+
 def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs):
     import comet
+    _assert_comet_version()
 
     if load_model is not None:
         model = load_model
@@ -290,6 +301,7 @@ def cometsrc(data, model_path, return_model=False, load_model=None, reverse=Fals
 
 def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs):
     import comet
+    _assert_comet_version()
 
     if load_model is not None:
         model1, model2 = load_model

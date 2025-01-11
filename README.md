@@ -1,31 +1,39 @@
 # <img src="misc/logo.svg" height="25em"> subset2evaluate
 
-> TODO
+Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 
+> TODO abstract
+
+
+# Example for Machine Translation
+
+Install the package and download WMT data:
 ```bash
-bash scripts/01-get_data.sh
-
-# install the subset2evaluate package
-cd ../subset2evaluate
-pip3 install -e .
+pip3 install subset2evaluate
+bash experiments/01-get_wmt_data.sh
 ```
 
-# Dependencies and Requirements
+Then in Python we compute the baseline:
+```python
+import subset2evaluate
 
-TODO, add checks that our py-irt and comet-src is installed
+data_full = subset2evaluate.utils.load_data_wmt(year="wmt23", langs="en-cs")
+data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
+print(utils.eval_subset_accuracy(data_new, data_full))
+```
 
-# Example 1
+and compare it to something better:
+```python
+data_full = subset2evaluate.utils.load_data_wmt(year="wmt23", langs="en-cs")
+data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric="MetricX-23")
+print(utils.eval_subset_accuracy(data_new, data_full))
+```
+
+# Example for Custom Dataset
 
 TODO process this
 
 ```
-# This is how to set up the data loader and everything
-# Run all the scripts from the top-level directory:
-# pip3 install -e .
-# bash 01-get_data.sh
-# This will register the project as a python package and downloads the data
-# Then, in Python, you can do:
-
 import utils
 data = utils.load_data_wmt()
 
@@ -43,19 +51,4 @@ data = utils.load_data_wmt(normalize=True)
 # - `scores` - mapping from systems to score names to numbers
 #            - for example data[0]["scores"]["ONLINE-Y"]["human"] is the human judgement for ONLINE-Y system for the first item
 #            - for example data[5]["scores"]["NLLB_GReedy"]["MetricX-23"] is MetricX-23 score for NLLB_GReedy system for the sixth item
-```
-
-# Example 2
-
-TODO process this
-
-```
-import utils
-import random
-
-data_full = utils.load_data_wmt()
-
-for k in range(50, 500, 50):
-    data_subset_random = random.Random(0).sample(data_full, k=k)
-    print(k, utils.eval_subset_accuracy(data_subset_random, data_full))
 ```

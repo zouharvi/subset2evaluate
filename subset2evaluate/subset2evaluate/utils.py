@@ -49,7 +49,7 @@ def _data_median_binarize(data):
             for met_k, met_v in met_all.items():
                 line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
-def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
+def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
     import glob
     import collections
     import numpy as np
@@ -292,7 +292,7 @@ def load_data_wmt_all(min_segments=500, **kwargs):
     # some years/langs have issues with human annotations coverage
     return {k:v for k,v in data.items() if len(v) > min_segments}
 
-def load_data_summeval(normalize=False):
+def load_data_summeval(normalize=True):
     from datasets import load_dataset
     from functools import reduce
     import collections
