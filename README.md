@@ -1,4 +1,4 @@
-# subset2evaluate
+# <img src="misc/logo.svg" height="25em"> subset2evaluate
 
 > TODO
 
