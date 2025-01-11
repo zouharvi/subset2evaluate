@@ -3,23 +3,51 @@ from typing import Dict
 import numpy as np
 PROPS = np.geomspace(0.05, 0.5, 10)
 
-def load_data_squad(n_items=1000, n_systems=161):
-    import json
-    data = [json.loads(x) for x in open("data/squad_systems.jsonl")]
-    data_out = []
-    for pred_i, pred in enumerate(list(data[0]["predictions"].keys())[:n_items]):
-        data_out.append({
-            "i": pred_i,
-            # TODO: check that all systems have the same predictions
-            "scores": {
-                sys["name"] + ":" + sys["submission_id"]: {
-                    "exact_match": sys["predictions"][pred]["scores"]["exact_match"],
-                    "f1": sys["predictions"][pred]["scores"]["f1"],
-                }
-                for sys in data[:n_systems]
-            }
-        })
-    return data_out
+def _data_minmax_normalize(data):
+    """
+    In-place min-max normalization of all scores
+    """
+    import collections
+    # if we are binarizing, none of this matters
+    data_flat = collections.defaultdict(list)
+    for line in data:
+        for met_all in line["scores"].values():
+            for met_k, met_v in met_all.items():
+                data_flat[met_k].append(met_v)
+
+    # normalize
+    data_flat = {
+        k: (min(v), max(v))
+        for k,v in data_flat.items()
+    }
+
+    for line in data:
+        for sys, met_all in line["scores"].items():
+            for met_k, met_v in met_all.items():
+                # (x-min)/(max-min) normalize
+                line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
+
+def _data_median_binarize(data):
+    """
+    In-place median binarization of all scores
+    """
+    import collections
+    data_flat = collections.defaultdict(list)
+    for line in data:
+        for met_all in line["scores"].values():
+            for met_k, met_v in met_all.items():
+                data_flat[met_k].append(met_v)
+
+    # normalize
+    data_flat = {
+        k: np.median(v)
+        for k,v in data_flat.items()
+    }
+
+    for line in data:
+        for sys, met_all in line["scores"].items():
+            for met_k, met_v in met_all.items():
+                line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
 def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
     import glob
@@ -153,43 +181,10 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=False, binarize=False):
 
         # this is min-max normalization
         if normalize and not binarize:
-            # if we are binarizing, none of this matters
-            data_flat = collections.defaultdict(list)
-            for line in data:
-                for met_all in line["scores"].values():
-                    for met_k, met_v in met_all.items():
-                        data_flat[met_k].append(met_v)
-
-            # normalize
-            data_flat = {
-                k: (min(v), max(v))
-                for k,v in data_flat.items()
-            }
-
-            for line in data:
-                for sys, met_all in line["scores"].items():
-                    for met_k, met_v in met_all.items():
-                        # (x-min)/(max-min) normalize
-                        line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
+            _data_minmax_normalize(data)
 
         if binarize:
-            data_flat = collections.defaultdict(list)
-            for line in data:
-                for met_all in line["scores"].values():
-                    for met_k, met_v in met_all.items():
-                        data_flat[met_k].append(met_v)
-
-            # normalize
-            data_flat = {
-                k: np.median(v)
-                for k,v in data_flat.items()
-            }
-
-            for line in data:
-                for sys, met_all in line["scores"].items():
-                    for met_k, met_v in met_all.items():
-                        line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
-
+            _data_median_binarize(data)
         
         # save cache
         pickle.dump(data, open(cache_f, "wb"))
@@ -296,6 +291,64 @@ def load_data_wmt_all(min_segments=500, **kwargs):
     # filter out empty datasets
     # some years/langs have issues with human annotations coverage
     return {k:v for k,v in data.items() if len(v) > min_segments}
+
+def load_data_summeval(normalize=False):
+    from datasets import load_dataset
+    import collections
+    data_raw = load_dataset("KnutJaegersberg/summeval_pairs")["train"]
+
+    data_by_id = collections.defaultdict(list)
+    for line in data_raw:
+        data_by_id[line["id"]].append(line)
+
+    def avg_human_annotations(expert_annotations: List[Dict[str, float]]) -> Dict[str, float]:
+        scores = collections.defaultdict(list)
+        for line in expert_annotations:
+            for k, v in line.items():
+                scores[k].append(v)
+        return {"human_" + k: sum(v) / len(v) for k, v in scores.items()}
+
+
+    data = []
+    for i, v in data_by_id.items():
+        # "coherence": 2, "consistency": 1, "fluency": 4, "relevance": 2 
+        data.append({
+            "i": i,
+            "src": None,
+            "ref": None,
+            "tgt": {line["model_id"]: line["decoded"] for line in v},
+            "scores": {
+                # rouge is nested for some reason
+                line["model_id"]: (
+                    line["metric_scores_1"] | line["metric_scores_1"]["rouge"] | avg_human_annotations(line["expert_annotations"])
+                )
+                for line in v
+            },
+        })
+
+    # remove rouge from scores and fix supert
+    data = [
+        {
+            **line,
+            "scores": {
+                sys: {
+                    metric:
+                    score if metric != "supert" else score[0]
+                    for metric, score in metrics.items()
+                    if metric != "rouge"
+                }
+                for sys, metrics in line["scores"].items()
+            }
+        }
+        for line in data
+    ]
+
+
+    if normalize:
+        _data_minmax_normalize(data)
+    
+
+    return data
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections
