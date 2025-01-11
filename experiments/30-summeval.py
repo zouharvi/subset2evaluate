@@ -7,8 +7,7 @@ import numpy as np
 data_old = utils.load_data_summeval(normalize=True)
 
 # %%
-# for target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency"]:
-for target in ["human_all"]:
+for target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_all"]:
     acc_all = []
     clu_all = []
     for _ in range(100):
@@ -21,11 +20,10 @@ for target in ["human_all"]:
 # %%
 
 for target, metric in [
-    # ("human_relevance", "chrf"),
-    # ("human_coherence", "density"),
-    # ("human_consistency", "coverage")
-    # ("human_fluency", "coverage"),
-    ("human_all", "density"),
+    ("human_relevance", "chrf"),
+    ("human_coherence", "density"),
+    ("human_consistency", "coverage")
+    ("human_fluency", "coverage"),
     ("human_all", "supert"),
 ]:
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
@@ -35,11 +33,10 @@ for target, metric in [
 # %%
 
 for target, metric in [
-    # ("human_relevance", "chrf"),
-    # ("human_coherence", "density"),
-    # ("human_consistency", "coverage")
-    # ("human_fluency", "coverage"),
-    ("human_all", "density"),
+    ("human_relevance", "chrf"),
+    ("human_coherence", "density"),
+    ("human_consistency", "coverage")
+    ("human_fluency", "coverage"),
     ("human_all", "supert"),
 ]:
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
@@ -49,11 +46,10 @@ for target, metric in [
 # %%
 
 for target, metric in [
-    # ("human_relevance", "chrf"),
-    # ("human_coherence", "density"),
-    # ("human_consistency", "coverage")
-    # ("human_fluency", "coverage"),
-    ("human_all", "density"),
+    ("human_relevance", "chrf"),
+    ("human_coherence", "density"),
+    ("human_consistency", "coverage")
+    ("human_fluency", "coverage"),
     ("human_all", "supert"),
 ]:
     acc_all = []
@@ -67,8 +63,7 @@ for target, metric in [
 
 
 # %%
-# for target in ["human_relevance", "human_coherence", "human_fluency", "human_consistency"]:
-for target in ["human_all"]:
+for target in ["human_relevance", "human_coherence", "human_fluency", "human_consistency", "human_all"]:
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity")
     clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")

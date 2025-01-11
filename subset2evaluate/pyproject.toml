@@ -12,6 +12,12 @@ dependencies = [
   "numpy",
   "torch",
   "lightning",
+  "pandas",
+  "scikit-learn",
+  "tqdm",
+  "matplotlib",
+  "unbabel_comet @ https://github.com/zouharvi/comet-src.git",
+  "py_irt @ https://github.com/zouharvi/py-irt.git",
 ]
 requires-python = ">=3.11"
 authors = [

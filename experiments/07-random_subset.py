@@ -66,11 +66,11 @@ def plot_extra_clu(ax):
 
 utils_fig.plot_subset_selection(
     points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.1%}")],
-    filename="0007-random_subset",
+    filename="07-random_subset",
     fn_extra=plot_extra_acc,
 )
 utils_fig.plot_subset_selection(
     points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_clu).T], f"Random {np.average(points_y_clu):.2f}")],
-    filename="0007-random_subset",
+    filename="07-random_subset",
     fn_extra=plot_extra_clu,
 )

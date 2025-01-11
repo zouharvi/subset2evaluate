@@ -42,10 +42,6 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     
         points_y_acc_all["diversity"][data_name].append(acc_new)
         points_y_clu_all["diversity"][data_name].append(clu_new)
-# %%
-
-points_y_acc_all_backup = points_y_acc_all
-points_y_clu_all_backup = points_y_clu_all
 
 # %%
 points_y_acc_all = {

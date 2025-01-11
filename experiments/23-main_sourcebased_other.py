@@ -43,8 +43,8 @@ points_y_clu_all = {
 utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_acc_all['precomet_div'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_acc_all['precomet_div']):.1%}"),
-        (utils.PROPS, points_y_acc_all['precomet_diff_precomet_disc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_acc_all['precomet_diff_precomet_disc']):.1%}"),
-        (utils.PROPS, points_y_acc_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times disc.}}$ $\\hspace{{-4.5}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_acc_all['precomet_diffdisc']):.1%}"),
+        (utils.PROPS, points_y_acc_all['precomet_diff_precomet_disc'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff.}}$ {np.average(points_y_acc_all['precomet_diff_precomet_disc']):.1%}"),
+        (utils.PROPS, points_y_acc_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_acc_all['precomet_diffdisc']):.1%}"),
     ],
     "23-main_sourcebased_other",
 )
@@ -52,7 +52,7 @@ utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_clu_all['precomet_div'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_clu_all['precomet_div']):.2f}"),
         (utils.PROPS, points_y_clu_all['precomet_diff_precomet_disc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_clu_all['precomet_diff_precomet_disc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times disc.}}$ $\\hspace{{-4.5}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu_all['precomet_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu_all['precomet_diffdisc']):.2f}"),
     ],
     "23-main_sourcebased_other",
 )
