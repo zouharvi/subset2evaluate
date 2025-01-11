@@ -45,7 +45,7 @@ utils_fig.plot_subset_selection(
     colors=utils_fig.COLORS,
 )
 
-utils_fig.plot_subset_selection(
+utils_fig.plot_subset_selection( 
     points=[
         (utils.PROPS, points_y_clu["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_clu['precomet_avg']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_clu['precomet_var']):.2f}"),

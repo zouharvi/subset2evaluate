@@ -16,8 +16,8 @@ dependencies = [
   "scikit-learn",
   "tqdm",
   "matplotlib",
-  "unbabel_comet @ https://github.com/zouharvi/comet-src.git",
-  "py_irt @ https://github.com/zouharvi/py-irt.git",
+  "unbabel_comet @ git+https://github.com/zouharvi/comet-src.git",
+  "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]
 requires-python = ">=3.11"
 authors = [
