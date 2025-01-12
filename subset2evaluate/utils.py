@@ -471,7 +471,7 @@ def load_data(data: Union[List, str]):
 
     if type(data) is list:
         pass
-    if os.path.exists(data):
+    elif os.path.exists(data):
         return [json.loads(x) for x in open(data, "r")]
     elif data.startswith("wmt"):
         data_year, data_lang = data.split("/")
