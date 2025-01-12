@@ -77,7 +77,7 @@ def main_cli():
     args.add_argument(
         'data', type=str,
         default='wmt23/en-cs',
-        help="Either descriptor of data, such as wmt23/all, wmt22/en-de, or summeval, or path to JSON file with data."
+        help="Either descriptor of data, such as wmt22/en-de, or summeval, or path to JSON file with data."
     )
     args.add_argument(
         '--method', default="var",
