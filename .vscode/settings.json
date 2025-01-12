@@ -1,8 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        "./experiments",
-        "./subset2evaluate",
-        "../neural-irt"
-    ],
-    "python.analysis.typeCheckingMode": "off"
-}
