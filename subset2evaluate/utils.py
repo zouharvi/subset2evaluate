@@ -471,20 +471,16 @@ def load_data(data: Union[List, str]):
 
     if type(data) is list:
         pass
+    if os.path.exists(data):
+        return [json.loads(x) for x in open(data, "r")]
     elif data.startswith("wmt"):
         data_year, data_lang = data.split("/")
-        data = load_data_wmt(year=data_year, langs=data_lang, normalize=True)
-    elif os.path.exists(data):
-        data = [json.loads(x) for x in open(data, "r")]
-        
-        # TODO: REMOVE ME
-        # systems = set(data[0]["scores"].keys())
-        # for line in data:
-        #     systems = systems.intersection(set(line["scores"].keys()))
-        systems = list(data[0]["scores"].keys())
-
-        for line in data:
-            line["scores"] = {k:v for k,v in line["scores"].items() if k in systems}
+        if data_lang == "all":
+            data = load_data_wmt_all()
+        else:
+            data = load_data_wmt(year=data_year, langs=data_lang, normalize=True)
+    elif data == "summeval":
+        return load_data_summeval(normalize=True)
     else:
         raise Exception("Could not parse data")
     

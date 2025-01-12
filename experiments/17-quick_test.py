@@ -47,16 +47,6 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
 
 
 # %%
-print("Experimental")
-
-# ACC: 81.25% | CLU: 1.88
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "precomet_diff_precomet_disc", "reverse": False})
-# ACC: 93.09% | CLU: 3.22
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "precomet_diff_precomet_disc", "reverse": True})
-# ACC: 92.81% | CLU: 3.01
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "precomet_diffdisc", "reverse": True})
-
-# %%
 print("PyIRT-score Fisher Information Content")
 benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score"})
 

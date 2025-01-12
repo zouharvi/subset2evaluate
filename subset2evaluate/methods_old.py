@@ -1,8 +1,23 @@
 # These are some subset selection methods that are not polished enough to be used in practice
+from typing import Any, Callable, List, Tuple, Union
+from functools import partial
 import subset2evaluate.utils as utils
+import numpy as np
+import random
 
 
-def metric_consistency(data, metric, **kwargs):
+def _fn_information_content_old(item_irt, data_irt) -> float:
+    # This formula is based on the simplified formula of Rodriquez et al 2021
+    information = 0
+    for theta in data_irt["systems"].values():
+        prob = utils.pred_irt(
+            theta,
+            item_irt
+        )
+        information += prob*(1-prob)*(item_irt["disc"]**2)
+    return information
+
+def metric_consistency(data, metric, **kwargs) -> List[float]:
     metric_scores = utils.get_sys_absolute(data, metric=metric)
     rank_correlation = {}
     sys_names = list(metric_scores.keys())
@@ -17,11 +32,15 @@ def metric_consistency(data, metric, **kwargs):
                     consistency -= 1
                 total += 1
         rank_correlation[example['i']] = consistency / total
-    data.sort(key=lambda item: rank_correlation[item['i']], reverse=True)
-    return data
+
+    return [
+        rank_correlation[item['i']]
+        for item in data
+    ]
 
 
 def nn_irt(data, metric, **kwargs):
+    raise NotImplementedError("This method is not yet implemented for use.")
     import torch
     import neural_irt.train
     from neural_irt.lit_module import IrtLitModule
@@ -287,16 +306,14 @@ def our_irt(data, metric, **kwargs):
     # print("Best validation step was:", best_val_step)
     data_irt = model.params_log[best_val_step]
 
-    items_joint = list(zip(data, data_irt["items"]))
-    items_joint.sort(
-        key=lambda x: model.fn_utility(x[1], data_irt["systems"]),
-        reverse=True
-    )
-
-    return [x[0] for x in items_joint]
+    return [
+        model.fn_utility(x, data_irt["systems"])
+        for x in data_irt["items"]
+    ]
 
 
-def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
+def get_nice_subset(data_old, target_size=100, step_size=10, metric="human") -> List[float]:
+    raise NotImplementedError("This method is not yet implemented for use.")
     import numpy as np
     order_full = utils.get_sys_ordering(data_old, metric=metric)
 
@@ -309,3 +326,113 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="human"):
 
     print(f"New average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
     return data_old
+
+def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float]:
+    # turn off warnings from sentence-transformers
+    import warnings
+    warnings.filterwarnings('ignore')
+    import sentence_transformers
+    import sklearn.neural_network
+
+    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
+    data_x_train = embd_model.encode([line["src"] for line in data_train])
+    data_y_train = [fn_utility(line) for line in data_train]
+
+    model = sklearn.neural_network.MLPRegressor(
+        hidden_layer_sizes=(128, 16),
+        max_iter=1000,
+        verbose=False,
+    )
+    model.fit(data_x_train, data_y_train)
+    data_x_test = embd_model.encode([line["src"] for line in data])
+    data_y_test = model.predict(data_x_test)
+
+    return list(data_y_test)
+
+def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
+    import sklearn.neural_network
+    import sentence_transformers
+    import subset2evaluate.methods
+
+    # turn off warnings from sentence-transformers
+    import warnings
+    warnings.filterwarnings('ignore')
+
+    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
+    data_x_train = embd_model.encode([line["src"] for line in data_train])
+
+    model_fn = lambda: sklearn.neural_network.MLPRegressor(
+        hidden_layer_sizes=(128, 16),
+        max_iter=1000,
+        verbose=False,
+    )
+
+    if load_model is not None:
+        model_diff, model_disc = load_model
+    else:
+        model_diff = model_fn()
+        model_disc = model_fn()
+
+        data_y_diff = [line["irt"]["diff"] for line in data_train]
+        data_y_disc = [line["irt"]["disc"] for line in data_train]
+
+        model_diff.fit(data_x_train, data_y_diff)
+        model_disc.fit(data_x_train, data_y_disc)
+
+    data_x_test = embd_model.encode([line["src"] for line in data])
+    data_y_diff = model_diff.predict(data_x_test)
+    data_y_disc = model_disc.predict(data_x_test)
+
+        
+    data_irt_items = [
+        {"diff": diff, "disc": disc}
+        for diff, disc in zip(data_y_diff, data_y_disc)
+    ]
+
+
+    items_joint = list(zip(data, data_irt_items))
+    items_joint.sort(
+        key=lambda x: subset2evaluate.methods.fn_irt_utility(x[0], x[1], None, kwargs["fn_utility"]),
+        reverse=True
+    )
+
+    items = [x[0] for x in items_joint]
+
+    if return_model:
+        return items, (model_diff, model_disc)
+    else:
+        return items
+
+
+def _run_simulation(args):
+    data_old, data_prior = args
+    data_new = random.sample(data_old, k=min(len(data_old), 20))
+    clusters = utils.eval_system_clusters(data_new+data_prior, metric="MetricX-23-c")
+    return data_new+data_prior, clusters
+
+
+def synthetic_simulation(data, **kwargs):
+    raise NotImplementedError("This method is not yet implemented for use.")
+    import multiprocessing
+
+    data_new = []
+    while len(data) > 0:
+        print("Remaining", len(data))
+        with multiprocessing.Pool(20) as pool:
+            results = pool.map(_run_simulation, [[data, data_new]]*1000)
+
+        # take best clustering but evaluate on human data
+        data_new = max(results, key=lambda x: x[1])[0]
+        data_best_i = {line["i"] for line in data_new}
+        data = [line for line in data if line["i"] not in data_best_i]
+    
+    return data_new
+
+METHODS = {
+    "synthetic_simulation": synthetic_simulation,
+    "premlp_irt_diffdisc": partial(premlp_irt, fn_utility="diffdisc"),
+    "premlp_irt_diff": partial(premlp_irt, fn_utility="diff"),
+    "premlp_irt_disc": partial(premlp_irt, fn_utility="disc"),
+    "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([sys_v["human"] for sys_v in line["scores"].values()])),
+    "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([sys_v["human"] for sys_v in line["scores"].values()])),
+}
