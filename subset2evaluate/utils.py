@@ -64,7 +64,8 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
 
         # load cache if exists
         if os.path.exists(cache_f):
-            return pickle.load(open(cache_f, "rb"))
+            with open(cache_f, "rb") as f:
+                return pickle.load(f)
 
         lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
         lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
@@ -187,7 +188,8 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
             _data_median_binarize(data)
         
         # save cache
-        pickle.dump(data, open(cache_f, "wb"))
+        with open(cache_f, "wb") as f:
+            pickle.dump(data, f)
     
     return data
 
@@ -390,6 +392,7 @@ def get_sys_ordering(data_new: list, metric="human"):
 
 def eval_system_clusters(data: list, metric="human"):
     from scipy.stats import wilcoxon
+    import warnings
     # computes number of clusters
 
     # sort from top
@@ -403,13 +406,13 @@ def eval_system_clusters(data: list, metric="human"):
     clusters = [[get_scores(sys_ord.pop(0))]]
     while sys_ord:
         sys_scores = get_scores(sys_ord.pop(0))
-        # TODO: should this be clusters[-1][0] or clusters[-1][-1]?
-        # TODO: handle different domains?
         diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
+        warnings.simplefilter("ignore", category=UserWarning)
         if all([d==0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
             clusters.append([sys_scores])
         else:
             clusters[-1].append(sys_scores)
+    warnings.resetwarnings()
     return len(clusters)
 
 def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):

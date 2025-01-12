@@ -26,7 +26,7 @@ for target, metric in [
     ("human_fluency", "coverage"),
     ("human_all", "supert"),
 ]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
+    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric=metric)
     clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
@@ -39,7 +39,7 @@ for target, metric in [
     ("human_fluency", "coverage"),
     ("human_all", "supert"),
 ]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
+    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric=metric)
     clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
@@ -64,6 +64,6 @@ for target, metric in [
 
 # %%
 for target in ["human_relevance", "human_coherence", "human_fluency", "human_consistency", "human_all"]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity")
+    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity_bleu")
     clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")

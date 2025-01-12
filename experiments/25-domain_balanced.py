@@ -43,18 +43,18 @@ for data_old in tqdm.tqdm(data_old_all):
     for _ in range(1):
         data_y = [np.var([line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
-        acc_new_all["var"].append(acc_new)
-        clu_new_all["var"].append(clu_new)
+        acc_new_all["metric_var"].append(acc_new)
+        clu_new_all["metric_var"].append(clu_new)
         
         data_y = [np.average([-line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
-        acc_new_all["avg"].append(acc_new)
-        clu_new_all["avg"].append(clu_new)
+        acc_new_all["metric_avg"].append(acc_new)
+        clu_new_all["metric_avg"].append(clu_new)
         
         data_y = [utility_diversity(line) for line in data_old]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
-        acc_new_all["diversity"].append(acc_new)
-        clu_new_all["diversity"].append(clu_new)
+        acc_new_all["diversity_bleu"].append(acc_new)
+        clu_new_all["diversity_bleu"].append(clu_new)
 
     for _ in range(5):
         _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)

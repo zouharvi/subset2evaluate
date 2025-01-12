@@ -1,4 +1,4 @@
-# <img src="misc/logo.svg" height="25em"> subset2evaluate
+# <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/logo.svg" height="25em"> subset2evaluate
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
@@ -13,21 +13,58 @@ It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém
 > The model is trained to predict item utility for human evaluation just based on the source alone.
 > We show on two natural language generation tasks, machine translation and summarization, that these methods make human evaluation more efficient and reduce costs without burdening annotators.
 
-<img src="misc/highlevel_subset_selection.svg" width="1000em">
+<img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em">
 
-### General recommendations based on MT evaluation:
+## Usage
+
+In short, you put list of items in the package and the package sorts the list in descending order (first is better) based on how suitable each item is for evaluation, such as with human annotations.
+In addition to the sorting, the package also returns the item utility stored in the `subset2evalute_utility` field of each item.
+General recommendations based on MT evaluation:
 
 | When to use? | What is it? | How to use? |
 |-|-|-|
-| Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="var", metric="MetricX-23"` |
-| Metric not available but system outputs available. | Diversity of system outputs. | `method="diversity"` |
+| Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="metric_var", metric="MetricX-23"` |
+| Metric not available but system outputs available. | Diversity of system outputs. | `method="diversity_bleu"` |
 | System outputs not available, only sources. | Estimated diversity in system outputs. | `method="precomet_diversity"` |
+
+The package supports multiple methods.
+We show benchmark of the methods on machine translation evaluation:
+
+| Method | Requirements | Cluster count | Accuracy |
+|-|-|-|-|
+| Random | | 91.0% | 2.25 |
+| **Output-based selection** |
+| MetricX-23 var | MetricX-23 scores | 92.0% | 3.22 |
+| MetricX-23 avg | MetricX-23 scores | 91.8% | 3.16 |
+| Diversity BLEU | Outputs | 92.1% | 2.99 |
+| Diversity unigram | Outputs | 91.1% | 2.62 |
+| IRT diff.×disc. | MetricX-23 scores | 91.2% | 3.14 |
+| **Source-based selection** |
+| PreCOMET var [model](https://huggingface.co/zouharvi/PreCOMET-var) | Sources | 91.2% | 2.58 |
+| PreCOMET avg [model](https://huggingface.co/zouharvi/PreCOMET-avg) | Sources | 91.1% | 2.68 |
+| PreCOMET diversity [[model](https://huggingface.co/zouharvi/PreCOMET-diversity)] | Sources | 92.1% | 2.86 |
+| PreCOMET diff.×disc. [[model1](https://huggingface.co/zouharvi/PreCOMET-diff), [model2](https://huggingface.co/zouharvi/PreCOMET-disc)] | Sources | 93.1% | 3.22 |
+
+
+And benchmark of the methods for summarization:
+
+| Method | Requirements | Cluster count | Accuracy |
+|-|-|-|-|
+| Random | | 90.5% | 2.00 |
+| **Output-based selection** |
+| Coverage var | Coverage scores | 92.2% | 2.30 |
+| Coverage avg | Coverage scores | 91.8% | 2.20 |
+| IRT diff.×disc. | Coverage scores | 92.6% | 2.44 |
+| Diversity BLEU | Outputs | 89.3% | 2.90 |
+| Diversity unigram | Outputs | 87.2% | 2.80 |
 
 ## Example for Machine Translation
 
 Install the package and download WMT data:
 ```bash
 pip3 install subset2evaluate
+# optionally these two packages for IRT and PreCOMET based selections
+pip3 install git+https://github.com/zouharvi/PreCOMET.git git+https://github.com/zouharvi/py-irt.git
 bash experiments/01-get_wmt_data.sh
 ```
 
@@ -45,14 +82,10 @@ subset2evaluate.utils.eval_system_clusters(data_new[:100])
 > 1
 
 # compare it to something better:
-data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="var", metric="MetricX-23")
+data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="metric_var" metric="MetricX-23")
 subset2evaluate.utils.eval_system_clusters(data_new[:100])
 > 3
 ```
-
-Benchmarks for some of the methods on WMT23:
-
-<!-- TODO: -->
 
 ## Example for Summarization
 
@@ -68,7 +101,7 @@ data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="ra
 subset2evaluate.utils.eval_system_clusters(data_new[:25], metric="human_relevance")
 > 2
 
-data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="diversity")
+data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="diversity_bleu")
 subset2evaluate.utils.eval_system_clusters(data_new[:25], metric="human_relevance")
 > 3
 ```
@@ -137,26 +170,6 @@ json.dumps(data[0], indent=2)
 
 ```
 
-```
-import utils
-data = utils.load_data_wmt()
-
-# In most cases we want to normalize the data such that values are in [0, 1]
-data = utils.load_data_wmt(normalize=True)
-
-# There are other options that load a different language pair from a different year but the default should be fine for now
-# The `data` is a list of items
-# Each item has:
-# - `i` - the index of the item
-# - `domain` - the domain of the sentence
-# - `src` - the source sentence
-# - `ref` - the reference sentence
-# - `tgt` - mapping from systems to their translations
-# - `scores` - mapping from systems to score names to numbers
-#            - for example data[0]["scores"]["ONLINE-Y"]["human"] is the human judgement for ONLINE-Y system for the first item
-#            - for example data[5]["scores"]["NLLB_GReedy"]["MetricX-23"] is MetricX-23 score for NLLB_GReedy system for the sixth item
-```
-
 ## Command-line Interface
 
 We recommend using the Python interface but the package can also be used from the command line:
@@ -172,3 +185,7 @@ subset2evaluate-eval wmt23/en-cs wmt23_encs_sorted.jsonl
 
 We are look forward to contributions, especially (1) using subset2evaluate for other tasks, (2) adding new methods, (3) finding bugs and increasing package usability.
 Please file a GitHub issue or [send us an email](mailto:vilem.zouhar@gmail.com).
+
+The repository is structured as follows:
+- `subset2evaluate/` contains the primary package and all methods 
+- `experiments/` contains scripts to run experiments in the paper

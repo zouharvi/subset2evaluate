@@ -48,7 +48,7 @@ def run_select_subset(
         out = out_fn()
 
     if return_model:
-        model, out = out
+        out, model = out
 
     out: List[Tuple[float, Dict]]
 
@@ -80,7 +80,7 @@ def main_cli():
         help="Either descriptor of data, such as wmt22/en-de, or summeval, or path to JSON file with data."
     )
     args.add_argument(
-        '--method', default="var",
+        '--method', default="metric_var",
         choices=methods.METHODS.keys(),
         help="Subset selection method.",
     )

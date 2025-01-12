@@ -72,8 +72,8 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_all["metricvar"].append(np.average(clu_new))
 
         clu_new, acc_new = beta_searcher_evaluate(utility_fn=utility_diversity, beta=beta)
-        acc_all["diversity"].append(np.average(acc_new))
-        clu_all["diversity"].append(np.average(clu_new))
+        acc_all["diversity_bleu"].append(np.average(acc_new))
+        clu_all["diversity_bleu"].append(np.average(clu_new))
 
         clu_new, acc_new = beta_searcher_evaluate(utility_fn=lambda x: utility_irt_diffdisc(x, irt_params), beta=beta)
         acc_all["irt_diffdisc"].append(np.average(acc_new))
@@ -90,7 +90,7 @@ def printrow(row):
 print(f"{np.average(acc_all_all['random']):.1%} \\\\")
 printrow(np.average(acc_all_all["metricavg"], axis=(0,)))
 printrow(np.average(acc_all_all["metricvar"], axis=(0,)))
-printrow(np.average(acc_all_all["diversity"], axis=(0,)))
+printrow(np.average(acc_all_all["diversity_bleu"], axis=(0,)))
 printrow(np.average(acc_all_all["irt_diffdisc"], axis=(0,)))
 
 def printrow(row):
@@ -98,5 +98,5 @@ def printrow(row):
 print(f"{np.average(clu_all_all['random']):.2f} \\\\")
 printrow(np.average(clu_all_all["metricavg"], axis=(0,)))
 printrow(np.average(clu_all_all["metricvar"], axis=(0,)))
-printrow(np.average(clu_all_all["diversity"], axis=(0,)))
+printrow(np.average(clu_all_all["diversity_bleu"], axis=(0,)))
 printrow(np.average(clu_all_all["irt_diffdisc"], axis=(0,)))

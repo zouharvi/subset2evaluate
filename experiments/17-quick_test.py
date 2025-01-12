@@ -66,9 +66,9 @@ benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg"})
 
 # %%
 print("Human-var")
-benchmark_method(repetitions=1, kwargs_dict={"method": "var", "metric": "human"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "human"})
 print("Human-avg")
-benchmark_method(repetitions=1, kwargs_dict={"method": "avg", "metric": "human"})
+benchmark_method(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "human"})
 
 # %%
 print("PreCOMET variants")

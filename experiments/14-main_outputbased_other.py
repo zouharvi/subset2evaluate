@@ -33,15 +33,15 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
 
     for _ in range(1):
         data_new = subset2evaluate.select_subset.run_select_subset(
-            data_old, method="diversity",
+            data_old, method="diversity_bleu",
         )
         clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
             data_old, data_new,
             metric="human"
         )
     
-        points_y_acc_all["diversity"][data_name].append(acc_new)
-        points_y_clu_all["diversity"][data_name].append(clu_new)
+        points_y_acc_all["diversity_bleu"][data_name].append(acc_new)
+        points_y_clu_all["diversity_bleu"][data_name].append(clu_new)
 
 # %%
 points_y_acc_all = {
