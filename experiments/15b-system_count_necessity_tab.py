@@ -68,8 +68,8 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 (False, dict(method="random")),
                 (True,  dict(method="precomet_var")),
                 (True,  dict(method="precomet_avg")),
-                (True,  dict(method="precomet_div")),
-                (True,  dict(method="precomet_diff_precomet_disc")),
+                (True,  dict(method="precomet_diversity")),
+                (True,  dict(method="precomet_diffdisc")),
                 (False, dict(method="var", metric="MetricX-23-c")),
                 (False, dict(method="avg", metric="MetricX-23-c")),
                 (False, dict(method="diversity")),
@@ -95,13 +95,13 @@ def method_formatter(method):
         "random": "Random",
         "precomet_var": r"PreCOMET\textsuperscript{var}",
         "precomet_avg": r"PreCOMET\textsuperscript{avg}",
-        "precomet_div": r"PreCOMET\textsuperscript{div}",
+        "precomet_diversity": r"PreCOMET\textsuperscript{div}",
         "var": "MetricX var.",
         "avg": "MetricX avg.",
         "diversity": "Diversity",
         "pyirt_diffdisc": r"IRT diff.$\times$disc.",
-        "precomet_diff_precomet_disc": r"PreCOMET\textsuperscript{diff.$\times$disc}",
-        "precomet_diffdisc": r"PreCOMET\textsuperscript{diff.$\times$disc} (direct)",
+        "precomet_diffdisc": r"PreCOMET\textsuperscript{diff.$\times$disc}",
+        "precomet_diffdisc_direct": r"PreCOMET\textsuperscript{diff.$\times$disc} (direct)",
     }
     if method in DICT:
         return DICT[method]

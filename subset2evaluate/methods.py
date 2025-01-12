@@ -1,41 +1,28 @@
-from typing import Callable
-import numpy as np
-import py_irt.models.abstract_model
-import subset2evaluate.utils as utils
+from typing import Any, Callable, List, Tuple, Union
 from functools import partial
-import random
+import numpy as np
+import subset2evaluate.utils as utils
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-def random_subset(data, seed=None, **kwargs):
+def random_subset(data, seed=None, **kwargs) -> List[float]:
     import random
-    random.Random(seed).shuffle(data)
-    return data
+    r = random.Random(seed)
+    return [r.random() for _ in data]
 
-def metric_avg(data, metric, **kwargs):
-    data.sort(key=lambda item: np.average(
-        [sys_v[metric] for sys_v in item["scores"].values()]
-    ))
-    return data
+def metric_avg(data, metric, **kwargs) -> List[float]:
+    return [
+        -np.average([sys_v[metric] for sys_v in item["scores"].values()])
+        for item in data
+    ]
 
-def metric_var(data, metric, **kwargs):
-    data.sort(key=lambda item: np.var(
-        [sys_v[metric] for sys_v in item["scores"].values()]
-    ), reverse=True)
-    return data
+def metric_var(data, metric, **kwargs) -> List[float]:
+    return [
+        np.var([sys_v[metric] for sys_v in item["scores"].values()])
+        for item in data
+    ]
 
-def _fn_information_content_old(item_irt, data_irt):
-    # This formula is based on the simplified formula of Rodriquez et al 2021
-    information = 0
-    for theta in data_irt["systems"].values():
-        prob = utils.pred_irt(
-            theta,
-            item_irt
-        )
-        information += prob*(1-prob)*(item_irt["disc"]**2)
-    return information
-
-def _fn_information_content(item_old, item_irt, data_irt):
+def _fn_information_content(item_old, item_irt, data_irt) -> float:
     information = 0
     for theta in data_irt["systems"].values():
         x1 = np.exp(item_irt["disc"]*(theta+item_irt["diff"]))
@@ -44,19 +31,8 @@ def _fn_information_content(item_old, item_irt, data_irt):
         information += (item_irt["disc"]**2)*x1/(x2+x3)**2
     return information
 
-def _fn_experiment(item_old, item_irt, data_irt):
-    information = 0
-    for theta in data_irt["systems"].values():
-        x1 = np.exp(item_irt["disc"]*(theta+item_irt["diff"]))
-        x2 = np.exp(item_irt["disc"]*item_irt["diff"])
-        x3 = np.exp(item_irt["disc"]*theta)
-        information += (item_irt["disc"]**2)*x1/(x2+x3)**2
-    return information
-
-def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
-    if fn_utility == "experiment":
-        return _fn_experiment(item_old, item_irt, data_irt)
-    elif fn_utility == "fisher_information_content":
+def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
+    if fn_utility == "fisher_information_content":
         return _fn_information_content(item_old, item_irt, data_irt)
     elif fn_utility == "diff":
         return -item_irt["diff"]
@@ -67,13 +43,14 @@ def fn_irt_utility(item_old, item_irt, data_irt, fn_utility):
     elif fn_utility == "feas":
         return item_irt["feas"]
 
-def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs):
+def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
     import py_irt
     import py_irt.config
     import py_irt.dataset
     import py_irt.io
     import py_irt.training
     import py_irt.models
+    import py_irt.models.abstract_model
     import pandas as pd
 
     if model not in py_irt.models.abstract_model._IRT_REGISTRY:
@@ -181,104 +158,22 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
                 ]
             }
 
-    items_joint = list(zip(data, data_irt["items"]))
-    items_joint.sort(
-        key=lambda x: fn_irt_utility(x[0], x[1], data_irt, kwargs["fn_utility"]),
-        reverse=True
-    )
-
-    items = [x[0] for x in items_joint]
-
-    if return_model:
-        return items, data_irt
-    else:
-        return items
-
-def premlp_other(data, data_train, fn_utility: Callable, **kwargs):
-    # turn off warnings from sentence-transformers
-    import warnings
-    warnings.filterwarnings('ignore')
-    import sentence_transformers
-    import sklearn.neural_network
-
-    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
-    data_x_train = embd_model.encode([line["src"] for line in data_train])
-    data_y_train = [fn_utility(line) for line in data_train]
-
-    model = sklearn.neural_network.MLPRegressor(
-        hidden_layer_sizes=(128, 16),
-        max_iter=1000,
-        verbose=False,
-    )
-    model.fit(data_x_train, data_y_train)
-    data_x_test = embd_model.encode([line["src"] for line in data])
-    data_y_test = model.predict(data_x_test)
-
-    data_w_score = list(zip(data, data_y_test))
-    data_w_score.sort(key=lambda x: x[1], reverse=True)
-
-    return [x[0] for x in data_w_score]
-
-def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs):
-    import sklearn.neural_network
-    import sentence_transformers
-
-    # turn off warnings from sentence-transformers
-    import warnings
-    warnings.filterwarnings('ignore')
-
-    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
-    data_x_train = embd_model.encode([line["src"] for line in data_train])
-
-    model_fn = lambda: sklearn.neural_network.MLPRegressor(
-        hidden_layer_sizes=(128, 16),
-        max_iter=1000,
-        verbose=False,
-    )
-
-    if load_model is not None:
-        model_diff, model_disc = load_model
-    else:
-        model_diff = model_fn()
-        model_disc = model_fn()
-
-        data_y_diff = [line["irt"]["diff"] for line in data_train]
-        data_y_disc = [line["irt"]["disc"] for line in data_train]
-
-        model_diff.fit(data_x_train, data_y_diff)
-        model_disc.fit(data_x_train, data_y_disc)
-
-    data_x_test = embd_model.encode([line["src"] for line in data])
-    data_y_diff = model_diff.predict(data_x_test)
-    data_y_disc = model_disc.predict(data_x_test)
-
-        
-    data_irt_items = [
-        {"diff": diff, "disc": disc}
-        for diff, disc in zip(data_y_diff, data_y_disc)
+    scores = [
+        fn_irt_utility(item_old, item_irt, data_irt, kwargs["fn_utility"])
+        for item_old, item_irt in zip(data, data_irt["items"])
     ]
 
-
-    items_joint = list(zip(data, data_irt_items))
-    items_joint.sort(
-        key=lambda x: fn_irt_utility(x[0], x[1], None, kwargs["fn_utility"]),
-        reverse=True
-    )
-
-    items = [x[0] for x in items_joint]
-
     if return_model:
-        return items, (model_diff, model_disc)
+        return scores, data_irt
     else:
-        return items
-
+        return scores
 
 def _assert_comet_version():
     import comet
     if "HypothesislessRegression" not in dir(comet.models):
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
 
-def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs):
+def cometsrc(data, model_path, return_model=False, load_model=None, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
     _assert_comet_version()
 
@@ -291,15 +186,12 @@ def cometsrc(data, model_path, return_model=False, load_model=None, reverse=Fals
         for line in data
     ]).scores
 
-    data_w_score = list(zip(data, scores))
-    data_w_score.sort(key=lambda x: x[1], reverse=reverse)
-
     if return_model:
-        return [x[0] for x in data_w_score], model
+        return scores, model
     else:
-        return [x[0] for x in data_w_score]
+        return scores
 
-def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs):
+def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
     _assert_comet_version()
 
@@ -318,15 +210,12 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
     ]).scores
     scores = [s1*s2 for s1, s2 in zip(scores1, scores2)]
 
-    data_w_score = list(zip(data, scores))
-    data_w_score.sort(key=lambda x: x[1], reverse=reverse)
-
     if return_model:
-        return [x[0] for x in data_w_score], (model1, model2)
+        return scores, (model1, model2)
     else:
-        return [x[0] for x in data_w_score]
+        return scores
 
-def diversity_variance_unigram(data, **kwargs):
+def diversity_variance_unigram(data, **kwargs) -> List[float]:
     import itertools
     import collections
 
@@ -341,57 +230,38 @@ def diversity_variance_unigram(data, **kwargs):
                 out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
         return np.average(out)
 
-    # sort from smallest similarity
-    data.sort(key=lambda line: _f(line), reverse=False)
-    return data
+    # we prefer smallest similarity so flip
+    return [
+        -_f(line)
+        for line in data
+    ]
 
-def diversity_variance_bleu(data, **kwargs):
+def diversity_variance_bleu(data, **kwargs) -> List[float]:
     import itertools
     import sacrebleu
     metric = sacrebleu.metrics.BLEU(effective_order=True)
 
     def _f(line):
-        score = np.average([
+        return np.average([
             metric.sentence_score(
                 text_a,
                 [text_b],
             ).score
             for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
         ])
-        return score
 
-    # sort from smallest similarity
-    data.sort(key=lambda line: _f(line), reverse=False)
-    return data
-
-def _run_simulation(args):
-    data_old, data_prior = args
-    data_new = random.sample(data_old, k=min(len(data_old), 20))
-    clusters = utils.eval_system_clusters(data_new+data_prior, metric="MetricX-23-c")
-    return data_new+data_prior, clusters
-
-def synthetic_simulation(data, **kwargs):
-    import multiprocessing
-
-    data_new = []
-    while len(data) > 0:
-        print("Remaining", len(data))
-        with multiprocessing.Pool(20) as pool:
-            results = pool.map(_run_simulation, [[data, data_new]]*1000)
-
-        # take best clustering but evaluate on human data
-        data_new = max(results, key=lambda x: x[1])[0]
-        data_best_i = {line["i"] for line in data_new}
-        data = [line for line in data if line["i"] not in data_best_i]
-    
-    return data_new
+    # we prefer smallest similarity so flip
+    return [
+        -_f(line)
+        for line in data
+    ]
 
 METHODS = {
     "random": random_subset,
     "avg": metric_avg,
     "var": metric_var,
     "diversity": diversity_variance_bleu,
-    "synthetic_simulation": synthetic_simulation,
+    "diversity_unigram": diversity_variance_unigram,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
@@ -400,23 +270,16 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
-    "premlp_irt_diffdisc": partial(premlp_irt, fn_utility="diffdisc"),
-    "premlp_irt_diff": partial(premlp_irt, fn_utility="diff"),
-    "premlp_irt_disc": partial(premlp_irt, fn_utility="disc"),
-
-    "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([sys_v["human"] for sys_v in line["scores"].values()])),
-    "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([sys_v["human"] for sys_v in line["scores"].values()])),
-
     # precomet_var val_pearson is semi-random, see comment in comet-src/experiments/03-generate_comet_data.py 
     "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777971/checkpoints/epoch=8-step=3519-val_pearson=0.009.ckpt", reverse=False),
     "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777972/checkpoints/epoch=9-step=3910-val_pearson=0.150.ckpt", reverse=False),
-    "precomet_div": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777784/checkpoints/epoch=5-step=2346-val_pearson=0.451.ckpt", reverse=False),
+    "precomet_diversity": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777784/checkpoints/epoch=5-step=2346-val_pearson=0.451.ckpt", reverse=False),
 
     "precomet_diff": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt", reverse=False),
     "precomet_disc": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt", reverse=True),
 
-    "precomet_diffdisc": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20442554/checkpoints/epoch=9-step=2430-val_pearson=0.509.ckpt", reverse=True),
-    "precomet_diff_precomet_disc": partial(
+    "precomet_diffdisc_direct": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20442554/checkpoints/epoch=9-step=2430-val_pearson=0.509.ckpt", reverse=True),
+    "precomet_diffdisc": partial(
         cometsrc2,
         model_path1="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt",
         model_path2="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt",

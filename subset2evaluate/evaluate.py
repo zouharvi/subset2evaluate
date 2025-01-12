@@ -37,17 +37,27 @@ def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
 
     return clu_new, acc_new
 
-if __name__ == "__main__":
+def main_cli():
     import argparse
 
-    args = argparse.ArgumentParser()
-    args.add_argument('data_old', type=str, default='wmt23/en-cs')
-    args.add_argument('data_new', type=str, default='wmt23/en-cs')
-    args.add_argument('--metric', type=str, default='human')
+    args = argparse.ArgumentParser(
+        description="Meta-evaluate subset selection methods with cluster count and system accuracy."
+    )
+    args.add_argument(
+        'data_old', type=str, default='wmt23/en-cs',
+        help="Original data descriptor or path."
+    )
+    args.add_argument(
+        'data_new', type=str, default='wmt23/en-cs',
+        help="Path to new ordered data."
+    )
+    args.add_argument(
+        '--metric', type=str, default='human',
+        help="Metric to evaluate against, e.g., human or human_consistency. Can also be a metric and not human score."
+    )
     args = args.parse_args()
 
     clu_new, acc_new = run_evaluate_topk(args.data_old, args.data_new, args.metric)
-    clu_old, _ = run_evaluate_topk(args.data_old, args.data_old, args.metric)
 
-    print(f"Clusters (old->new): {np.average(clu_old):.3f} -> {np.average(clu_new):.3f}")
-    print(f"Accuracy (new): {np.average(acc_new):.1%}")
+    print(f"Clusters: {np.average(clu_new):.2f}")
+    print(f"Accuracy: {np.average(acc_new):.1%}")
