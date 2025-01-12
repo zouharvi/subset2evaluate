@@ -20,9 +20,9 @@ clu_new_all_met = collections.defaultdict(list)
 for data_old in tqdm.tqdm(data_old_all):
     for method_kwargs in [
         dict(method="random"),
-        dict(method="avg"),
-        dict(method="var"),
-        dict(method="diversity"),
+        dict(method="metric_avg"),
+        dict(method="metric_var"),
+        dict(method="diversity_bleu"),
         # dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000),
     ]:
         # run multiple times to average out the effect
@@ -59,9 +59,9 @@ plt.scatter(
     label="random"
 )
 plt.scatter(
-    clu_new_all_met["var"],
-    clu_new_all_hum["var"],
-    label="var"
+    clu_new_all_met["metric_var"],
+    clu_new_all_hum["metric_var"],
+    label="metric_var"
 )
 plt.legend()
 plt.show()
@@ -69,13 +69,13 @@ plt.show()
 # %%
 
 plt.scatter(
-    np.array(clu_new_all_met["var"]) - np.array(clu_new_all_met["random"]),
-    np.array(clu_new_all_hum["var"]) - np.array(clu_new_all_hum["random"]),
+    np.array(clu_new_all_met["metric_var"]) - np.array(clu_new_all_met["random"]),
+    np.array(clu_new_all_hum["metric_var"]) - np.array(clu_new_all_hum["random"]),
     label="var-random"
 )
 plt.scatter(
-    np.array(clu_new_all_met["avg"]) - np.array(clu_new_all_met["random"]),
-    np.array(clu_new_all_hum["avg"]) - np.array(clu_new_all_hum["random"]),
+    np.array(clu_new_all_met["metric_avg"]) - np.array(clu_new_all_met["random"]),
+    np.array(clu_new_all_hum["metric_avg"]) - np.array(clu_new_all_hum["random"]),
     label="avg-random"
 )
 plt.legend()

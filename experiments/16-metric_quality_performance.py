@@ -49,17 +49,17 @@ for data_old in tqdm.tqdm(data_old_all):
             clus_all['random'].append(np.average(clu_new))
             accs_all['random'].append(np.average(acc_new))
 
-            data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="avg", metric=metric)
+            data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
             clus_all['avg'].append(np.average(clu_new))
             accs_all['avg'].append(np.average(acc_new))
 
-            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="var", metric=metric)
+            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
             clus_all['var'].append(np.average(clu_new))
             accs_all['var'].append(np.average(acc_new))
 
-            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity", metric=metric)
+            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity_bleu", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_var)
             clus_all['diversity'].append(np.average(clu_new))
             accs_all['diversity'].append(np.average(acc_new))
@@ -99,20 +99,20 @@ axs[0].plot(
 )
 axs[0].plot(
     data_x,
-    aggregate_data_y(accs_all["diversity"]),
-    label=f"diversity",
+    aggregate_data_y(accs_all["diversity_bleu"]),
+    label=f"diversity_bleu",
     linewidth=2,
     color="gray",
 )
 axs[0].plot(
     data_x,
-    aggregate_data_y(accs_all["avg"]),
+    aggregate_data_y(accs_all["metric_avg"]),
     label=f"metric avg",
     linewidth=2,
 )
 axs[0].plot(
     data_x,
-    aggregate_data_y(accs_all["var"]),
+    aggregate_data_y(accs_all["metric_var"]),
     label=f"metric var",
     linewidth=2,
 )
@@ -151,20 +151,20 @@ axs[1].plot(
 )
 axs[1].plot(
     data_x,
-    aggregate_data_y(clus_all["diversity"]),
-    label=f"diversity",
+    aggregate_data_y(clus_all["diversity_bleu"]),
+    label=f"diversity_bleu",
     linewidth=2,
     color="gray",
 )
 axs[1].plot(
     data_x,
-    aggregate_data_y(clus_all["avg"]),
+    aggregate_data_y(clus_all["metric_avg"]),
     label=f"metric avg",
     linewidth=2,
 )
 axs[1].plot(
     data_x,
-    aggregate_data_y(clus_all["var"]),
+    aggregate_data_y(clus_all["metric_var"]),
     label=f"metric var",
     linewidth=2,
 )

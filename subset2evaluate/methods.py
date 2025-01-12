@@ -173,33 +173,45 @@ def _assert_comet_version():
     if "HypothesislessRegression" not in dir(comet.models):
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
 
-def cometsrc(data, model_path, return_model=False, load_model=None, **kwargs) -> Union[List, Tuple[List, Any]]:
+def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
+    import os
     _assert_comet_version()
 
     if load_model is not None:
         model = load_model
-    else:
+    elif os.path.exists(model_path):
         model = comet.load_from_checkpoint(model_path)
+    else:
+        model = comet.load_from_checkpoint(comet.download_model(model_path))
     scores = model.predict([
         {"src": line["src"]}
         for line in data
     ]).scores
+    if reverse:
+        scores = [-x for x in scores]
 
     if return_model:
         return scores, model
     else:
         return scores
 
-def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, **kwargs) -> Union[List, Tuple[List, Any]]:
+def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
     _assert_comet_version()
 
     if load_model is not None:
         model1, model2 = load_model
     else:
-        model1 = comet.load_from_checkpoint(model_path1)
-        model2 = comet.load_from_checkpoint(model_path2)
+        if os.path.exists(model_path1):
+            model1 = comet.load_from_checkpoint(model_path1)
+        else:
+            model1 = comet.load_from_checkpoint(comet.download_model(model_path1))
+
+        if os.path.exists(model_path2):
+            model2 = comet.load_from_checkpoint(model_path2)
+        else:
+            model2 = comet.load_from_checkpoint(comet.download_model(model_path2))
     scores1 = model1.predict([
         {"src": line["src"]}
         for line in data
@@ -208,14 +220,18 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
         {"src": line["src"]}
         for line in data
     ]).scores
-    scores = [s1*s2 for s1, s2 in zip(scores1, scores2)]
+
+    if reverse:
+        scores = [-s1*s2 for s1, s2 in zip(scores1, scores2)]
+    else:
+        scores = [s1*s2 for s1, s2 in zip(scores1, scores2)]
 
     if return_model:
         return scores, (model1, model2)
     else:
         return scores
 
-def diversity_variance_unigram(data, **kwargs) -> List[float]:
+def diversity_unigram(data, **kwargs) -> List[float]:
     import itertools
     import collections
 
@@ -236,7 +252,7 @@ def diversity_variance_unigram(data, **kwargs) -> List[float]:
         for line in data
     ]
 
-def diversity_variance_bleu(data, **kwargs) -> List[float]:
+def diversity_bleu(data, **kwargs) -> List[float]:
     import itertools
     import sacrebleu
     metric = sacrebleu.metrics.BLEU(effective_order=True)
@@ -256,12 +272,34 @@ def diversity_variance_bleu(data, **kwargs) -> List[float]:
         for line in data
     ]
 
+
+def diversity_chrf(data, **kwargs) -> List[float]:
+    import itertools
+    import sacrebleu
+    metric = sacrebleu.metrics.CHRF()
+
+    def _f(line):
+        return np.average([
+            metric.sentence_score(
+                text_a,
+                [text_b],
+            ).score
+            for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
+        ])
+
+    # we prefer smallest similarity so flip
+    return [
+        -_f(line)
+        for line in data
+    ]
+
 METHODS = {
     "random": random_subset,
-    "avg": metric_avg,
-    "var": metric_var,
-    "diversity": diversity_variance_bleu,
-    "diversity_unigram": diversity_variance_unigram,
+    "metric_avg": metric_avg,
+    "metric_var": metric_var,
+    "diversity_bleu": diversity_bleu,
+    "diversity_chrf": diversity_chrf,
+    "diversity_unigram": diversity_unigram,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
@@ -270,19 +308,17 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
-    # precomet_var val_pearson is semi-random, see comment in comet-src/experiments/03-generate_comet_data.py 
-    "precomet_var": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777971/checkpoints/epoch=8-step=3519-val_pearson=0.009.ckpt", reverse=False),
-    "precomet_avg": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777972/checkpoints/epoch=9-step=3910-val_pearson=0.150.ckpt", reverse=False),
-    "precomet_diversity": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_19777784/checkpoints/epoch=5-step=2346-val_pearson=0.451.ckpt", reverse=False),
+    "precomet_var": partial(cometsrc, model_path="zouharvi/PreCOMET-var", reverse=True),
+    "precomet_avg": partial(cometsrc, model_path="zouharvi/PreCOMET-avg", reverse=True),
+    "precomet_diversity": partial(cometsrc, model_path="zouharvi/PreCOMET-diversity", reverse=True),
 
-    "precomet_diff": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt", reverse=False),
-    "precomet_disc": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt", reverse=True),
-
-    "precomet_diffdisc_direct": partial(cometsrc, model_path="/home/vilda/comet-src/lightning_logs/version_20442554/checkpoints/epoch=9-step=2430-val_pearson=0.509.ckpt", reverse=True),
+    "precomet_diff": partial(cometsrc, model_path="zouharvi/PreCOMET-diff", reverse=False),
+    "precomet_disc": partial(cometsrc, model_path="zouharvi/PreCOMET-disc", reverse=True),
+    "precomet_diffdisc_direct": partial(cometsrc, model_path="zouharvi/PreCOMET-diffdisc_direct", reverse=False),
     "precomet_diffdisc": partial(
         cometsrc2,
-        model_path1="/home/vilda/comet-src/lightning_logs/version_20439689/checkpoints/epoch=9-step=2430-val_pearson=0.499.ckpt",
-        model_path2="/home/vilda/comet-src/lightning_logs/version_20439690/checkpoints/epoch=9-step=2430-val_pearson=0.654.ckpt",
-        reverse=True
+        model_path1="zouharvi/PreCOMET-diff",
+        model_path2="zouharvi/PreCOMET-disc",
+        reverse=False,
     ),
 }

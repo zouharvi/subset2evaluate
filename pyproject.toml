@@ -7,7 +7,7 @@ packages = ["subset2evaluate"]
 
 [project]
 name = "subset2evaluate"
-version = "0.0.0"
+version = "0.0.1a2"
 dependencies = [
   "numpy",
   "torch",
@@ -16,14 +16,20 @@ dependencies = [
   "scikit-learn",
   "tqdm",
   "matplotlib",
-  "unbabel_comet @ git+https://github.com/zouharvi/comet-src.git",
-  "py_irt @ git+https://github.com/zouharvi/py-irt.git",
+  # "unbabel_comet @ git+https://github.com/zouharvi/PreCOMET.git",
+  # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]
+readme = "README.md"
 requires-python = ">=3.11"
 authors = [
   {name = "Vilém Zouhar", email = "vilem.zouhar@gmail.com"},
 ]
+keywords = ["evaluation", "natural language generation", "machine translation", "human evaluation", "subset selection"]
 
 [project.scripts]
 subset2evaluate = "subset2evaluate.select_subset:main_cli"
 subset2evaluate-eval = "subset2evaluate.evaluate:main_cli"
+
+# python3 -m build
+# twine check dist/*
+# twine upload dist/* -u __token__
