@@ -4,7 +4,6 @@ import subset2evaluate.utils as utils
 import utils_fig
 import numpy as np
 import tqdm
-import scipy.stats as st
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 
@@ -12,16 +11,6 @@ data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
 points_y_acc_all = []
 points_y_clu_all = []
-
-
-def confidence_interval(data):
-    return st.t.interval(
-        confidence=0.9,
-        df=len(data) - 1,
-        loc=np.mean(data),
-        scale=np.std(data)
-    )
-
 
 for data_old in tqdm.tqdm(data_old_all):
     points_y_acc = []
