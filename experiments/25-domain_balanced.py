@@ -12,9 +12,9 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
 acc_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
-
-
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+
+
 def utility_diversity(line):
     return -np.average([
         metric_bleu.sentence_score(
@@ -45,12 +45,12 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["metric_var"].append(acc_new)
         clu_new_all["metric_var"].append(clu_new)
-        
+
         data_y = [np.average([-line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["metric_avg"].append(acc_new)
         clu_new_all["metric_avg"].append(clu_new)
-        
+
         data_y = [utility_diversity(line) for line in data_old]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["diversity_bleu"].append(acc_new)
@@ -58,7 +58,7 @@ for data_old in tqdm.tqdm(data_old_all):
 
     for _ in range(5):
         _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
-        data_y = [line_irt["diff"]*line_irt["disc"] for line_irt in params["items"]]
+        data_y = [line_irt["diff"] * line_irt["disc"] for line_irt in params["items"]]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["pyirt_diffdisc"].append(acc_new)
         clu_new_all["pyirt_diffdisc"].append(clu_new)
@@ -68,7 +68,7 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["random"].append(acc_new)
         clu_new_all["random"].append(clu_new)
-        
+
 
 print("Aggregate utility:")
 for method, acc_new in acc_new_all.items():

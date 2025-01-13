@@ -5,6 +5,7 @@ import numpy as np
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 
+
 def benchmark_method(repetitions=10, kwargs_dict={}):
     data_old = utils.load_data_wmt(year="wmt23", langs="en-cs", normalize=True)
     points_y_acc = []
@@ -24,7 +25,10 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
     if repetitions > 1:
         print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")
 
+
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
+
+
 def benchmark_method_all(repetitions=10, kwargs_dict={}):
     points_y_acc = []
     points_y_clu = []
@@ -57,7 +61,7 @@ benchmark_method(repetitions=10, kwargs_dict={"enforce_positive_disc": True, "me
 
 # %%
 print("Random")
-benchmark_method(repetitions=10, kwargs_dict={"method": "random"})    
+benchmark_method(repetitions=10, kwargs_dict={"method": "random"})
 
 # %%
 print("PreCOMET-{avg,var}")

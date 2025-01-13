@@ -27,21 +27,28 @@ data_x_all = [
     [len(item["src"].split()) for item in data_old]
     for data_old in data_all
 ]
+
+
 def utility_metricx_avg(item):
     return -np.average(
         [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
+
 
 def utility_metricx_var(item):
     return np.var(
         [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
+
 def utility_irt_diffdisc(item, data_irt):
     item_irt = data_irt["items"][item["i"]]
-    return item_irt["diff"]*item_irt["disc"]
+    return item_irt["diff"] * item_irt["disc"]
+
 
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+
+
 def utility_diversity(line):
     return -np.average([
         metric_bleu.sentence_score(
@@ -53,7 +60,7 @@ def utility_diversity(line):
 
 
 data_y_all_metricx_avg = [
-    [utility_metricx_avg(item) for item in data_old]    
+    [utility_metricx_avg(item) for item in data_old]
     for data_old in data_all
 ]
 data_y_all_metricx_var = [
@@ -69,12 +76,15 @@ data_y_all_irt_diffdisc = [
     for data_old, data_irt in zip(data_all, data_irt_all)
 ]
 
+
 # %%
 def z_normalize(data):
     data = np.array(data)
     return (data - np.mean(data)) / np.std(data)
 
+
 _, axs = plt.subplots(2, 2, figsize=(4, 3))
+
 
 def plot(ax, title, data_x_all, data_y_all):
     # average pearson correlation
@@ -133,6 +143,7 @@ def plot(ax, title, data_x_all, data_y_all):
     ax.set_yticks([], [])
 
     ax.spines[["top", "right"]].set_visible(False)
+
 
 plot(axs[0, 0], "MetricX-23 avg.", data_x_all, data_y_all_metricx_avg)
 plot(axs[0, 1], "MetricX-23 var.", data_x_all, data_y_all_metricx_var)

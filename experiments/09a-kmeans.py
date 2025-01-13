@@ -20,6 +20,7 @@ def featurize(line):
         ]
     )
 
+
 def l2_dist(a, b):
     return np.linalg.norm(a - b)
 
@@ -35,7 +36,6 @@ points_y = []
 
 for prop in tqdm.tqdm(utils.PROPS):
     points_x.append(prop)
-
 
     points_y_local = []
     # repeat each sampling 10 times to smooth it out

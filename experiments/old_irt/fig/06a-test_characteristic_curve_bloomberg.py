@@ -19,7 +19,7 @@ plt.figure(figsize=(1.7, 1.7))
 
 theta_min = 0.8
 theta_max = 2.7
-points_x = np.linspace(theta_min-0.2, theta_max+0.2, 100)
+points_x = np.linspace(theta_min - 0.2, theta_max + 0.2, 100)
 
 
 points_y_pred = [

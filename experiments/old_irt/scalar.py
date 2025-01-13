@@ -2,6 +2,7 @@ import torch
 import torch.utils
 from base import IRTModelBase
 
+
 class IRTModelScalar(IRTModelBase):
     def __init__(self, data, systems, **kwargs):
         super().__init__(systems=systems, **kwargs)
@@ -13,7 +14,7 @@ class IRTModelScalar(IRTModelBase):
         self.param_diff = torch.nn.Parameter(torch.randn(len(data)))
         # feasability
         self.param_feas = torch.nn.Parameter(torch.randn(len(data)))
-    
+
         self.clamp_feas = True
 
     def get_irt_params(self, i_item, name):
@@ -23,7 +24,7 @@ class IRTModelScalar(IRTModelBase):
             return self.param_diff[i_item]
         elif name == "feas":
             return self.param_feas[i_item]
-        
+
     def pack_irt_params_items(self):
         return [
             {

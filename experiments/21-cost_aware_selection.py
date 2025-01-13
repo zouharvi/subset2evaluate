@@ -10,21 +10,27 @@ import copy
 import itertools
 import sacrebleu
 
+
 def utility_metricx_avg(item):
     return -np.average(
         [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
+
 
 def utility_metricx_var(item):
     return np.var(
         [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
     )
 
+
 def utility_irt_diffdisc(item, data_irt):
     item_irt = data_irt["items"][item["i"]]
-    return item_irt["diff"]*item_irt["disc"]
+    return item_irt["diff"] * item_irt["disc"]
+
 
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+
+
 def utility_diversity(line):
     return -np.average([
         metric_bleu.sentence_score(
@@ -81,20 +87,27 @@ for data_old in tqdm.tqdm(data_old_all):
 
     for key, value in acc_all.items():
         acc_all_all[key].append(value)
+
     for key, value in clu_all.items():
         clu_all_all[key].append(value)
+
 
 # %%
 def printrow(row):
     print(" & ".join([f"{x:.1%}".replace("%", r"\%") for x in row]) + r" \\")
+
+
 print(f"{np.average(acc_all_all['random']):.1%} \\\\")
 printrow(np.average(acc_all_all["metricavg"], axis=(0,)))
 printrow(np.average(acc_all_all["metricvar"], axis=(0,)))
 printrow(np.average(acc_all_all["diversity_bleu"], axis=(0,)))
 printrow(np.average(acc_all_all["irt_diffdisc"], axis=(0,)))
 
+
 def printrow(row):
     print(" & ".join([f"{x:.2f}" for x in row]) + r" \\")
+
+
 print(f"{np.average(clu_all_all['random']):.2f} \\\\")
 printrow(np.average(clu_all_all["metricavg"], axis=(0,)))
 printrow(np.average(clu_all_all["metricvar"], axis=(0,)))

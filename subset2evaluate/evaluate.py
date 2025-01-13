@@ -1,6 +1,7 @@
 import numpy as np
 import subset2evaluate.utils as utils
 
+
 def run_evaluate_topk(data_old, data_new, metric="human"):
     # both list or descriptor is fine
     data_old = utils.load_data(data_old)
@@ -9,11 +10,12 @@ def run_evaluate_topk(data_old, data_new, metric="human"):
     clu_new = []
     acc_new = []
     for prop in utils.PROPS:
-        k = int(len(data_old)*prop)
+        k = int(len(data_old) * prop)
         clu_new.append(utils.eval_system_clusters(data_new[:k], metric=metric))
         acc_new.append(utils.eval_subset_accuracy(data_new[:k], data_old, metric=metric))
 
     return clu_new, acc_new
+
 
 def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
     # both list or descriptor is fine
@@ -23,7 +25,7 @@ def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
     clu_new = []
     acc_new = []
     for prop in utils.PROPS:
-        k = int(len(data_old)*prop)
+        k = int(len(data_old) * prop)
         data_new_inbudget = []
         budget = k
         for item in data_new:
@@ -36,6 +38,7 @@ def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
         acc_new.append(utils.eval_subset_accuracy(data_new_inbudget, data_old, metric=metric))
 
     return clu_new, acc_new
+
 
 def main_cli():
     import argparse

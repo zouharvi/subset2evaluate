@@ -14,7 +14,7 @@ plt.figure(figsize=(3, 2))
 
 theta_min = min(data_irt["theta"])
 theta_max = max(data_irt["theta"])
-points_x = np.linspace(theta_min-0.05, theta_max+0.05, 100)
+points_x = np.linspace(theta_min - 0.05, theta_max + 0.05, 100)
 
 points_y_true = [
     np.average([
@@ -27,15 +27,15 @@ points_y_pred = [
     np.average([
         utils.pred_irt(
             data_irt["theta"][sys_i], {
-            "disc": disc,
-            "diff": diff,
-            "feas": feas,
-        })
+                "disc": disc,
+                "diff": diff,
+                "feas": feas,
+            })
         for disc, diff, feas in zip(data_irt["disc"], data_irt["diff"], data_irt["feas"])
     ])
     for sys_i in systems_i
 ]
-print(f"Correlation: {np.corrcoef(points_y_true, points_y_pred)[0,1]:.1%}")
+print(f"Correlation: {np.corrcoef(points_y_true, points_y_pred)[0, 1]:.1%}")
 
 # plot empirical
 plt.scatter(
@@ -69,7 +69,7 @@ plt.plot(
 
 plt.xticks(
     list([x for x in data_irt["theta"]]),
-    [""]*len(systems_i),
+    [""] * len(systems_i),
 )
 plt.xlabel(r"$\theta$ (systems)")
 plt.ylabel("Expected performance")

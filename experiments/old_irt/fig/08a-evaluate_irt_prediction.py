@@ -27,4 +27,4 @@ for (item_i, system_i), score_true in data_test:
     error_model.append(abs(score_pred - score_true))
 
 print(f"MAE:  {np.average(error_model):.3f}")
-print(f"Corr: {np.corrcoef([x[1] for x in data_test], test_pred)[0,1]:.3f}")
+print(f"Corr: {np.corrcoef([x[1] for x in data_test], test_pred)[0, 1]:.3f}")

@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 
 data_old = utils.load_data_wmt()
 
+
 def confidence_interval(data):
     return st.t.interval(
         confidence=0.95,
-        df=len(data)-1,
+        df=len(data) - 1,
         loc=np.mean(data),
         scale=np.std(data)
     )
@@ -24,7 +25,7 @@ mean_true = utils.get_sys_absolute(data_old)
 _random = random.Random(0)
 
 for prop in tqdm.tqdm(utils.PROPS):
-    k = int(len(data_old)*prop)
+    k = int(len(data_old) * prop)
     points_x.append(k)
 
     points_y_local = []
@@ -33,7 +34,7 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_new = _random.sample(data_old, k=k)
         points_y_local.append(np.average(
             [
-                abs(mean_true[sys]-sys_mean)
+                abs(mean_true[sys] - sys_mean)
                 for sys, sys_mean in utils.get_sys_absolute(data_new).items()
             ]
         ))
@@ -59,7 +60,7 @@ plt.plot(
 
 plt.plot(
     points_x,
-    [50/(x**0.75) for x in points_x],
+    [50 / (x**0.75) for x in points_x],
     marker=".",
     markersize=10,
     color=utils_fig.COLORS[1],
@@ -90,5 +91,5 @@ ax.spines[['top', 'right']].set_visible(False)
 
 # plt.ylim(72, 86)
 plt.tight_layout(pad=0.2)
-plt.savefig(f"figures/08a-random_convergence_speed.svg")
+plt.savefig("figures/08a-random_convergence_speed.svg")
 plt.show()

@@ -1,14 +1,15 @@
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, List, Tuple, Union
 from functools import partial
 import numpy as np
-import subset2evaluate.utils as utils
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 
 def random_subset(data, seed=None, **kwargs) -> List[float]:
     import random
     r = random.Random(seed)
     return [r.random() for _ in data]
+
 
 def metric_avg(data, metric, **kwargs) -> List[float]:
     return [
@@ -16,20 +17,23 @@ def metric_avg(data, metric, **kwargs) -> List[float]:
         for item in data
     ]
 
+
 def metric_var(data, metric, **kwargs) -> List[float]:
     return [
         np.var([sys_v[metric] for sys_v in item["scores"].values()])
         for item in data
     ]
 
+
 def _fn_information_content(item_old, item_irt, data_irt) -> float:
     information = 0
     for theta in data_irt["systems"].values():
-        x1 = np.exp(item_irt["disc"]*(theta+item_irt["diff"]))
-        x2 = np.exp(item_irt["disc"]*item_irt["diff"])
-        x3 = np.exp(item_irt["disc"]*theta)
-        information += (item_irt["disc"]**2)*x1/(x2+x3)**2
+        x1 = np.exp(item_irt["disc"] * (theta + item_irt["diff"]))
+        x2 = np.exp(item_irt["disc"] * item_irt["diff"])
+        x3 = np.exp(item_irt["disc"] * theta)
+        information += (item_irt["disc"]**2) * x1 / (x2 + x3)**2
     return information
+
 
 def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
     if fn_utility == "fisher_information_content":
@@ -39,9 +43,10 @@ def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
     elif fn_utility == "disc":
         return -item_irt["disc"]
     elif fn_utility == "diffdisc":
-        return item_irt["diff"]*item_irt["disc"]
+        return item_irt["diff"] * item_irt["disc"]
     elif fn_utility == "feas":
         return item_irt["feas"]
+
 
 def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
     import py_irt
@@ -118,15 +123,14 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
             params["disc"] = -np.array(params["disc"])
             params["ability"] = -np.array(params["ability"])
             params["diff"] = -np.array(params["diff"])
-        
+
         # normalize naming
         if "lambdas" in params:
             params["feas"] = params.pop("lambdas")
-    
 
         # TODO: cross-check make sure that we do the predictions as the models were trained
-        # 3PL/4PL
         if "feas" in params:
+            # 3PL/4PL
             data_irt = {
                 "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
                 "items": [
@@ -168,10 +172,12 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     else:
         return scores
 
+
 def _assert_comet_version():
     import comet
     if "HypothesislessRegression" not in dir(comet.models):
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
+
 
 def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
@@ -195,6 +201,7 @@ def cometsrc(data, model_path, return_model=False, load_model=None, reverse=Fals
         return scores, model
     else:
         return scores
+
 
 def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import comet
@@ -222,14 +229,15 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
     ]).scores
 
     if reverse:
-        scores = [-s1*s2 for s1, s2 in zip(scores1, scores2)]
+        scores = [-s1 * s2 for s1, s2 in zip(scores1, scores2)]
     else:
-        scores = [s1*s2 for s1, s2 in zip(scores1, scores2)]
+        scores = [s1 * s2 for s1, s2 in zip(scores1, scores2)]
 
     if return_model:
         return scores, (model1, model2)
     else:
         return scores
+
 
 def diversity_unigram(data, **kwargs) -> List[float]:
     import itertools
@@ -243,7 +251,7 @@ def diversity_unigram(data, **kwargs) -> List[float]:
             if text_a.total() == 0 or text_b.total() == 0:
                 out.append(1)
             else:
-                out.append(2*(text_a & text_b).total()/(text_a.total()+text_b.total()))
+                out.append(2 * (text_a & text_b).total() / (text_a.total() + text_b.total()))
         return np.average(out)
 
     # we prefer smallest similarity so flip
@@ -251,6 +259,7 @@ def diversity_unigram(data, **kwargs) -> List[float]:
         -_f(line)
         for line in data
     ]
+
 
 def diversity_bleu(data, **kwargs) -> List[float]:
     import itertools
@@ -292,6 +301,7 @@ def diversity_chrf(data, **kwargs) -> List[float]:
         -_f(line)
         for line in data
     ]
+
 
 METHODS = {
     "random": random_subset,

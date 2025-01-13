@@ -9,11 +9,12 @@ import matplotlib.cm as cm
 import numpy as np
 import subset2evaluate.select_subset
 
+
 def plot_irt(data):
-    cmap=cm.coolwarm_r
-    norm=mpl.colors.Normalize(
-        vmin=0-0.1,
-        vmax=1+0.1,
+    cmap = cm.coolwarm_r
+    norm = mpl.colors.Normalize(
+        vmin=0 - 0.1,
+        vmax=1 + 0.1,
         # vmin=min([item["feas"] for item in data["items"]])-0.01,
         # vmax=max([item["feas"] for item in data["items"]])+0.01,
     )
@@ -22,18 +23,18 @@ def plot_irt(data):
         ncols=2, nrows=2,
         width_ratios=(1, 7),
         height_ratios=(7, 1),
-        figsize=(4,3),
+        figsize=(4, 3),
     )
     sys_mean = np.average(list(data["systems"].values()))
 
     # main plot
     axs[0, 1].scatter(
-        [item["diff"]-sys_mean for item in data["items"]],
+        [item["diff"] - sys_mean for item in data["items"]],
         [item["disc"] for item in data["items"]],
         s=5,
         alpha=0.7,
         linewidths=0,
-        # color=[cmap(norm(item["feas"])) for item in data["items"]],
+        color=[cmap(norm(item["feas"])) for item in data["items"]],
         color=figutils.COLORS[1],
     )
     axs[0, 1].spines[["bottom", "top", "left", "right"]].set_visible(False)
@@ -42,7 +43,7 @@ def plot_irt(data):
 
     # top histogram (difficulty)
     axs[1, 1].hist(
-        [item["diff"]-sys_mean for item in data["items"]],
+        [item["diff"] - sys_mean for item in data["items"]],
         bins=np.linspace(*axs[0, 1].get_xlim(), 40),
         orientation="vertical",
         color="black",
@@ -65,13 +66,13 @@ def plot_irt(data):
     axs[0, 0].yaxis.set_ticks_position('right')
     axs[0, 0].set_ylabel(" " * 15 + r"Discriminability ($a$)", labelpad=-20)
     axs[0, 0].spines[["bottom", "top", "left"]].set_visible(False)
-    
+
     axs[1, 0].axis("off")
 
-    pos_theta_tick = axs[0, 1].get_ylim()[0]+(axs[0, 1].get_ylim()[1]-axs[0, 1].get_ylim()[0])*0.1
+    pos_theta_tick = axs[0, 1].get_ylim()[0] + (axs[0, 1].get_ylim()[1] - axs[0, 1].get_ylim()[0]) * 0.1
     axs[0, 1].plot(
-        [5*(x-sys_mean) for x in data["systems"].values()],
-        len(list(data["systems"].values()))*[pos_theta_tick],
+        [5 * (x - sys_mean) for x in data["systems"].values()],
+        len(list(data["systems"].values())) * [pos_theta_tick],
         marker=".",
         alpha=1,
         markersize=10,
@@ -79,7 +80,7 @@ def plot_irt(data):
         color=figutils.COLORS[0],
     )
     axs[0, 1].text(
-        0-sys_mean*0.7, pos_theta_tick*0.4,
+        0 - sys_mean * 0.7, pos_theta_tick * 0.4,
         "System\nability ($\\theta$)",
         ha="right",
         va="top",
@@ -123,11 +124,13 @@ def plot_irt(data):
         fontsize=9,
         arrowprops=dict(arrowstyle="->"),
     )
-      
+
     plt.tight_layout(pad=0)
     plt.subplots_adjust()
     plt.savefig("figures_pdf/20-annotated_irt.pdf")
     plt.show()
+
+
 # %%
 data_old = list(utils.load_data_wmt_all(normalize=True).values())[2]
 
@@ -141,7 +144,7 @@ data_old = list(utils.load_data_wmt_all(normalize=True).values())[2]
 
 #     data_y = (data_y - min_y) / (max_y - min_y)
 #     mean = np.mean(data_y)
-    
+
 #     return data_y
 # data_y = []
 # systems = list(data_old_norm[0]["scores"].keys())

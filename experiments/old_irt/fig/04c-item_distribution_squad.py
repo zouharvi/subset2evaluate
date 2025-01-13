@@ -2,7 +2,6 @@
 Look at individual segments and how they correspond to system averages.
 """
 
-import json
 import utils_fig
 import subset2evaluate.utils as utils
 import matplotlib.pyplot as plt
@@ -13,8 +12,10 @@ data = utils.load_data_squad()
 systems = list(data[0]["scores"].keys())
 data = [[item["scores"][sys]["f1"] for item in data] for sys in systems]
 
+
 def linear(x, a, b):
     return a * x + b
+
 
 utils_fig.matplotlib_default()
 
@@ -28,7 +29,7 @@ fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
     ax.set_title(f"Item {item_i}")
     np.random.seed(0)
-    system_subset = np.random.random_integers(0, len(data_x)-1, 15)
+    system_subset = np.random.random_integers(0, len(data_x) - 1, 15)
 
     _data_y = np.array([sys_v[item_i] for sys_v in data])[system_subset]
     _data_x = np.array(data_x)[system_subset]
@@ -36,7 +37,7 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
 
     p, _ = curve_fit(linear, _data_x, _data_y, maxfev=50000)
     ax.plot(data_x_ticks, linear(data_x_ticks, *p))
-    
+
     ax.scatter(
         _data_x,
         _data_y,

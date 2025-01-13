@@ -11,21 +11,26 @@ data_old_all = list(utils.load_data_wmt_all().values())[:9]
 points_y_acc_all = collections.defaultdict(list)
 points_y_clu_all = collections.defaultdict(list)
 
+
 def heuristic_metricx_avg(line):
     return np.average(
         [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
     )
 
+
 def heuristic_metricx_var(line):
     return np.var([sys_v["MetricX-23-c"] for sys_v in line["scores"].values()])
+
 
 def heuristic_chrf_avg(line):
     return np.average(
         [sys_v["chrF"] for sys_v in line["scores"].values()]
     )
 
+
 def heuristic_chrf_var(line):
     return np.var([sys_v["chrF"] for sys_v in line["scores"].values()])
+
 
 for data_old in tqdm.tqdm(data_old_all):
     # sort by the heuristic
@@ -56,7 +61,7 @@ for data_old in tqdm.tqdm(data_old_all):
         points_y_clu["metricx_var"].append(
             utils.eval_system_clusters(data_metricx_var[: int(len(data_old) * prop)])
         )
-    
+
     # add lists to the global list
     for k, v in points_y_acc.items():
         points_y_acc_all[k].append(v)
@@ -65,11 +70,11 @@ for data_old in tqdm.tqdm(data_old_all):
 
 points_y_acc_all = {
     k: np.average(np.array(v), axis=0)
-    for k,v in points_y_acc_all.items()
+    for k, v in points_y_acc_all.items()
 }
 points_y_clu_all = {
     k: np.average(np.array(v), axis=0)
-    for k,v in points_y_clu_all.items()
+    for k, v in points_y_clu_all.items()
 }
 # %%
 utils_fig.plot_subset_selection(

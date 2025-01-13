@@ -24,7 +24,7 @@ data_disc = [
 data_diffdisc = [
     {
         "src": line["src"],
-        "score": line["irt"]["diff"]*line["irt"]["disc"],
+        "score": line["irt"]["diff"] * line["irt"]["disc"],
     }
     for line in data_all
 ]

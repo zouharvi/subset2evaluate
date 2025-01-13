@@ -13,13 +13,15 @@ data_old_all = list(utils.load_data_wmt_all().values())[:9]
 points_y_acc_all = []
 points_y_clu_all = []
 
+
 def confidence_interval(data):
     return st.t.interval(
         confidence=0.9,
-        df=len(data)-1,
+        df=len(data) - 1,
         loc=np.mean(data),
         scale=np.std(data)
     )
+
 
 for data_old in tqdm.tqdm(data_old_all):
     points_y_acc = []
@@ -34,7 +36,7 @@ for data_old in tqdm.tqdm(data_old_all):
         )
         points_y_acc.append(acc_new)
         points_y_clu.append(clu_new)
-    
+
     points_y_acc_all.append(np.average(points_y_acc, axis=0))
     points_y_clu_all.append(np.average(points_y_clu, axis=0))
 
@@ -53,6 +55,8 @@ def plot_extra_acc(ax):
             linewidth=1,
             alpha=0.2,
         )
+
+
 def plot_extra_clu(ax):
     for points_y_clu in points_y_clu_all:
         ax.plot(
@@ -63,6 +67,7 @@ def plot_extra_clu(ax):
             linewidth=1,
             alpha=0.2,
         )
+
 
 utils_fig.plot_subset_selection(
     points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.1%}")],

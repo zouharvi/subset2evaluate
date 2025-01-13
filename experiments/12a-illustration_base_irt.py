@@ -1,4 +1,3 @@
-import json
 import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
@@ -33,7 +32,7 @@ def plot_scenario(ax, item, systems, title):
     )
     ax.scatter(
         [x for x, _ in systems],
-        [utils.pred_irt(x, item)+y for x, y in systems],
+        [utils.pred_irt(x, item) + y for x, y in systems],
         marker="o",
         s=100,
         color="#888",

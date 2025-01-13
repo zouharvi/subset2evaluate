@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.ticker as mtick
 import json
 
-data_irt_d0 = json.load(open(f"computed/irt_score_d0.json", "r"))
-data_irt_d1 = json.load(open(f"computed/irt_score_d1.json", "r"))
+data_irt_d0 = json.load(open("computed/irt_score_d0.json", "r"))
+data_irt_d1 = json.load(open("computed/irt_score_d1.json", "r"))
 systems = list(data_irt_d0["systems"].keys())
 utils_fig.matplotlib_default()
 plt.figure(figsize=(2.0, 1.7))
@@ -16,7 +16,7 @@ plt.figure(figsize=(2.0, 1.7))
 
 theta_min = min(min(data_irt_d0["systems"].values()), min(data_irt_d1["systems"].values()))
 theta_max = max(max(data_irt_d0["systems"].values()), max(data_irt_d1["systems"].values()))
-points_x = np.linspace(theta_min-0.4, theta_max+0.4, 100)
+points_x = np.linspace(theta_min - 0.4, theta_max + 0.4, 100)
 
 
 points_y_pred_d0 = [
@@ -71,10 +71,10 @@ plt.text(
 )
 
 
-plt.gca().xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
-plt.gca().yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y*100:.0f}")) 
+plt.gca().xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y * 100:.0f}"))
+plt.gca().yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f"{y * 100:.0f}"))
 
 utils_fig.turn_off_spines()
 plt.tight_layout(pad=0)
-plt.savefig(f"figures/comparable_theta_joint.pdf")
+plt.savefig("figures/comparable_theta_joint.pdf")
 plt.show()

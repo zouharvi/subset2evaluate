@@ -12,8 +12,10 @@ from scipy.optimize import curve_fit
 def sigmoid_irt(x, a, b, c):
     return c / (1 + np.exp(-a * (x - b)))
 
+
 def linear(x, a, b):
     return a * x + b
+
 
 data_wmt = utils.load_data_wmt(normalize=True)
 systems = list(data_wmt[0]["scores"].keys())
@@ -34,7 +36,7 @@ data_x_ticks = np.linspace(min(data_x), max(data_x), 100)
 system_index = systems
 system_index.sort(key=lambda sys: system_scores[sys], reverse=True)
 system_index = {
-    sys: system_index.index(sys)+1
+    sys: system_index.index(sys) + 1
     for sys in systems
 }
 print(system_index)

@@ -1,9 +1,9 @@
-import json
 from typing import List, Any, Union, Tuple, Dict
 import subset2evaluate.utils as utils
 import subset2evaluate.methods as methods
 import copy
 import sys
+
 
 def run_select_subset(
     data: Union[List, str],

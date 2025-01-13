@@ -26,10 +26,9 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
             data_old, data_new,
             metric="human"
         )
-    
+
         points_y_acc_all["pyirt_diffdisc"][data_name].append(acc_new)
         points_y_clu_all["pyirt_diffdisc"][data_name].append(clu_new)
-
 
     for _ in range(1):
         data_new = subset2evaluate.select_subset.run_select_subset(
@@ -39,7 +38,7 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
             data_old, data_new,
             metric="human"
         )
-    
+
         points_y_acc_all["diversity_bleu"][data_name].append(acc_new)
         points_y_clu_all["diversity_bleu"][data_name].append(clu_new)
 

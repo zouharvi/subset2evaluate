@@ -6,6 +6,7 @@ import json
 import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 
+
 class IRTModelBase(L.LightningModule):
     def __init__(self, systems, **kwargs):
         super().__init__()
@@ -29,7 +30,7 @@ class IRTModelBase(L.LightningModule):
                     theta,
                     item
                 )
-                information += prob*(1-prob)*(item["disc"]**2)
+                information += prob * (1 - prob) * (item["disc"]**2)
             return information
 
         self.fn_utility = {
@@ -50,7 +51,7 @@ class IRTModelBase(L.LightningModule):
     def training_step(self, batch, batch_idx):
         # apply constraint
         if self.clamp_feas:
-            self.param_feas.data = torch.clamp(self.param_feas, min=10e-3, max=1-10e-3)
+            self.param_feas.data = torch.clamp(self.param_feas, min=10e-3, max=1 - 10e-3)
 
         # training_step defines the train loop.
         # it is independent of forward
@@ -79,7 +80,7 @@ class IRTModelBase(L.LightningModule):
         )
 
         data_new = [x[0] for x in items_joint]
-        
+
         clu_new_metric, acc_new_metric = subset2evaluate.evaluate.run_evaluate_topk(
             self.data_old,
             data_new,
@@ -94,7 +95,7 @@ class IRTModelBase(L.LightningModule):
             # TODO: set this dynamically
             metric="human"
         )
-        
+
         # print(
         # f"Metric CLU: {np.average(clu_new_metric):.2f} | ACC: {np.average(acc_new_metric):.1%} | ",
         # f"Human  CLU: {np.average(clu_new_human):.2f} | ACC: {np.average(acc_new_human):.1%}",
@@ -121,7 +122,7 @@ class IRTModelBase(L.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.05)
-    
+
     def pack_irt_params(self):
         return {
             "items": self.pack_irt_params_items(),

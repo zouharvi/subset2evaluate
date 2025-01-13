@@ -1,4 +1,5 @@
-# %% 
+# %%
+from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -13,7 +14,7 @@ axs[0].bar(
     width=0.15,
     color=figutils.COLORS[1],
     alpha=0.5,
-    
+
 )
 axs[0].bar(
     x=np.array([1]),
@@ -25,13 +26,13 @@ axs[0].set_ylabel("Probability / Density")
 axs[0].set_xlabel("Binary Succcess")
 axs[0].set_xticks(
     [0, 1],
-    [" "*5 + "Incorrect", "Correct" + " "*5],
+    [" " * 5 + "Incorrect", "Correct" + " " * 5],
     fontsize=8,
 )
 
 axs[0].annotate(
     "$p$=65% =\nIRT prediction",
-    xy=(1-0.07, 0.65),
+    xy=(1 - 0.07, 0.65),
     xytext=(0.15, 0.7),
     arrowprops=dict(
         facecolor='black',
@@ -60,11 +61,8 @@ axs[0].annotate(
     va='center',
 )
 
-
-from scipy.stats import norm 
-  
-xs = np.arange(0, 1, 0.01) 
-ys = norm.pdf(xs, 0.65, 1/5)
+xs = np.arange(0, 1, 0.01)
+ys = norm.pdf(xs, 0.65, 1 / 5)
 axs[1].fill_between(
     xs, 0, ys,
     alpha=0.5,
@@ -84,7 +82,7 @@ axs[1].bar(
 )
 axs[1].bar(
     x=[0.65],
-    height=[norm.pdf(0.65, 0.65, 1/5)],
+    height=[norm.pdf(0.65, 0.65, 1 / 5)],
     width=0.014,
     color=figutils.COLORS[1],
 )
@@ -96,8 +94,8 @@ axs[1].set_xticks(
     fontsize=8,
 )
 axs[1].set_yticks([])
-axs[1].set_xlim(-1e-1, 1+1e-1)
-                  
+axs[1].set_xlim(-1e-1, 1 + 1e-1)
+
 
 axs[1].annotate(
     "$\\mu$=65% =\nIRT prediction",

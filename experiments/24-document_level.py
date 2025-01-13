@@ -9,8 +9,8 @@ import itertools
 import sacrebleu
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
-
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
+
 
 def utility_diversity(line):
     score = -np.average([
@@ -22,10 +22,9 @@ def utility_diversity(line):
     ])
     return score
 
-
-
 # %%
 # aggregate scores
+
 
 acc_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
@@ -87,14 +86,11 @@ for method, acc_new in acc_new_all.items():
 for method, clu_new in clu_new_all.items():
     print(method, f"CLU: {np.average(clu_new):.2f}")
 
-
-
 # %%
 # aggregate utilities
 
 acc_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
-
 
 for data_old in tqdm.tqdm(data_old_all):
     def evaluate_aggregate_second(data_y):
@@ -124,7 +120,7 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["metric_var"].append(acc_new)
         clu_new_all["metric_var"].append(clu_new)
-        
+
         data_y = [np.average([-line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["metric_avg"].append(acc_new)
@@ -147,8 +143,8 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["random"].append(acc_new)
         clu_new_all["random"].append(clu_new)
-        
-        
+
+
 print("Aggregate utility:")
 for method, acc_new in acc_new_all.items():
     print(method, f"ACC: {np.average(acc_new):.1%}")

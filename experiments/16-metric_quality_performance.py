@@ -2,7 +2,6 @@
 import subset2evaluate.select_subset
 import subset2evaluate.evaluate
 import subset2evaluate.utils
-import copy
 import random
 import tqdm
 import numpy as np
@@ -10,6 +9,7 @@ import scipy.stats
 import subset2evaluate.utils as utils
 import utils_fig as fig_utils
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import collections
 
 random.seed(0)
@@ -43,7 +43,7 @@ for data_old in tqdm.tqdm(data_old_all):
                 for sys in systems
             ]
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
-            
+
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="random", metric=metric)
             clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_avg)
             clus_all['random'].append(np.average(clu_new))
@@ -78,13 +78,16 @@ for data_old in tqdm.tqdm(data_old_all):
 # %%
 
 data_x = np.linspace(0, 0.55, 10)
+
+
 def aggregate_data_y(data_y):
     assert len(corrs_all) == len(data_y)
     data_y_new = []
-    for x1, x2 in zip(data_x, list(data_x[1:])+[float("inf")]):
+    for x1, x2 in zip(data_x, list(data_x[1:]) + [float("inf")]):
         # add all data that are in [x1, x2) interval
-        data_y_new.append([y for x, y in zip(corrs_all, data_y) if x1 <= x < x2 and type(y) == np.float64])
+        data_y_new.append([y for x, y in zip(corrs_all, data_y) if x1 <= x < x2 and isinstance(y, np.float64)])
     return [np.average(l) for l in data_y_new]
+
 
 # figure for accuracy
 fig_utils.matplotlib_default()
@@ -93,34 +96,34 @@ fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
 axs[0].plot(
     data_x,
     aggregate_data_y(accs_all["random"]),
-    label=f"random",
+    label="random",
     linewidth=2,
     color="black",
 )
 axs[0].plot(
     data_x,
     aggregate_data_y(accs_all["diversity_bleu"]),
-    label=f"diversity_bleu",
+    label="diversity_bleu",
     linewidth=2,
     color="gray",
 )
 axs[0].plot(
     data_x,
     aggregate_data_y(accs_all["metric_avg"]),
-    label=f"metric avg",
+    label="metric avg",
     linewidth=2,
 )
 axs[0].plot(
     data_x,
     aggregate_data_y(accs_all["metric_var"]),
-    label=f"metric var",
+    label="metric var",
     linewidth=2,
 )
 
 data_y = aggregate_data_y(accs_all["irt"])
 axs[0].plot(
     data_x, data_y,
-    label=f"IRT diff.$\\times$disc.",
+    label="IRT diff.$\\times$disc.",
     linewidth=2,
 )
 
@@ -136,7 +139,6 @@ axs[0].legend(
     fontsize=8
 )
 # show y-axis as percentage
-import matplotlib as mpl
 axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 axs[0].spines[['top', 'right']].set_visible(False)
 
@@ -145,40 +147,40 @@ axs[0].spines[['top', 'right']].set_visible(False)
 axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["random"]),
-    label=f"random",
+    label="random",
     linewidth=2,
     color="black",
 )
 axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["diversity_bleu"]),
-    label=f"diversity_bleu",
+    label="diversity_bleu",
     linewidth=2,
     color="gray",
 )
 axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["metric_avg"]),
-    label=f"metric avg",
+    label="metric avg",
     linewidth=2,
 )
 axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["metric_var"]),
-    label=f"metric var",
+    label="metric var",
     linewidth=2,
 )
 
 axs[1].plot(
     data_x,
     aggregate_data_y(clus_all["irt"]),
-    label=f"IRT diff.$\\times$disc.",
+    label="IRT diff.$\\times$disc.",
     linewidth=2,
 )
 
 axs[1].set_ylabel("Average cluster count")
 axs[1].set_xticks([0.0, 0.25, 0.5])
-axs[1].set_xlabel("Metric correlation with human" +" " *40)
+axs[1].set_xlabel("Metric correlation with human" + " " * 40)
 axs[1].spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
 plt.savefig("figures_pdf/16-metric_quality_performance.pdf")
