@@ -24,6 +24,7 @@ dependencies = [
   "scikit-learn",
   "tqdm",
   "matplotlib",
+  "requests",
   # "unbabel_comet @ git+https://github.com/zouharvi/PreCOMET.git",
   # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]

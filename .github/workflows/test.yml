@@ -20,13 +20,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.11
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
     - name: Install dependencies
       run: |
         pip install --upgrade pip
         pip install flake8 pytest
+        rm -f subset2evaluate/README.md
         pip install -e .
     - name: Lint with flake8
       run: |
