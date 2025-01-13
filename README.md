@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/logo.svg" height="25em"> subset2evaluate &nbsp;&nbsp;&nbsp; ![PyPI Version](https://img.shields.io/pypi/v/subset2evaluate)
+# <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/logo.svg" height="25em"> subset2evaluate &nbsp;&nbsp;&nbsp; ![PyPI Version](https://img.shields.io/pypi/v/subset2evaluate) [![test subset2evaluate](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml/badge.svg)](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml)
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.

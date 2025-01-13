@@ -18,9 +18,9 @@ authors = [
 keywords = ["evaluation", "natural language generation", "machine translation", "human evaluation", "subset selection"]
 dependencies = [
   "numpy",
-  "torch",
-  "lightning",
   "pandas",
+  "sacrebleu",
+  "datasets",
   "scikit-learn",
   "tqdm",
   "matplotlib",
