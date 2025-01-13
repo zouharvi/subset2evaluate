@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/logo.svg" height="25em"> subset2evaluate
+# <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/logo.svg" height="25em"> subset2evaluate &nbsp;&nbsp;&nbsp; ![PyPI Version](https://img.shields.io/pypi/v/subset2evaluate)
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
@@ -65,7 +65,6 @@ Install the package and download WMT data:
 pip3 install subset2evaluate
 # optionally these two packages for IRT and PreCOMET based selections
 pip3 install git+https://github.com/zouharvi/PreCOMET.git git+https://github.com/zouharvi/py-irt.git
-bash experiments/01-get_wmt_data.sh
 ```
 
 Then in Python we compute the baseline:
