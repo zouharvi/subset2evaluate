@@ -30,7 +30,7 @@ General recommendations based on MT evaluation:
 The package supports multiple methods.
 We show benchmark of the methods on machine translation evaluation:
 
-| Method | Requirements | Cluster count | Accuracy |
+| Method | Requirements | Accuracy | Cluster count |
 |-|-|-|-|
 | Random | | 91.0% | 2.25 |
 | **Output-based selection** |
@@ -48,7 +48,7 @@ We show benchmark of the methods on machine translation evaluation:
 
 And benchmark of the methods for summarization:
 
-| Method | Requirements | Cluster count | Accuracy |
+| Method | Requirements | Accuracy | Cluster count |
 |-|-|-|-|
 | Random | | 90.5% | 2.00 |
 | **Output-based selection** |
