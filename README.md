@@ -174,7 +174,7 @@ json.dumps(data[0], indent=2)
 We recommend using the Python interface but the package can also be used from the command line:
 
 ```
-subset2evaluate wmt23/en-cs --method var --args "{'metric': 'MetricX-23'}" > wmt23_encs_sorted.jsonl
+subset2evaluate wmt23/en-cs --method metric_var --args "{'metric': 'MetricX-23'}" > wmt23_encs_sorted.jsonl
 subset2evaluate-eval wmt23/en-cs wmt23_encs_sorted.jsonl 
 > Clusters: 2.30
 > Accuracy: 86.7%
