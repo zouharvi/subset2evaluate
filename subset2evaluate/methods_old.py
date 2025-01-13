@@ -104,12 +104,12 @@ def nn_irt(data, metric, **kwargs):
     )
     val_loaders_dict = {
         "val": torch_data.DataLoader(
-        data_test,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        collate_fn=train_collator,
-        num_workers=1,
-    )
+            data_test,
+            batch_size=BATCH_SIZE,
+            shuffle=True,
+            collate_fn=train_collator,
+            num_workers=1,
+        )
     }
     val_loader_names = list(val_loaders_dict.keys())
     val_loaders = [val_loaders_dict[name] for name in val_loader_names]

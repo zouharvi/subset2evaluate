@@ -18,7 +18,7 @@ def _data_minmax_normalize(data):
     # normalize
     data_flat = {
         k: (min(v), max(v))
-        for k,v in data_flat.items()
+        for k, v in data_flat.items()
     }
 
     for line in data:
@@ -49,6 +49,21 @@ def _data_median_binarize(data):
             for met_k, met_v in met_all.items():
                 line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
 
+def ensure_wmt_exists():
+    import requests
+    import os
+    import tarfile
+
+    if not os.path.exists("data/mt-metrics-eval-v2/"):
+        print("Downloading WMT data because data/mt-metrics-eval-v2/ does not exist..")
+        os.makedirs("data/", exist_ok=True)
+        r = requests.get("https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz")
+        with open("data/mt-metrics-eval-v2.tgz", "wb") as f:
+            f.write(r.content)
+        with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
+            f.extractall("data/")
+        os.remove("data/mt-metrics-eval-v2.tgz")
+
 def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
     import glob
     import collections
@@ -59,6 +74,8 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
 
     # temporarily change to the root directory
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+        ensure_wmt_exists()
+
         os.makedirs("data/cache/", exist_ok=True)
         cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
 
@@ -129,7 +146,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 lines_score[sys][line_i % len(lines_src)][metric] = float(score)
 
         # filter out lines that have no human score
-        lines_score = {k:v for k,v in lines_score.items() if len(v) > 0}
+        lines_score = {k: v for k, v in lines_score.items() if len(v) > 0}
         systems = [sys for sys in systems if sys in lines_score]
 
         # putting it all together
@@ -427,7 +444,7 @@ def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((scores_old[sys1]<scores_old[sys2])==(scores_new[sys1]<scores_new[sys2]))
+        result.append((scores_old[sys1] < scores_old[sys2]) ==( scores_new[sys1] < scores_new[sys2]))
 
     return np.average(result)
 
@@ -440,7 +457,7 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((scores_old[sys1]<scores_old[sys2])==(scores_new[sys1]<scores_new[sys2]))
+        result.append((scores_old[sys1] < scores_old[sys2]) == (scores_new[sys1] < scores_new[sys2]))
 
     return np.average(result)
 
@@ -452,7 +469,7 @@ def get_ord_accuracy(ord1, ord2):
     result = []
 
     for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((ord2[sys1]<ord2[sys2])==(ord1[sys1]<ord1[sys2]))
+        result.append((ord2[sys1]<ord2[sys2]) == (ord1[sys1]<ord1[sys2]))
 
     return np.average(result)
 
@@ -486,6 +503,5 @@ def load_data(data: Union[List, str]):
         return load_data_summeval(normalize=True)
     else:
         raise Exception("Could not parse data")
-    
-    return data
 
+    return data
