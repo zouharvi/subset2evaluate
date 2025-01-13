@@ -3,6 +3,7 @@ import torch.utils
 from base import IRTModelBase
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+
 class IRTModelTFIDF(IRTModelBase):
     def __init__(self, data, systems, **kwargs):
         super().__init__(systems=systems, **kwargs)
@@ -19,15 +20,15 @@ class IRTModelTFIDF(IRTModelBase):
         self.param_feas = torch.nn.Linear(768, 1)
 
         self.len_items = len(data)
-    
+
     def get_irt_params(self, i_item, name):
         if name == "disc":
-            return self.param_disc(self.text_src[i_item,:]).flatten()
+            return self.param_disc(self.text_src[i_item, :]).flatten()
         elif name == "diff":
-            return self.param_diff(self.text_src[i_item,:]).flatten()
+            return self.param_diff(self.text_src[i_item, :]).flatten()
         elif name == "feas":
-            return self.param_feas(self.text_src[i_item,:]).flatten()
-        
+            return self.param_feas(self.text_src[i_item, :]).flatten()
+
     def pack_irt_params_items(self):
         return [
             {

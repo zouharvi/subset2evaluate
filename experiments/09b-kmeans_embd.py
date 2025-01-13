@@ -7,9 +7,11 @@ from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2").to("cuda:0")
 
+
 def vec_sim(a, b):
     # return -np.linalg.norm(a-b)
     return np.dot(a, b)
+
 
 data_old = utils.load_data_wmt()
 # encode references

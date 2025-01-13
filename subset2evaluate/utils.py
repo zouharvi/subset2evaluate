@@ -3,6 +3,7 @@ from typing import Dict
 import numpy as np
 PROPS = np.geomspace(0.05, 0.5, 10)
 
+
 def _data_minmax_normalize(data):
     """
     In-place min-max normalization of all scores
@@ -25,7 +26,8 @@ def _data_minmax_normalize(data):
         for sys, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
                 # (x-min)/(max-min) normalize
-                line["scores"][sys][met_k] = (met_v-data_flat[met_k][0])/(data_flat[met_k][1]-data_flat[met_k][0])
+                line["scores"][sys][met_k] = (met_v - data_flat[met_k][0]) / (data_flat[met_k][1] - data_flat[met_k][0])
+
 
 def _data_median_binarize(data):
     """
@@ -41,13 +43,14 @@ def _data_median_binarize(data):
     # normalize
     data_flat = {
         k: np.median(v)
-        for k,v in data_flat.items()
+        for k, v in data_flat.items()
     }
 
     for line in data:
         for sys, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
-                line["scores"][sys][met_k] = 1*(met_v >= data_flat[met_k])
+                line["scores"][sys][met_k] = 1 * (met_v >= data_flat[met_k])
+
 
 def ensure_wmt_exists():
     import requests
@@ -63,6 +66,7 @@ def ensure_wmt_exists():
         with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
+
 
 def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
     import glob
@@ -106,7 +110,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
             sys = f.split("/")[-1].removesuffix(".txt")
             if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
-                    continue
+                continue
 
             line_sys[sys] = open(f, "r").readlines()
 
@@ -124,15 +128,14 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
         ]:
             if fname and os.path.exists(fname):
                 break
-        
+
         if not fname:
             # did not find human scores
             return []
-        
+
         for line_raw in open(fname, "r").readlines():
             sys, score = line_raw.strip().split()
             lines_score[sys].append({"human": score})
-
 
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
             metric = f.split("/")[-1].removesuffix("-refA.seg.score")
@@ -180,10 +183,9 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 "time": 0.15 * word_count + 33.7,
                 "domain": line_domain,
                 "doc": line_doc,
-                "scores": {sys: {metric: float(v) for metric,v in lines_score[sys][line_i].items()} for sys in systems},
+                "scores": {sys: {metric: float(v) for metric, v in lines_score[sys][line_i].items()} for sys in systems},
             })
             line_id_true += 1
-
 
         # normalize times
         if data:
@@ -194,8 +196,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 # make it have var=1 and avg=0
                 # line["time"] = (line["time"]-data_flat[0])/(data_flat[1]-data_flat[0]) + 1
                 # z-normalize
-                line["time"] = (line["time"]-mean)/std + 1
-        
+                line["time"] = (line["time"] - mean) / std + 1
 
         # this is min-max normalization
         if normalize and not binarize:
@@ -203,12 +204,13 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
 
         if binarize:
             _data_median_binarize(data)
-        
+
         # save cache
         with open(cache_f, "wb") as f:
             pickle.dump(data, f)
-    
+
     return data
+
 
 def load_data_wmt_all(min_segments=500, **kwargs):
     data = {
@@ -309,7 +311,8 @@ def load_data_wmt_all(min_segments=500, **kwargs):
     }
     # filter out empty datasets
     # some years/langs have issues with human annotations coverage
-    return {k:v for k,v in data.items() if len(v) > min_segments}
+    return {k: v for k, v in data.items() if len(v) > min_segments}
+
 
 def load_data_summeval(normalize=True):
     from datasets import load_dataset
@@ -332,10 +335,9 @@ def load_data_summeval(normalize=True):
         scores["human_all"] = reduce(lambda x, y: x * y, scores.values())
         return scores
 
-
     data = []
     for i, v in data_by_id.items():
-        # "coherence": 2, "consistency": 1, "fluency": 4, "relevance": 2 
+        # "coherence": 2, "consistency": 1, "fluency": 4, "relevance": 2
         data.append({
             "i": i,
             "src": None,
@@ -367,12 +369,11 @@ def load_data_summeval(normalize=True):
         for line in data
     ]
 
-
     if normalize:
         _data_minmax_normalize(data)
-    
 
     return data
+
 
 def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections
@@ -392,20 +393,22 @@ def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
 
     return scores_new
 
+
 def get_sys_ordering(data_new: list, metric="human"):
     scores_new = get_sys_absolute(data_new, metric)
-    
+
     # sort to get ordering
     scores_new = list(scores_new.items())
     # sort from highest
     scores_new.sort(key=lambda x: x[1], reverse=True)
-    
+
     sys_ord = {
         sys: sys_i
         for sys_i, (sys, sys_v) in enumerate(scores_new)
     }
 
     return sys_ord
+
 
 def eval_system_clusters(data: list, metric="human"):
     from scipy.stats import wilcoxon
@@ -425,18 +428,19 @@ def eval_system_clusters(data: list, metric="human"):
         sys_scores = get_scores(sys_ord.pop(0))
         diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
         warnings.simplefilter("ignore", category=UserWarning)
-        if all([d==0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
+        if all([d == 0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
             clusters.append([sys_scores])
         else:
             clusters[-1].append(sys_scores)
     warnings.resetwarnings()
     return len(clusters)
 
+
 def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
     # evaluates against ordering from data_old
     import itertools
     import numpy as np
-    
+
     systems = list(data_old[0]["scores"].keys())
 
     scores_old = get_sys_absolute(data_old, metric=metric)
@@ -444,15 +448,16 @@ def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
 
     result = []
     for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((scores_old[sys1] < scores_old[sys2]) ==( scores_new[sys1] < scores_new[sys2]))
+        result.append((scores_old[sys1] < scores_old[sys2]) == (scores_new[sys1] < scores_new[sys2]))
 
     return np.average(result)
+
 
 def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, float]):
     # evaluates against ordering from data_old
     import itertools
     import numpy as np
-    
+
     systems = list(scores_old.keys())
 
     result = []
@@ -460,6 +465,7 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
         result.append((scores_old[sys1] < scores_old[sys2]) == (scores_new[sys1] < scores_new[sys2]))
 
     return np.average(result)
+
 
 def get_ord_accuracy(ord1, ord2):
     import itertools
@@ -469,9 +475,10 @@ def get_ord_accuracy(ord1, ord2):
     result = []
 
     for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((ord2[sys1]<ord2[sys2]) == (ord1[sys1]<ord1[sys2]))
+        result.append((ord2[sys1] < ord2[sys2]) == (ord1[sys1] < ord1[sys2]))
 
     return np.average(result)
+
 
 def pred_irt(system_theta, item):
     import numpy as np
@@ -484,6 +491,7 @@ def pred_irt(system_theta, item):
     if "diff" in item:
         return 1 / (1 + np.exp(system_theta - item["diff"]))
     raise Exception("Uknown item", item)
+
 
 def load_data(data: Union[List, str]):
     import os

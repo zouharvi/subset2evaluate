@@ -1,9 +1,10 @@
 import numpy as np
 import subset2evaluate
 
+
 def test_wmt_loader():
     data = subset2evaluate.utils.load_data("wmt23/all")
-    assert type(data) == dict
+    assert isinstance(data, dict)
     assert len(data) == 33
     assert len(data[("wmt23", "en-cs")]) == 1098
     assert "src" in data[("wmt23", "en-cs")][0]
@@ -25,6 +26,7 @@ def test_wmt_method_metric_var():
     assert abs(np.average(clu_new) - 1.8000) < 0.01
     assert abs(np.average(acc_new) - 0.8552) < 0.01
 
+
 def test_wmt_method_diversity():
     data_new = subset2evaluate.select_subset.run_select_subset("wmt23/en-de", method="diversity_bleu")
     clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk("wmt23/en-de", data_new, metric="human")
@@ -34,7 +36,7 @@ def test_wmt_method_diversity():
 
 def test_summeval_loader():
     data = subset2evaluate.utils.load_data("summeval")
-    assert type(data) == list
+    assert isinstance(data, list)
     assert len(data) == 100
     assert "tgt" in data[0]
     assert "scores" in data[0]
@@ -47,6 +49,7 @@ def test_summeval_method_random():
     # it is a bit different on GitHub actions, therefore higher error margin
     assert abs(np.average(clu_new) - 1.6000) < 0.2
     assert abs(np.average(acc_new) - 0.9279) < 0.2
+
 
 def test_summeval_method_metric_var():
     data_new = subset2evaluate.select_subset.run_select_subset("summeval", method="metric_var", metric="coverage")

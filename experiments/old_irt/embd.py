@@ -1,9 +1,11 @@
+# flake8: noqa E402
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 import torch.utils
 from base import IRTModelBase
 from sentence_transformers import SentenceTransformer
+
 
 class IRTModelEmbd(IRTModelBase):
     def __init__(self, data, systems, **kwargs):
@@ -28,15 +30,15 @@ class IRTModelEmbd(IRTModelBase):
         self.param_feas = fn()
 
         self.len_items = len(data)
-    
+
     def get_irt_params(self, i_item, name):
         if name == "disc":
-            return self.param_disc(self.text_src[i_item,:]).flatten()
+            return self.param_disc(self.text_src[i_item, :]).flatten()
         elif name == "diff":
-            return self.param_diff(self.text_src[i_item,:]).flatten()
+            return self.param_diff(self.text_src[i_item, :]).flatten()
         elif name == "feas":
-            return self.param_feas(self.text_src[i_item,:]).flatten()
-        
+            return self.param_feas(self.text_src[i_item, :]).flatten()
+
     def pack_irt_params_items(self):
         return [
             {

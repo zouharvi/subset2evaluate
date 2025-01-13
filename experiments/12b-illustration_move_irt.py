@@ -1,4 +1,3 @@
-import json
 import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
@@ -31,6 +30,7 @@ data_x = np.linspace(-2, 4, 100)
 
 _, axs = plt.subplots(ncols=3, figsize=(9.3, 3))
 
+
 def plot_scenario(ax, item_new, title):
     ax.plot(
         data_x,
@@ -52,7 +52,7 @@ def plot_scenario(ax, item_new, title):
     )
     ax.text(
         x=data_x[-1],
-        y=utils.pred_irt(data_x[-1], item_base)*0.65,
+        y=utils.pred_irt(data_x[-1], item_base) * 0.65,
         ha="right",
         va="top",
         s="\n".join([f"{k}: {v}" for k, v in item_new.items()]),
@@ -65,6 +65,7 @@ def plot_scenario(ax, item_new, title):
 
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_ylim(0, 1)
+
 
 plot_scenario(axs[2], item_diff, "difficulty")
 plot_scenario(axs[1], item_disc, "discriminability")

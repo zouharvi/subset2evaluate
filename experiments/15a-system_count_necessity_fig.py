@@ -24,7 +24,7 @@ for subset_size in tqdm.tqdm(points_x):
     for data_old in data_old_all:
         data_old_i_to_line = {line["i"]: line for line in data_old}
         systems = list(data_old[0]["scores"].keys())
-        
+
         # run multiple times
         for _ in range(4):
             systems_local = random.sample(systems, k=min(subset_size, len(systems)))
@@ -65,7 +65,7 @@ for subset_size in tqdm.tqdm(points_x):
             ])
             clus_new.append((clu_new_avg, clu_new_var, clu_new_irt, clu_new_div))
             accs_new.append((acc_new_avg, acc_new_var, acc_new_irt, acc_new_div))
-    
+
     accs_all.append(np.average(accs_new, axis=0))
     clus_all.append(np.average(clus_new, axis=0))
 
@@ -175,7 +175,7 @@ plt.hlines(
     label="Random",
 )
 # plt.ylim(0.91, None)
-plt.ylabel("Average cluster count" + " "*10, labelpad=10)
+plt.ylabel("Average cluster count" + " " * 10, labelpad=10)
 plt.xlabel("Number of systems in training data" + " " * 5)
 plt.xticks(range(min(points_x), max(points_x), 3))
 plt.legend(

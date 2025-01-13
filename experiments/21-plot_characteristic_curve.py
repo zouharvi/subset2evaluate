@@ -1,6 +1,3 @@
-
-
-
 # %%
 
 import subset2evaluate.utils as utils
@@ -34,10 +31,11 @@ with open("computed/21-plot_characteristic_curve.pkl", "wb") as f:
 with open("computed/21-plot_characteristic_curve.pkl", "rb") as f:
     data_irt_score, data_irt_bin, data_old, data_old_bin = pickle.load(f)
 
-# %%
 
+# %%
 def pred_irt_4pl(theta, item):
     return item["feas"] / (1 + np.exp(-item["disc"] * (theta - item["diff"])))
+
 
 def plot_item_curve(ax, data_irt, data_old, title, item_i=87):
     data_old_item = data_old[item_i]
@@ -46,7 +44,6 @@ def plot_item_curve(ax, data_irt, data_old, title, item_i=87):
     theta_min = min(list(data_irt["systems"].values()))
     theta_max = max(list(data_irt["systems"].values()))
 
-    
     data_x = np.linspace(theta_min, theta_max, 100)
     data_y = [pred_irt_4pl(theta, data_irt_item) for theta in data_x]
     ax.plot(
@@ -61,7 +58,7 @@ def plot_item_curve(ax, data_irt, data_old, title, item_i=87):
         color=figutils.COLORS[0] if "Cont" in title else figutils.COLORS[1],
     )
     ax.set_title(title, fontsize=10)
-    ax.set_ylim(0-0.1, 1+0.1)
+    ax.set_ylim(0 - 0.1, 1 + 0.1)
     ax.spines[["top", "right"]].set_visible(False)
 
 
@@ -93,9 +90,10 @@ y_pred = [(i, [pred_irt_4pl(theta, item) for theta in data_irt_bin["systems"].va
 y_true = [(i, [data_old_bin[i]["scores"][system]["MetricX-23-c"] for system in data_irt_bin["systems"]]) for i in range(len(data_old_bin))]
 losses = [(i, np.mean((np.array(y_pred[i][1]) - np.array(y_true[i][1]))**2)) for i in range(len(data_old_bin))]
 losses = [
-    (i, l) for i, l in losses if
-    np.mean([data_old_bin[i]["scores"][system]["MetricX-23-c"] for system in data_irt_bin["systems"]]) > 0.2 and 
-    np.mean([data_old_bin[i]["scores"][system]["MetricX-23-c"] for system in data_irt_bin["systems"]]) < 0.8
+    (i, l) for i, l in losses if (
+        np.mean([data_old_bin[i]["scores"][system]["MetricX-23-c"] for system in data_irt_bin["systems"]]) > 0.2 and
+        np.mean([data_old_bin[i]["scores"][system]["MetricX-23-c"] for system in data_irt_bin["systems"]]) < 0.8
+    )
 ]
 sorted(losses, key=lambda x: x[1])[100:120]
 
@@ -118,7 +116,7 @@ def plot_test_curve(ax, data_irt, data_old, title):
         data_irt_item = data_irt["items"][item_i]
         data_y_pred_all.append([pred_irt_4pl(theta, data_irt_item) for theta in data_x])
         data_y_true_all.append([data_old_item["scores"][system]["MetricX-23-c"] for system in systems])
-    
+
     ax.plot(
         data_x,
         np.average(data_y_pred_all, axis=0),
@@ -132,6 +130,7 @@ def plot_test_curve(ax, data_irt, data_old, title):
     )
     ax.set_title(title, fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
+
 
 fig, axs = plt.subplots(1, 2, figsize=(4, 2))
 plot_test_curve(axs[0], data_irt_bin, data_old_bin, "Binary IRT")

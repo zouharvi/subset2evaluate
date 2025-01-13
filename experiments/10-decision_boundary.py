@@ -10,12 +10,14 @@ for line in data_old:
     # TODO: also try with oracle?
     line["ord"] = utils.get_sys_ordering([line], metric="MetricX-23-c")
 
+
 def ord_distance(ord_a: dict, ord_b: dict):
     return np.average([
         # np.abs(ord_a[sys]-ord_b[sys])
-        np.square(ord_a[sys]-ord_b[sys])
+        np.square(ord_a[sys] - ord_b[sys])
         for sys in ord_a.keys()
     ])
+
 
 points_x = []
 points_y_lo = []
@@ -38,7 +40,7 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_old_lo_local = [x for x in data_old_lo_local if x["i"] not in data_new_lo_set_i]
         data_old_hi_local = [x for x in data_old_hi_local if x["i"] not in data_new_hi_set_i]
 
-        while len(data_new_lo) < int(len(data_old)*prop):
+        while len(data_new_lo) < int(len(data_old) * prop):
             # this is for purely active learning
             # cur_ord = utils.get_sys_ordering(data_new, metric="score")
             # this is true apriori subset selection
@@ -53,7 +55,7 @@ for prop in tqdm.tqdm(utils.PROPS):
             data_old_lo_local = [x for x in data_old_lo_local if x["i"] not in data_new_lo_set_i]
             data_new_lo.append(line_lo_conf)
 
-        while len(data_new_hi) < int(len(data_old)*prop):
+        while len(data_new_hi) < int(len(data_old) * prop):
             cur_ord = utils.get_sys_ordering(data_new_hi, metric="MetricX-23-c")
             line_hi_conf = max(data_old_hi_local, key=lambda x: ord_distance(cur_ord, x["ord"]))
             data_new_hi_set_i.add(line_hi_conf["i"])

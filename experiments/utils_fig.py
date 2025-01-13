@@ -19,11 +19,13 @@ def matplotlib_default():
     mpl.rcParams["legend.fontsize"] = 9
     mpl.rcParams["legend.borderpad"] = 0.1
 
+
 def turn_off_spines(which=['top', 'right']):
     import matplotlib.pyplot as plt
 
     ax = plt.gca()
     ax.spines[which].set_visible(False)
+
 
 def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
@@ -31,7 +33,7 @@ def plot_subset_selection(
         areas: List[Tuple[List, List, List]] = [],
         fn_extra: Callable = lambda _: None,
         colors: List[str] = COLORS,
-    ):
+):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
     import contextlib
@@ -84,7 +86,6 @@ def plot_subset_selection(
     if not IS_CLUSTERS:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
-
     fn_extra(plt.gca())
 
     plt.legend(
@@ -93,7 +94,7 @@ def plot_subset_selection(
         handlelength=1,
         labelspacing=0.2,
         facecolor="#ccc",
-        scatteryoffsets=[0.5]*len(points),
+        scatteryoffsets=[0.5] * len(points),
     )
 
     if IS_CLUSTERS:

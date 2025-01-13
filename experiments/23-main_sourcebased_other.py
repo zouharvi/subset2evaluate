@@ -44,7 +44,7 @@ utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_acc_all['precomet_diversity'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_acc_all['precomet_diversity']):.1%}"),
         (utils.PROPS, points_y_acc_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff.}}$ {np.average(points_y_acc_all['precomet_diffdisc']):.1%}"),
-        (utils.PROPS, points_y_acc_all['precomet_diffdisc_direct'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_acc_all['precomet_diffdisc_direct']):.1%}"),
+        (utils.PROPS, points_y_acc_all['precomet_diffdisc_direct'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_acc_all['precomet_diffdisc_direct']):.1%}"),
     ],
     "23-main_sourcebased_other",
 )
@@ -52,7 +52,7 @@ utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_clu_all['precomet_diversity'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_clu_all['precomet_diversity']):.2f}"),
         (utils.PROPS, points_y_clu_all['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_clu_all['precomet_diffdisc']):.2f}"),
-        (utils.PROPS, points_y_clu_all['precomet_diffdisc_direct'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu_all['precomet_diffdisc_direct']):.2f}"),
+        (utils.PROPS, points_y_clu_all['precomet_diffdisc_direct'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu_all['precomet_diffdisc_direct']):.2f}"),
     ],
     "23-main_sourcebased_other",
 )

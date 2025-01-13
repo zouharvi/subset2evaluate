@@ -28,6 +28,7 @@ for _ in tqdm.tqdm(range(5)):
         for line, line_irt in zip(data_old, params["items"])
     ])
 
+
 def average_irt_params(data_train):
     # the old data (e.g. line src) is the same everywhere
     data_new = [l for l in data_train[0]]
@@ -43,14 +44,12 @@ def average_irt_params(data_train):
 
     return data_new
 
-data_params = average_irt_params(data_params)
 
+data_params = average_irt_params(data_params)
 
 # dump to computed/irt_params
 os.makedirs("computed/irt_params", exist_ok=True)
 pickle.dump(data_params, open(f"computed/irt_params/{args.i}.pkl", "wb"))
-
-
 
 # for i in $(seq 0 32); do
 #     sbatch_gpu_short "irt_params_$i" "python3 experiments/26-get_irt_params.py $i"

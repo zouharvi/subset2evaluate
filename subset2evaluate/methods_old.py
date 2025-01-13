@@ -14,8 +14,9 @@ def _fn_information_content_old(item_irt, data_irt) -> float:
             theta,
             item_irt
         )
-        information += prob*(1-prob)*(item_irt["disc"]**2)
+        information += prob * (1 - prob) * (item_irt["disc"]**2)
     return information
+
 
 def metric_consistency(data, metric, **kwargs) -> List[float]:
     metric_scores = utils.get_sys_absolute(data, metric=metric)
@@ -25,7 +26,7 @@ def metric_consistency(data, metric, **kwargs) -> List[float]:
         consistency = 0
         total = 0
         for i in range(len(sys_names)):
-            for j in range(i+1, len(sys_names)):
+            for j in range(i + 1, len(sys_names)):
                 if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][metric] - example['scores'][sys_names[j]][metric]) > 0:
                     consistency += 1
                 else:
@@ -71,7 +72,6 @@ def nn_irt(data, metric, **kwargs):
                     "ruling": sys_v[metric],
                 })
         return data_out
-    
 
     def create_agent_indexer_from_dataset(
         dataset_or_path: str | Sequence[dict[str, Any]],
@@ -86,13 +86,11 @@ def nn_irt(data, metric, **kwargs):
         agent_type_map = {entry["agent_id"]: entry["agent_type"] for entry in dataset}
         return neural_irt.train.AgentIndexer(agent_ids, agent_types, agent_type_map)
 
-    
     data_train, data_test = train_test_split(data, test_size=0.1, random_state=0)
     data_train = wrangle_data(data_train)
     data_test = wrangle_data(data_test)
-    agent_indexer = create_agent_indexer_from_dataset(data_train+data_test)
+    agent_indexer = create_agent_indexer_from_dataset(data_train + data_test)
     train_collator = collators.CaimiraCollator(agent_indexer, is_training=True)
-    val_collator = collators.CaimiraCollator(agent_indexer, is_training=False)
 
     # TODO: very likely will fail here because the data is not wrangled properly
     train_loader = torch_data.DataLoader(
@@ -113,7 +111,6 @@ def nn_irt(data, metric, **kwargs):
     }
     val_loader_names = list(val_loaders_dict.keys())
     val_loaders = [val_loaders_dict[name] for name in val_loader_names]
-
 
     class TrainerConfig(BaseModel):
         # Train time
@@ -136,9 +133,9 @@ def nn_irt(data, metric, **kwargs):
 
         ckpt_savedir: str = "./checkpoints/irt"
 
-        c_reg_skill : float = 1e-6
-        c_reg_difficulty : float = 1e-6
-        c_reg_relevance : float = 1e-6
+        c_reg_skill: float = 1e-6
+        c_reg_difficulty: float = 1e-6
+        c_reg_relevance: float = 1e-6
 
     class CaimiraConfig(IrtModelConfig):
         # Number of dimensions in item embeddings
@@ -161,15 +158,14 @@ def nn_irt(data, metric, **kwargs):
         @property
         def arch(self):
             return "caimira"
-        
+
         n_agents: int = len(systems)
         # 1 for now because we don't know what it really is
-        n_agent_types : int = 1
-        n_dim : int = 32
-        fit_guess_bias : float = False
+        n_agent_types: int = 1
+        n_dim: int = 32
+        fit_guess_bias: float = False
         # TODO: turn off?
-        fit_agent_type_embeddings : bool = True
-
+        fit_agent_type_embeddings: bool = True
 
     model = IrtLitModule(
         trainer_config=TrainerConfig(),
@@ -225,7 +221,6 @@ def our_irt(data, metric, **kwargs):
     os.environ["WANDB_SILENT"] = "true"
     from lightning.pytorch.loggers import WandbLogger
 
-
     systems = list(data[0]["scores"].keys())
 
     ModelClass = {
@@ -272,7 +267,6 @@ def our_irt(data, metric, **kwargs):
             print(exception)
             exit()
 
-        
     trainer = L.Trainer(
         max_epochs=2000,
         check_val_every_n_epoch=50,
@@ -327,6 +321,7 @@ def get_nice_subset(data_old, target_size=100, step_size=10, metric="human") -> 
     print(f"New average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
     return data_old
 
+
 def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float]:
     # turn off warnings from sentence-transformers
     import warnings
@@ -348,6 +343,7 @@ def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float
     data_y_test = model.predict(data_x_test)
 
     return list(data_y_test)
+
 
 def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
     import sklearn.neural_network
@@ -383,12 +379,10 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) 
     data_y_diff = model_diff.predict(data_x_test)
     data_y_disc = model_disc.predict(data_x_test)
 
-        
     data_irt_items = [
         {"diff": diff, "disc": disc}
         for diff, disc in zip(data_y_diff, data_y_disc)
     ]
-
 
     items_joint = list(zip(data, data_irt_items))
     items_joint.sort(
@@ -407,8 +401,8 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) 
 def _run_simulation(args):
     data_old, data_prior = args
     data_new = random.sample(data_old, k=min(len(data_old), 20))
-    clusters = utils.eval_system_clusters(data_new+data_prior, metric="MetricX-23-c")
-    return data_new+data_prior, clusters
+    clusters = utils.eval_system_clusters(data_new + data_prior, metric="MetricX-23-c")
+    return data_new + data_prior, clusters
 
 
 def synthetic_simulation(data, **kwargs):
@@ -419,14 +413,15 @@ def synthetic_simulation(data, **kwargs):
     while len(data) > 0:
         print("Remaining", len(data))
         with multiprocessing.Pool(20) as pool:
-            results = pool.map(_run_simulation, [[data, data_new]]*1000)
+            results = pool.map(_run_simulation, [[data, data_new]] * 1000)
 
         # take best clustering but evaluate on human data
         data_new = max(results, key=lambda x: x[1])[0]
         data_best_i = {line["i"] for line in data_new}
         data = [line for line in data if line["i"] not in data_best_i]
-    
+
     return data_new
+
 
 METHODS = {
     "synthetic_simulation": synthetic_simulation,

@@ -1,4 +1,3 @@
-import numpy as np
 import utils_fig
 import matplotlib.pyplot as plt
 import matplotlib as mpl

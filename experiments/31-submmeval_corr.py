@@ -2,12 +2,11 @@
 
 import subset2evaluate.utils as utils
 import scipy.stats
+import collections
 
 data_old = utils.load_data_summeval(normalize=True)
 
 # %%
-
-import collections
 corrs = collections.defaultdict(dict)
 systems = list(data_old[0]["scores"].keys())
 for metric in data_old[0]["scores"]["M11"].keys():

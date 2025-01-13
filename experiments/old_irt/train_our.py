@@ -29,7 +29,7 @@ data_loader = [
 # subsample training data
 assert args.train_size > 0.0 and args.train_size <= 1.0
 if args.train_size == 1.0:
-    data_train= data_loader
+    data_train = data_loader
     data_test = []
 else:
     data_train, data_test = train_test_split(data_loader, random_state=0, train_size=args.train_size)

@@ -27,8 +27,8 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
         for _ in tqdm.tqdm(range(5), desc="Repetition"):
             systems = list(data_old[0]["scores"].keys())
             systems_true = random.sample(systems, k=8)
-            systems_artificial = random.sample(sorted(set(systems)-set(systems_true)), k=subset_size)
-            
+            systems_artificial = random.sample(sorted(set(systems) - set(systems_true)), k=subset_size)
+
             data_old_true = [
                 {
                     **line,
@@ -89,6 +89,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 clus_all[method_kwargs["method"]][subset_size].append(clu_new)
                 accs_all[method_kwargs["method"]][subset_size].append(acc_new)
 
+
 # %%
 def method_formatter(method):
     DICT = {
@@ -107,6 +108,7 @@ def method_formatter(method):
         return DICT[method]
     else:
         return method
+
 
 # ACCs
 for method, subset_kv in accs_all.items():
@@ -135,7 +137,7 @@ for method, subset_kv in clus_all.items():
         print(
             r"\multicolumn{2}{c}{",
             "------",
-            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.2f}" ,
+            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.2f}",
             "------",
             "}",
             end=" \\\\\n"

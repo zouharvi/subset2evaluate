@@ -4,6 +4,7 @@ import tqdm
 import numpy as np
 import json
 
+
 def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
     if data == "wmt/all":
         data_old_all = list(subset2evaluate.utils.load_data_wmt_all(normalize=True).values())[:9]
@@ -25,11 +26,15 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
 
     print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_acc):.1%} | {np.average(points_y_clu):.2f}")
 
+
 def benchmark_method_mt(**kwargs):
     benchmark_method(data="wmt/all", target="human", **kwargs)
 
+
 def benchmark_method_summeval(**kwargs):
     benchmark_method(data="summeval", target="human_all", **kwargs)
+
+
 # %%
 benchmark_method_mt(repetitions=100, kwargs_dict=dict(method="random"))
 

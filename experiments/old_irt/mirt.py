@@ -5,7 +5,8 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 from sentence_transformers import SentenceTransformer
 import subset2evaluate.utils as utils
-import logging, argparse
+import logging
+import argparse
 import numpy as np
 
 
@@ -72,18 +73,18 @@ class MultiDimensionalIRTEmbedding(torch.nn.Module):
         self.param_ability = torch.nn.Embedding(num_systems, dim)
 
         self.disc_layers = nn.Sequential(
-            nn.Linear(embd_size, embd_size//2),
+            nn.Linear(embd_size, embd_size // 2),
             nn.ReLU(),
-            nn.Linear(embd_size//2, embd_size//4),
+            nn.Linear(embd_size // 2, embd_size // 4),
             nn.ReLU(),
-            nn.Linear(embd_size//4, embd_size//8),
+            nn.Linear(embd_size // 4, embd_size // 8),
             nn.ReLU(),
-            nn.Linear(embd_size//8, dim)
+            nn.Linear(embd_size // 8, dim)
         )
         self.diff_layers = nn.Sequential(
-            nn.Linear(embd_size, embd_size//2),
+            nn.Linear(embd_size, embd_size // 2),
             nn.ReLU(),
-            nn.Linear(embd_size//2, 1)
+            nn.Linear(embd_size // 2, 1)
         )
 
     def forward(self, item_embd, system_id):
@@ -108,7 +109,7 @@ def train(batch_size, num_epoch, lr, embed, dim, split=0.9):
     all_data = utils.load_data_wmt(normalize=True)
     all_dataset = MIRTDataset(all_data)
 
-    train_size = int(len(all_dataset)*split)
+    train_size = int(len(all_dataset) * split)
     val_size = len(all_dataset) - train_size
     dataset_train, dataset_val = random_split(all_dataset, [train_size, val_size])
     logging.info('{} train examples, {} test examples'.format(len(dataset_train), len(dataset_val)))
@@ -149,7 +150,7 @@ def train(batch_size, num_epoch, lr, embed, dim, split=0.9):
                 loss = criterion(output, batch_data['score'].unsqueeze(-1))
                 val_loss += loss
 
-        logging.info('Epoch {}, train_loss {}, val loss {}'.format(epoch+1, train_loss/train_size, val_loss/(val_size+1e-5)))
+        logging.info('Epoch {}, train_loss {}, val loss {}'.format(epoch + 1, train_loss / train_size, val_loss / (val_size + 1e-5)))
 
     if embed:
         save_path = 'mirt_embd_param.jsonl'
@@ -208,7 +209,7 @@ def rank(param_file, ):
             pred_score = np.sum(np.array(param['disc'][item_id]) * np.array(param['ability'][system_id])) - param['diff'][item_id]
             d_value = []  # each dim
             for d in range(32):
-                fi = pred_score * (1-pred_score) * param['disc'][item_id][d]**2
+                fi = pred_score * (1 - pred_score) * param['disc'][item_id][d]**2
                 d_value.append(fi)
             fisher_info[item_id].append(d_value)
 

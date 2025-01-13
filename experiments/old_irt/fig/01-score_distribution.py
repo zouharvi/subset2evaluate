@@ -1,7 +1,6 @@
 import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
-import random
 import numpy as np
 import argparse
 
@@ -13,15 +12,16 @@ data_old = utils.load_data_wmt(normalize=True)
 utils_fig.matplotlib_default()
 plt.figure(figsize=(3, 2))
 
+
 def renormalize(data_y):
     data_y = np.array(data_y)
     min_y, max_y = np.quantile(data_y, [0.01, 0.99])
     data_y = np.clip(data_y, min_y, max_y)
 
     data_y = (data_y - min_y) / (max_y - min_y)
-    mean = np.mean(data_y)
-    
+
     return data_y
+    # mean = np.mean(data_y)
     # offset = 0.5 - mean
     # return [y+offset for y in data_y]
 

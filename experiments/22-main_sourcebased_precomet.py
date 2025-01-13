@@ -29,11 +29,11 @@ for data_old_name, data_old in tqdm.tqdm(data_old_all):
 
 points_y_acc = {
     k: np.average(np.array(v), axis=0)
-    for k,v in points_y_acc.items()
+    for k, v in points_y_acc.items()
 }
 points_y_clu = {
     k: np.average(np.array(v), axis=0)
-    for k,v in points_y_clu.items()
+    for k, v in points_y_clu.items()
 }
 # %%
 utils_fig.plot_subset_selection(
@@ -45,7 +45,7 @@ utils_fig.plot_subset_selection(
     colors=utils_fig.COLORS,
 )
 
-utils_fig.plot_subset_selection( 
+utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_clu["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_clu['precomet_avg']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_clu['precomet_var']):.2f}"),

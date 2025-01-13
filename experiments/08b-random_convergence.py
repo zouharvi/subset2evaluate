@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 
 data_old = utils.load_data_wmt()
 
+
 def confidence_interval(data):
     return st.t.interval(
         confidence=0.95,
-        df=len(data)-1,
+        df=len(data) - 1,
         loc=np.mean(data),
         scale=np.std(data)
     )
@@ -23,7 +24,7 @@ points_y_struct = []
 _random = random.Random(0)
 
 for prop in tqdm.tqdm(utils.PROPS):
-    k = int(len(data_old)*prop)
+    k = int(len(data_old) * prop)
     points_x.append(k)
 
     points_y_local = []
@@ -47,11 +48,8 @@ points_y_interval = [
     for points_y_local in points_y_struct
 ]
 
-
-
 utils_fig.matplotlib_default()
 plt.figure(figsize=(6, 2.5))
-
 
 for sys in systems:
     plt.plot(
@@ -74,7 +72,7 @@ for sys in systems:
     )
 for sys in systems_highlighted:
     plt.text(
-        x=points_x[-1]+10,
+        x=points_x[-1] + 10,
         y=points_y_single[-1][sys],
         s=sys.replace("DocTransformer", "Doc"),
         fontsize=8,
@@ -88,5 +86,5 @@ ax = plt.gca()
 ax.spines[['top', 'right']].set_visible(False)
 
 plt.tight_layout(pad=0.2)
-plt.savefig(f"figures/08b-random_convergence.svg")
+plt.savefig("figures/08b-random_convergence.svg")
 plt.show()
