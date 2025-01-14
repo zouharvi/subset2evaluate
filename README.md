@@ -77,12 +77,12 @@ len(data_full)
 
 # take only top 100 segments to "human-evaluate"
 data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="random")
-subset2evaluate.utils.eval_system_clusters(data_new[:100])
+subset2evaluate.evalute.eval_subset_clusters(data_new[:100])
 > 1
 
 # compare it to something better:
 data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="metric_var" metric="MetricX-23")
-subset2evaluate.utils.eval_system_clusters(data_new[:100])
+subset2evaluate.evaluate.eval_subset_clusters(data_new[:100])
 > 3
 ```
 
@@ -97,11 +97,11 @@ len(data_full)
 
 # take only top 25 segments to "human-evaluate"
 data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="random")
-subset2evaluate.utils.eval_system_clusters(data_new[:25], metric="human_relevance")
+subset2evaluate.evaluate.eval_subset_clusters(data_new[:25], metric="human_relevance")
 > 2
 
 data_new = subset2evaluate.select_subset.run_select_subset(data_full, method="diversity_bleu")
-subset2evaluate.utils.eval_system_clusters(data_new[:25], metric="human_relevance")
+subset2evaluate.evaluate.eval_subset_clusters(data_new[:25], metric="human_relevance")
 > 3
 ```
 

@@ -74,7 +74,7 @@ for data_old in tqdm.tqdm(data_old_all):
                 for doc in data_new
                 for i in doc["i"]
             ]
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_flat, metric="human")
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_flat, data_old, metric="human")
             acc_new_all[method_kwargs["method"]].append(np.average(acc_new))
             clu_new_all[method_kwargs["method"]].append(np.average(clu_new))
 
@@ -112,7 +112,7 @@ for data_old in tqdm.tqdm(data_old_all):
             for doc in data_old_aggregated
             for i in doc["i"]
         ]
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new_flat, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(acc_new)
 
     for _ in range(1):

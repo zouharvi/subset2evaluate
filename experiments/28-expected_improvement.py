@@ -37,11 +37,11 @@ for data_old in tqdm.tqdm(data_old_all):
                 metric="MetricX-23-c",
                 retry_on_error=True,
             )
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new, data_old, metric="human")
             acc_new_all_hum_local.append(np.average(acc_new))
             clu_new_all_hum_local.append(np.average(clu_new))
 
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="MetricX-23-c")
+            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new, data_old, metric="MetricX-23-c")
             acc_new_all_met_local.append(np.average(acc_new))
             clu_new_all_met_local.append(np.average(clu_new))
 

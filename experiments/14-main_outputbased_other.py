@@ -22,8 +22,9 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
             metric="MetricX-23-c", model="4pl_score", epochs=1000,
             retry_on_error=True,
         )
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-            data_old, data_new,
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
+            data_new,
+            data_old,
             metric="human"
         )
 
@@ -34,8 +35,9 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         data_new = subset2evaluate.select_subset.run_select_subset(
             data_old, method="diversity_bleu",
         )
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-            data_old, data_new,
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
+            data_new,
+            data_old,
             metric="human"
         )
 

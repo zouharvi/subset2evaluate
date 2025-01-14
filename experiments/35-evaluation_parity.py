@@ -14,9 +14,9 @@ data_old = data_old_all[1]
 
 acc_random = []
 for seed in range(10):
-    _, acc_new = subset2evaluate.evaluate.run_evaluate_topk(
-        data_old,
+    _, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
         subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+        data_old,
         metric="human"
     )
     acc_random.append(acc_new)
