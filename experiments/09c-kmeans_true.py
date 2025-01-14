@@ -4,6 +4,7 @@ import numpy as np
 import tqdm
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+import subset2evaluate.evaluate
 
 
 def featurize(line):
@@ -56,7 +57,7 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_new.append(cluster_prototypes[cluster_i])
 
     # repeat each sampling 10 times to smooth it out
-    points_y.append(utils.eval_system_clusters(data_new))
+    points_y.append(subset2evaluate.evaluate.eval_subset_clusters(data_new))
 
 print(f"Average  {np.average(points_y):.2f}")
 

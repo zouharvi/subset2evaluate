@@ -2,6 +2,8 @@
 from typing import Any, Callable, List, Tuple, Union
 from functools import partial
 import subset2evaluate.utils as utils
+import subset2evaluate
+import subset2evaluate.evaluate
 import numpy as np
 import random
 
@@ -19,7 +21,7 @@ def _fn_information_content_old(item_irt, data_irt) -> float:
 
 
 def metric_consistency(data, metric, **kwargs) -> List[float]:
-    metric_scores = utils.get_sys_absolute(data, metric=metric)
+    metric_scores = subset2evaluate.evaluate.get_sys_absolute(data, metric=metric)
     rank_correlation = {}
     sys_names = list(metric_scores.keys())
     for example in data:
@@ -309,16 +311,16 @@ def our_irt(data, metric, **kwargs):
 def get_nice_subset(data_old, target_size=100, step_size=10, metric="human") -> List[float]:
     raise NotImplementedError("This method is not yet implemented for use.")
     import numpy as np
-    order_full = utils.get_sys_ordering(data_old, metric=metric)
+    order_full = subset2evaluate.evaluate.get_sys_ordering(data_old, metric=metric)
 
-    print(f"Previous average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
+    print(f"Previous average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
 
     while len(data_old) > target_size:
-        order_full = utils.get_sys_ordering(data_old, metric=metric)
-        data_old.sort(key=lambda line: utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)))
+        order_full = subset2evaluate.evaluate.get_sys_ordering(data_old, metric=metric)
+        data_old.sort(key=lambda line: subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)))
         data_old = data_old[step_size:]
 
-    print(f"New average accuracy: {np.average([utils.get_ord_accuracy(order_full, utils.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
+    print(f"New average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
     return data_old
 
 
@@ -401,7 +403,7 @@ def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) 
 def _run_simulation(args):
     data_old, data_prior = args
     data_new = random.sample(data_old, k=min(len(data_old), 20))
-    clusters = utils.eval_system_clusters(data_new + data_prior, metric="MetricX-23-c")
+    clusters = subset2evaluate.evaluate.eval_subset_clusters(data_new + data_prior, metric="MetricX-23-c")
     return data_new + data_prior, clusters
 
 
