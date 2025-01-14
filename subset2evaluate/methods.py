@@ -179,9 +179,17 @@ def _assert_comet_version():
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
 
 
-def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
-    import comet
+def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
+    tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
+    os.environ["TQDM_DISABLE"] = "1"
+
+    import comet
+    import warnings
+    import logging
+
+    logging.disable(logging.INFO)
+    warnings.filterwarnings("ignore")
     _assert_comet_version()
 
     if load_model is not None:
@@ -193,9 +201,15 @@ def cometsrc(data, model_path, return_model=False, load_model=None, reverse=Fals
     scores = model.predict([
         {"src": line["src"]}
         for line in data
-    ]).scores
+    ], progress_bar=False).scores
     if reverse:
         scores = [-x for x in scores]
+    
+    warnings.resetwarnings()
+    if tqdm_disable_prev is not None:
+        os.environ["TQDM_DISABLE"] = tqdm_disable_prev
+    else:
+        os.environ.pop("TQDM_DISABLE")
 
     if return_model:
         return scores, model
@@ -203,8 +217,17 @@ def cometsrc(data, model_path, return_model=False, load_model=None, reverse=Fals
         return scores
 
 
-def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+def precomet_dual(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+    import os
+    tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
+    os.environ["TQDM_DISABLE"] = "1"
+
     import comet
+    import warnings
+    import logging
+
+    logging.disable(logging.INFO)
+    warnings.filterwarnings("ignore")
     _assert_comet_version()
 
     if load_model is not None:
@@ -222,16 +245,22 @@ def cometsrc2(data, model_path1, model_path2, return_model=False, load_model=Non
     scores1 = model1.predict([
         {"src": line["src"]}
         for line in data
-    ]).scores
+    ], progress_bar=False).scores
     scores2 = model2.predict([
         {"src": line["src"]}
         for line in data
-    ]).scores
+    ], progress_bar=False).scores
 
     if reverse:
         scores = [-s1 * s2 for s1, s2 in zip(scores1, scores2)]
     else:
         scores = [s1 * s2 for s1, s2 in zip(scores1, scores2)]
+
+    warnings.resetwarnings()
+    if tqdm_disable_prev is not None:
+        os.environ["TQDM_DISABLE"] = tqdm_disable_prev
+    else:
+        os.environ.pop("TQDM_DISABLE")
 
     if return_model:
         return scores, (model1, model2)
@@ -318,15 +347,15 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
-    "precomet_var": partial(cometsrc, model_path="zouharvi/PreCOMET-var", reverse=True),
-    "precomet_avg": partial(cometsrc, model_path="zouharvi/PreCOMET-avg", reverse=True),
-    "precomet_diversity": partial(cometsrc, model_path="zouharvi/PreCOMET-diversity", reverse=True),
+    "precomet_var": partial(precomet, model_path="zouharvi/PreCOMET-var", reverse=True),
+    "precomet_avg": partial(precomet, model_path="zouharvi/PreCOMET-avg", reverse=True),
+    "precomet_diversity": partial(precomet, model_path="zouharvi/PreCOMET-diversity", reverse=True),
 
-    "precomet_diff": partial(cometsrc, model_path="zouharvi/PreCOMET-diff", reverse=False),
-    "precomet_disc": partial(cometsrc, model_path="zouharvi/PreCOMET-disc", reverse=True),
-    "precomet_diffdisc_direct": partial(cometsrc, model_path="zouharvi/PreCOMET-diffdisc_direct", reverse=False),
+    "precomet_diff": partial(precomet, model_path="zouharvi/PreCOMET-diff", reverse=False),
+    "precomet_disc": partial(precomet, model_path="zouharvi/PreCOMET-disc", reverse=True),
+    "precomet_diffdisc_direct": partial(precomet, model_path="zouharvi/PreCOMET-diffdisc_direct", reverse=False),
     "precomet_diffdisc": partial(
-        cometsrc2,
+        precomet_dual,
         model_path1="zouharvi/PreCOMET-diff",
         model_path2="zouharvi/PreCOMET-disc",
         reverse=False,

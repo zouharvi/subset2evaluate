@@ -8,7 +8,9 @@ import subset2evaluate.select_subset
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 data_old = data_old_all[1]
 
-_ = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", metric="MetricX-23")
+_ = subset2evaluate.select_subset.run_select_subset(data_old, method="precomet_diversity")
+
+exit()
 
 # %%
 cluacc_precomputed = subset2evaluate.evaluate.precompute_randnorm(data_old, random_seeds=10, metric="human")
