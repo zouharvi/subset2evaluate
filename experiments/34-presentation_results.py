@@ -11,13 +11,15 @@ data_old_all = list(utils.load_data_wmt_all().values())[:9]
 data_old = data_old_all[1]
 
 acc_random = []
-for seed in range(10):
+for seed in range(100):
     _, acc_new = subset2evaluate.evaluate.eval_cluacc(
         data_old,
         subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
         metric="human"
     )
     acc_random.append(acc_new)
+
+# %%
 
 _, acc_metric_var = subset2evaluate.evaluate.eval_cluacc(
     subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric="MetricX-23"),
@@ -30,7 +32,7 @@ _, acc_metric_avg = subset2evaluate.evaluate.eval_cluacc(
     metric="human"
 )
 _, acc_diffdisc = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", metric="MetricX-23"),
+    subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True),
     data_old,
     metric="human",
 )
@@ -46,6 +48,9 @@ _, acc_precomet_var = subset2evaluate.evaluate.eval_cluacc(
 )
 
 # %%
+import importlib
+importlib.reload(utils_fig)
+
 utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, np.average(acc_random, axis=0), f"Random {np.average(acc_random):.1%}"),

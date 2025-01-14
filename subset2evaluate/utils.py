@@ -330,9 +330,11 @@ def load_data_summeval(normalize=True):
             for k, v in line.items():
                 scores[k].append(v)
         scores = {"human_" + k: sum(v) / len(v) for k, v in scores.items()}
+        scores_values = list(scores.values())
 
         # multiply all human
-        scores["human_all"] = reduce(lambda x, y: x * y, scores.values())
+        scores["human_avg"] = reduce(lambda x, y: x + y, scores_values)
+        scores["human_mul"] = reduce(lambda x, y: x * y, scores_values)
         return scores
 
     data = []
