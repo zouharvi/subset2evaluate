@@ -106,6 +106,7 @@ def plot_subset_selection(
         plt.ylim(1.2, 5.0)
     else:
         plt.ylim(0.85, 0.97)
+        # plt.ylim(0.75, 1.0)
     plt.tight_layout(pad=0.1)
 
     if filename:

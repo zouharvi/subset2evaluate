@@ -40,7 +40,7 @@ with multiprocessing.Pool(5) as pool:
     req_k = pool.starmap(
         process_data_old,
         [
-            (data_old, seed, "human_all", dict(method="metric_var", metric="coverage"))
+            (data_old, seed, "human_mul", dict(method="metric_var", metric="coverage"))
             for seed in range(5)
         ])
 
