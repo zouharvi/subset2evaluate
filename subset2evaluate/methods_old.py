@@ -344,6 +344,7 @@ def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float
     data_x_test = embd_model.encode([line["src"] for line in data])
     data_y_test = model.predict(data_x_test)
 
+    warnings.resetwarnings()
     return list(data_y_test)
 
 
