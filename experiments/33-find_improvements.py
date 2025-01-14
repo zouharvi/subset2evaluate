@@ -1,5 +1,8 @@
 # %%
 import subset2evaluate
+import subset2evaluate.evaluate
+import subset2evaluate.select_subset
+import subset2evaluate.utils
 import numpy as np
 import multiprocessing
 
@@ -7,14 +10,14 @@ import multiprocessing
 def process_data_old(data_old, seed, target, kwargs):
     k = int(0.25*len(data_old))
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed)
-    acc_rand = subset2evaluate.utils.eval_subset_accuracy(data_new[:k], data_old, metric=target)
+    acc_rand = subset2evaluate.evaluate.eval_subset_accuracy(data_new[:k], data_old, metric=target)
 
     acc_better = None
     k = 0
     while acc_better is None or acc_better < acc_rand:
         k += 1
         data_new = subset2evaluate.select_subset.run_select_subset(data_old, **kwargs)
-        acc_better = subset2evaluate.utils.eval_subset_accuracy(data_new[:k], data_old, metric=target)
+        acc_better = subset2evaluate.evaluate.eval_subset_accuracy(data_new[:k], data_old, metric=target)
 
     return k/(len(data_old)*0.25)
 

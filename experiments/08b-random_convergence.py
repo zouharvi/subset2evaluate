@@ -5,6 +5,7 @@ import numpy as np
 import tqdm
 import scipy.stats as st
 import matplotlib.pyplot as plt
+import subset2evaluate.evaluate
 
 data_old = utils.load_data_wmt()
 
@@ -31,7 +32,7 @@ for prop in tqdm.tqdm(utils.PROPS):
     # repeat each sampling 10 times to smooth it out
     for _ in range(10):
         data_new = _random.sample(data_old, k=k)
-        points_y_local.append(utils.get_sys_absolute(data_new))
+        points_y_local.append(subset2evaluate.evaluate.get_sys_absolute(data_new))
 
     points_y_struct.append(points_y_local)
 

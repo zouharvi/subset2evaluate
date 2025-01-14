@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 from sentence_transformers import SentenceTransformer
 import subset2evaluate.utils as utils
+import subset2evaluate.evaluate
 import logging
 import argparse
 import numpy as np
@@ -172,7 +173,7 @@ def rank(param_file, ):
         all_acc = []
         for prop in utils.PROPS:
             subset = sorted_data[:int(len(all_data) * prop)]
-            acc = utils.eval_subset_accuracy(subset, all_data)
+            acc = subset2evaluate.evaluate.eval_subset_accuracy(subset, all_data)
             all_acc.append(acc)
             print('{}: {}'.format(prop, acc))
         print('avg acc: {}'.format(sum(all_acc) / len(all_acc)))

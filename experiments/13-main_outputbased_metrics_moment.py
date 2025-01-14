@@ -5,6 +5,7 @@ import subset2evaluate.utils as utils
 import utils_fig
 import numpy as np
 import tqdm
+import subset2evaluate.evaluate
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
@@ -44,22 +45,22 @@ for data_old in tqdm.tqdm(data_old_all):
     for prop in utils.PROPS:
 
         points_y_acc["metricx_avg"].append(
-            utils.eval_subset_accuracy(data_metricx_avg[: int(len(data_old) * prop)], data_old)
+            subset2evaluate.evaluate.eval_subset_accuracy(data_metricx_avg[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["metricx_avg"].append(
-            utils.eval_system_clusters(data_metricx_avg[: int(len(data_old) * prop)])
+            subset2evaluate.evaluate.eval_subset_clusters(data_metricx_avg[: int(len(data_old) * prop)])
         )
         points_y_acc["chrf_avg"].append(
-            utils.eval_subset_accuracy(data_chrf_avg[: int(len(data_old) * prop)], data_old)
+            subset2evaluate.evaluate.eval_subset_accuracy(data_chrf_avg[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["chrf_avg"].append(
-            utils.eval_system_clusters(data_chrf_avg[: int(len(data_old) * prop)])
+            subset2evaluate.evaluate.eval_subset_clusters(data_chrf_avg[: int(len(data_old) * prop)])
         )
         points_y_acc["metricx_var"].append(
-            utils.eval_subset_accuracy(data_metricx_var[: int(len(data_old) * prop)], data_old)
+            subset2evaluate.evaluate.eval_subset_accuracy(data_metricx_var[: int(len(data_old) * prop)], data_old)
         )
         points_y_clu["metricx_var"].append(
-            utils.eval_system_clusters(data_metricx_var[: int(len(data_old) * prop)])
+            subset2evaluate.evaluate.eval_subset_clusters(data_metricx_var[: int(len(data_old) * prop)])
         )
 
     # add lists to the global list

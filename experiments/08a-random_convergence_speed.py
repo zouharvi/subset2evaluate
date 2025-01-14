@@ -5,6 +5,7 @@ import numpy as np
 import tqdm
 import scipy.stats as st
 import matplotlib.pyplot as plt
+import subset2evaluate.evaluate
 
 data_old = utils.load_data_wmt()
 
@@ -20,7 +21,7 @@ def confidence_interval(data):
 
 points_x = []
 points_y = []
-mean_true = utils.get_sys_absolute(data_old)
+mean_true = subset2evaluate.evaluate.get_sys_absolute(data_old)
 
 _random = random.Random(0)
 
@@ -35,7 +36,7 @@ for prop in tqdm.tqdm(utils.PROPS):
         points_y_local.append(np.average(
             [
                 abs(mean_true[sys] - sys_mean)
-                for sys, sys_mean in utils.get_sys_absolute(data_new).items()
+                for sys, sys_mean in subset2evaluate.evaluate.get_sys_absolute(data_new).items()
             ]
         ))
 

@@ -4,6 +4,7 @@ import numpy as np
 import tqdm
 import random
 from sentence_transformers import SentenceTransformer
+import subset2evaluate.evaluate
 
 model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2").to("cuda:0")
 
@@ -45,7 +46,7 @@ for prop in tqdm.tqdm(utils.PROPS):
             # TODO: should be deduplicated
 
         # repeat each sampling 10 times to smooth it out
-        points_y_local.append(utils.eval_system_clusters(data_new))
+        points_y_local.append(subset2evaluate.evaluate.eval_subset_clusters(data_new))
 
     points_y.append(np.average(points_y_local))
 
