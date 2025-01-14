@@ -1,4 +1,5 @@
 import copy
+from typing import Dict
 import subset2evaluate.utils as utils
 import subset2evaluate
 import subset2evaluate.evaluate
@@ -14,7 +15,7 @@ for line in data_old:
     line["ord"] = subset2evaluate.evaluate.get_sys_ordering([line], metric="MetricX-23-c")
 
 
-def ord_distance(ord_a: dict, ord_b: dict):
+def ord_distance(ord_a: Dict, ord_b: Dict):
     return np.average([
         # np.abs(ord_a[sys]-ord_b[sys])
         np.square(ord_a[sys] - ord_b[sys])

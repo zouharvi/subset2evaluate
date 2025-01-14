@@ -1,9 +1,10 @@
-from typing import Dict
+from typing import Dict, List, Tuple
 import numpy as np
+import subset2evaluate
 import subset2evaluate.utils as utils
 
 
-def run_evaluate_cluacc(data_new, data_old, metric="human", props=utils.PROPS):
+def run_evaluate_cluacc(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
@@ -18,7 +19,113 @@ def run_evaluate_cluacc(data_new, data_old, metric="human", props=utils.PROPS):
     return clu_new, acc_new
 
 
-def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
+def run_evaluate_cluacc_par(
+        data_new: List[Dict],
+        data_old: List[Dict],
+        clus_tgt: List[float],
+        accs_tgt: List[float],
+        metric="human",
+        props: List[float]=utils.PROPS,
+        workers=10,
+) -> Tuple[float, float]:
+    """
+    Evaluates the proportion of data that is needed to achieve parity with target.
+    """
+    import multiprocessing.pool
+
+    # both list or descriptor is fine
+    data_new = utils.load_data(data_new)
+    data_old = utils.load_data(data_old)
+
+    def _par_clu(data_new, clu_tgt, metric):
+        for k in range(5, len(data_new) + 1):
+            if eval_subset_clusters(data_new[:k], metric=metric) >= clu_tgt:
+                break
+        return k
+    
+    def _par_acc(data_new, data_old, acc_tgt, metric):
+        for k in range(5, len(data_new) + 1):
+            if eval_subset_accuracy(data_new[:k], data_old, metric=metric) >= acc_tgt:
+                break
+        return k
+
+    # multiprocess for each prop rather than k because the thread
+    # orchestration would be more expensive otherwise
+    with multiprocessing.pool.ThreadPool(min(workers, len(props))) as pool:
+        ks_clu_par = pool.starmap(
+            _par_clu,
+            [(data_new, clu_tgt, metric) for prop, clu_tgt in zip(props, clus_tgt)]
+        )
+        ks_clu_par = [k / (len(data_old) * prop) for k, prop in zip(ks_clu_par, props)]
+
+        ks_acc_par = pool.starmap(
+            _par_acc,
+            [(data_new, data_old, clu_tgt, metric) for prop, clu_tgt in zip(props, accs_tgt)]
+        )
+        ks_acc_par = [k / (len(data_old) * prop) for k, prop in zip(ks_acc_par, props)]
+    
+    return np.average(ks_clu_par), np.average(ks_acc_par)
+
+
+def precompute_randnorm(
+    data_old: List[Dict],
+    random_seeds=10,
+    metric="human",
+) -> Tuple[List[float], List[float], float, float]:
+    import subset2evaluate.select_subset
+    clu_random = []
+    acc_random = []
+    for seed in range(10):
+        clu_new, acc_new = run_evaluate_cluacc(
+            subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+            data_old,
+            metric=metric,
+        )
+        clu_random.append(clu_new)
+        acc_random.append(acc_new)
+    clu_random = np.average(clu_random, axis=0)
+    acc_random = np.average(acc_random, axis=0)
+
+    pars_clu_rand = []
+    pars_acc_rand = []
+
+    for seed in range(random_seeds, 2*random_seeds):
+        par_clu_rand, par_acc_rand = run_evaluate_cluacc_par(
+            subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+            data_old,
+            clu_random,
+            acc_random,
+            metric=metric,
+        )
+        pars_clu_rand.append(par_clu_rand)
+        pars_acc_rand.append(par_acc_rand)
+
+    return (clu_random, acc_random), (np.average(pars_clu_rand), np.average(pars_acc_rand))
+
+def run_evaluate_cluacc_randnorm(
+    data_new: List[Dict],
+    data_old: List[Dict],
+    random_seeds=10,
+    metric="human",
+    cluacc_precomputed = None
+) -> Tuple[float, float]:
+
+    if cluacc_precomputed is not None:
+        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = cluacc_precomputed
+    else:
+        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = precompute_randnorm(data_old, random_seeds=random_seeds, metric=metric)
+
+    # compute the parity of the new data
+    par_clu, par_acc = run_evaluate_cluacc_par(
+        data_new, data_old,
+        clu_random, acc_random,
+        metric=metric
+    )
+
+    return par_clu/clu_random_norm, par_acc/acc_random_norm
+
+
+def run_evaluate_top_timebudget(data_new, data_old, metric="human"):
     # both list or descriptor is fine
     data_old = utils.load_data(data_old)
     data_new = utils.load_data(data_new)
@@ -41,10 +148,9 @@ def run_evaluate_top_timebudget(data_old, data_new, metric="human"):
     return clu_new, acc_new
 
 
-def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
+def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):
     # evaluates against ordering from data_old
     import itertools
-    import numpy as np
 
     systems = list(data_old[0]["scores"].keys())
 
@@ -58,10 +164,14 @@ def eval_subset_accuracy(data_new: list, data_old: list, metric="human"):
     return np.average(result)
 
 
-def eval_subset_clusters(data: list, metric="human"):
+def eval_subset_clusters(data: List[Dict], metric="human"):
     from scipy.stats import wilcoxon
     import warnings
     # computes number of clusters
+
+    # if we have just 3 samples, we can't say that there are clusters
+    if len(data) < 3:
+        return 1
 
     # sort from top
     sys_ord = list(get_sys_absolute(data, metric=metric).items())
@@ -103,7 +213,7 @@ def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     return scores_new
 
 
-def get_sys_ordering(data_new: list, metric="human"):
+def get_sys_ordering(data_new: List[Dict], metric="human"):
     scores_new = get_sys_absolute(data_new, metric)
 
     # sort to get ordering
