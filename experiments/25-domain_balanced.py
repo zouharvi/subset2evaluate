@@ -14,6 +14,7 @@ acc_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
 
+# TODO: instead of reimplementing the utility functions here, use line["subset2evaluate_utility"]
 
 def utility_diversity(line):
     return -np.average([

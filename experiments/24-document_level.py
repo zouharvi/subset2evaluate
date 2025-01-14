@@ -11,6 +11,7 @@ import sacrebleu
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
 
+# TODO: instead of reimplementing the utility functions here, use line["subset2evaluate_utility"]
 
 def utility_diversity(line):
     score = -np.average([
