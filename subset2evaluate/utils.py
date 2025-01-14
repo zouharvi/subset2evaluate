@@ -377,6 +377,22 @@ def load_data_summeval(normalize=True):
     return data
 
 
+def load_rose_data():
+    import datasets
+    data_raw = datasets.load_dataset("Salesforce/rose", "cnndm_protocol")
+    data_raw = list(data_raw.values())[0]
+    data = []
+    for line in data_raw:
+        data.append({
+            "i": line["example_id"],
+            "src": line["source"],
+            "ref": line["reference"],
+            "tgt": line["system_outputs"],
+            # TODO: no metrics!
+            "scores": line["annotations"],
+        })
+
+
 def pred_irt(system_theta, item):
     import numpy as np
     if "feas" in item:
