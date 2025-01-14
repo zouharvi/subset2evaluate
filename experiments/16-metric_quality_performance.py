@@ -45,27 +45,27 @@ for data_old in tqdm.tqdm(data_old_all):
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
 
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="random", metric=metric)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_avg, data_old)
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_avg, data_old)
             clus_all['random'].append(np.average(clu_new))
             accs_all['random'].append(np.average(acc_new))
 
             data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric=metric)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_avg, data_old)
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_avg, data_old)
             clus_all['avg'].append(np.average(clu_new))
             accs_all['avg'].append(np.average(acc_new))
 
             data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric=metric)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_var, data_old)
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_var, data_old)
             clus_all['var'].append(np.average(clu_new))
             accs_all['var'].append(np.average(acc_new))
 
             data_new_var = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity_bleu", metric=metric)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_var, data_old)
-            clus_all['diversity'].append(np.average(clu_new))
-            accs_all['diversity'].append(np.average(acc_new))
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_var, data_old)
+            clus_all['diversity_bleu'].append(np.average(clu_new))
+            accs_all['diversity_bleu'].append(np.average(acc_new))
 
             data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", model="4pl_score", epochs=1000, metric=metric, retry_on_error=True)
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_irt, data_old)
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_irt, data_old)
             clus_all['irt'].append(np.average(clu_new))
             accs_all['irt'].append(np.average(acc_new))
 

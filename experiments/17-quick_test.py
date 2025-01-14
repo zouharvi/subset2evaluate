@@ -13,7 +13,7 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 
     # run multiple times to smooth variance
     for _ in range(repetitions):
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
+        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
             subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict, retry_on_error=False),
             data_old,
             metric="human"
@@ -36,7 +36,7 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
     for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
-            clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
                 subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict, retry_on_error=False),
                 data_old,
                 metric="human"

@@ -4,7 +4,7 @@ import subset2evaluate
 import subset2evaluate.utils as utils
 
 
-def run_evaluate_cluacc(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
+def eval_cluacc(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
@@ -19,7 +19,7 @@ def run_evaluate_cluacc(data_new: List[Dict], data_old: List[Dict], metric="huma
     return clu_new, acc_new
 
 
-def run_evaluate_cluacc_par(
+def eval_cluacc_par(
         data_new: List[Dict],
         data_old: List[Dict],
         clus_tgt: List[float],
@@ -78,7 +78,7 @@ def precompute_randnorm(
     clu_random = []
     acc_random = []
     for seed in range(random_seeds):
-        clu_new, acc_new = run_evaluate_cluacc(
+        clu_new, acc_new = eval_cluacc(
             subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
             data_old,
             metric=metric,
@@ -92,7 +92,7 @@ def precompute_randnorm(
     pars_acc_rand = []
 
     for seed in range(random_seeds, 2*random_seeds):
-        par_clu_rand, par_acc_rand = run_evaluate_cluacc_par(
+        par_clu_rand, par_acc_rand = eval_cluacc_par(
             subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
             data_old,
             clu_random,
@@ -105,7 +105,7 @@ def precompute_randnorm(
 
     return (clu_random, acc_random), (np.average(pars_clu_rand), np.average(pars_acc_rand))
 
-def run_evaluate_cluacc_randnorm(
+def eval_cluacc_randnorm(
     data_new: List[Dict],
     data_old: List[Dict],
     random_seeds=10,
@@ -119,7 +119,7 @@ def run_evaluate_cluacc_randnorm(
         (clu_random, acc_random), (clu_random_norm, acc_random_norm) = precompute_randnorm(data_old, random_seeds=random_seeds, metric=metric)
 
     # compute the parity of the new data
-    par_clu, par_acc = run_evaluate_cluacc_par(
+    par_clu, par_acc = eval_cluacc_par(
         data_new, data_old,
         clu_random, acc_random,
         metric=metric
@@ -128,7 +128,7 @@ def run_evaluate_cluacc_randnorm(
     return par_clu/clu_random_norm, par_acc/acc_random_norm
 
 
-def run_evaluate_top_timebudget(data_new, data_old, metric="human"):
+def eval_cluacc_timebudget(data_new, data_old, metric="human"):
     # both list or descriptor is fine
     data_old = utils.load_data(data_old)
     data_new = utils.load_data(data_new)
@@ -266,7 +266,7 @@ def main_cli():
     )
     args = args.parse_args()
 
-    clu_new, acc_new = run_evaluate_cluacc(args.data_old, args.data_new, args.metric)
+    clu_new, acc_new = eval_cluacc(args.data_old, args.data_new, args.metric)
 
     print(f"Clusters: {np.average(clu_new):.2f}")
     print(f"Accuracy: {np.average(acc_new):.1%}")

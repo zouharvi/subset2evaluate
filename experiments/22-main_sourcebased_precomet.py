@@ -19,13 +19,15 @@ MODELS = {
     method: subset2evaluate.select_subset.run_select_subset(data_old_all[0][1], method=method, return_model=True)[1]
     for method in ["precomet_avg", "precomet_var"]
 }
+MODELS["random"] = None
 
 for data_old_name, data_old in tqdm.tqdm(data_old_all):
-    for method, model in MODELS.items():
-        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=model)
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new, data_old, metric="human")
-        points_y_acc[method].append(acc_new)
-        points_y_clu[method].append(clu_new)
+    for repetitions, method in [(1, "precomet_avg"), (1, "precomet_var"), (100, "random")]:
+        for _ in range(repetitions):
+            data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=MODELS[method])
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric="human")
+            points_y_acc[method].append(acc_new)
+            points_y_clu[method].append(clu_new)
 
 points_y_acc = {
     k: np.average(np.array(v), axis=0)
@@ -38,18 +40,20 @@ points_y_clu = {
 # %%
 utils_fig.plot_subset_selection(
     points=[
+        (utils.PROPS, points_y_acc["random"], f"Random {np.average(points_y_acc['random']):.1%}"),
         (utils.PROPS, points_y_acc["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_acc['precomet_avg']):.1%}"),
         (utils.PROPS, points_y_acc["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_acc['precomet_var']):.1%}"),
     ],
+    colors=["black"] + utils_fig.COLORS,
     filename="22-main_sourcebased_precomet",
-    colors=utils_fig.COLORS,
 )
 
 utils_fig.plot_subset_selection(
     points=[
+        (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_avg"], f"PreCOMET$^\\mathrm{{avg}}$ {np.average(points_y_clu['precomet_avg']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_var"], f"PreCOMET$^\\mathrm{{var}}$ {np.average(points_y_clu['precomet_var']):.2f}"),
     ],
+    colors=["black"] + utils_fig.COLORS,
     filename="22-main_sourcebased_precomet",
-    colors=utils_fig.COLORS,
 )

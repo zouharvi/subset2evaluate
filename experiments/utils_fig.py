@@ -47,14 +47,14 @@ def plot_subset_selection(
     )
 
     matplotlib_default()
-    plt.figure(figsize=(3, 2))
+    plt.figure(figsize=(4, 2))
 
     if len(points) == 1:
         colors = ["black"]
 
     for (points_x, points_y, label), color in zip(points, colors):
         plt.plot(
-            points_x,
+            range(len(points_x)),
             points_y,
             marker="o",
             markersize=5,
@@ -66,7 +66,7 @@ def plot_subset_selection(
         )
     for (points_x, points_y_low, points_y_high), color in zip(areas, colors):
         plt.fill_between(
-            points_x,
+            range(len(points_x)),
             y1=points_y_low,
             y2=points_y_high,
             color=color,
@@ -75,14 +75,19 @@ def plot_subset_selection(
         )
 
     if IS_CLUSTERS:
-        plt.ylabel("Number of clusters" + " " * 5, labelpad=17)
+        plt.ylabel("Number of clusters" + " " * 5, labelpad=13)
     else:
-        plt.ylabel("System accuracy" + " " * 5, labelpad=-5)
-    plt.xlabel("Proportion of original data", labelpad=-2)
+        plt.ylabel("System accuracy" + " " * 5, labelpad=-1)
+    plt.xlabel("Proportion of original data", labelpad=-1)
+
+    plt.xticks(
+        list(range(len(points_x)))[::3],
+        [f"{x:.0%}" for x in points_x][::3],
+    )
 
     ax = plt.gca()
     ax.spines[['top', 'right']].set_visible(False)
-    ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    # ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
     if not IS_CLUSTERS:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
@@ -100,7 +105,7 @@ def plot_subset_selection(
     if IS_CLUSTERS:
         plt.ylim(1.2, 5.0)
     else:
-        plt.ylim(0.77, 1)
+        plt.ylim(0.85, 0.97)
     plt.tight_layout(pad=0.1)
 
     if filename:
