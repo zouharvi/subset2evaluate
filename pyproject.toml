@@ -7,7 +7,7 @@ packages = ["subset2evaluate"]
 
 [project]
 name = "subset2evaluate"
-version = "0.0.1a5"
+version = "0.0.1a6"
 description = "Find informative examples to efficiently (human)-evaluate NLG models."
 license = {text = "MIT License"}
 readme = "README.md"
@@ -39,4 +39,4 @@ subset2evaluate-eval = "subset2evaluate.evaluate:main_cli"
 
 # python3 -m build
 # twine check dist/*
-# twine upload dist/* -u __token__
+# python3 -m twine upload dist/* -u __token__
