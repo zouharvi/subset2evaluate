@@ -3,14 +3,14 @@ import numpy as np
 import subset2evaluate.utils as utils
 
 
-def run_evaluate_topk(data_old, data_new, metric="human"):
+def run_evaluate_cluacc(data_new, data_old, metric="human", props=utils.PROPS):
     # both list or descriptor is fine
-    data_old = utils.load_data(data_old)
     data_new = utils.load_data(data_new)
+    data_old = utils.load_data(data_old)
 
     clu_new = []
     acc_new = []
-    for prop in utils.PROPS:
+    for prop in props:
         k = int(len(data_old) * prop)
         clu_new.append(eval_subset_clusters(data_new[:k], metric=metric))
         acc_new.append(eval_subset_accuracy(data_new[:k], data_old, metric=metric))
@@ -153,7 +153,7 @@ def main_cli():
     )
     args = args.parse_args()
 
-    clu_new, acc_new = run_evaluate_topk(args.data_old, args.data_new, args.metric)
+    clu_new, acc_new = run_evaluate_cluacc(args.data_old, args.data_new, args.metric)
 
     print(f"Clusters: {np.average(clu_new):.2f}")
     print(f"Accuracy: {np.average(acc_new):.1%}")

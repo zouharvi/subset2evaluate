@@ -23,7 +23,7 @@ MODELS = {
 for data_name, data_old in tqdm.tqdm(data_old_all):
     for method, model in MODELS.items():
         data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=model)
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_topk(data_old, data_new, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new, data_old, metric="human")
         points_y_acc_all[method][data_name].append(acc_new)
         points_y_clu_all[method][data_name].append(clu_new)
 
