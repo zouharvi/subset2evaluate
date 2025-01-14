@@ -41,6 +41,7 @@ def run_select_subset(
         while True:
             try:
                 out = out_fn()
+                break
             except Exception as e:
                 print(e, file=sys.stderr)
                 continue

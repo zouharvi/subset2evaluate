@@ -1,6 +1,7 @@
 # %%
 
 import collections
+import subset2evaluate.select_subset
 import subset2evaluate.utils as utils
 import utils_fig
 import numpy as np
@@ -9,90 +10,53 @@ import subset2evaluate.evaluate
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
-points_y_acc_all = collections.defaultdict(list)
-points_y_clu_all = collections.defaultdict(list)
-
-
-def heuristic_metricx_avg(line):
-    return np.average(
-        [sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]
-    )
-
-
-def heuristic_metricx_var(line):
-    return np.var([sys_v["MetricX-23-c"] for sys_v in line["scores"].values()])
-
-
-def heuristic_chrf_avg(line):
-    return np.average(
-        [sys_v["chrF"] for sys_v in line["scores"].values()]
-    )
-
-
-def heuristic_chrf_var(line):
-    return np.var([sys_v["chrF"] for sys_v in line["scores"].values()])
+points_y_acc = collections.defaultdict(list)
+points_y_clu = collections.defaultdict(list)
 
 
 for data_old in tqdm.tqdm(data_old_all):
-    # sort by the heuristic
-    data_metricx_avg = sorted(data_old, key=lambda x: heuristic_metricx_avg(x))
-    data_metricx_var = sorted(data_old, key=lambda x: -heuristic_metricx_var(x))
-    data_chrf_avg = sorted(data_old, key=lambda x: heuristic_chrf_avg(x))
+    for repetitions, method_kwargs in [
+        (1, dict(method="metric_var", metric="MetricX-23")),
+        (1, dict(method="metric_avg", metric="MetricX-23")),
+        (100, dict(method="random")),
+    ]:
+        for _ in range(repetitions):
+            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+                subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs),
+                data_old,
+                metric="human",
+            )
+            points_y_acc[method_kwargs["method"]].append(acc_new)
+            points_y_clu[method_kwargs["method"]].append(clu_new)
 
-    points_y_acc = collections.defaultdict(list)
-    points_y_clu = collections.defaultdict(list)
+# %%
 
-    for prop in utils.PROPS:
-
-        points_y_acc["metricx_avg"].append(
-            subset2evaluate.evaluate.eval_subset_accuracy(data_metricx_avg[: int(len(data_old) * prop)], data_old)
-        )
-        points_y_clu["metricx_avg"].append(
-            subset2evaluate.evaluate.eval_subset_clusters(data_metricx_avg[: int(len(data_old) * prop)])
-        )
-        points_y_acc["chrf_avg"].append(
-            subset2evaluate.evaluate.eval_subset_accuracy(data_chrf_avg[: int(len(data_old) * prop)], data_old)
-        )
-        points_y_clu["chrf_avg"].append(
-            subset2evaluate.evaluate.eval_subset_clusters(data_chrf_avg[: int(len(data_old) * prop)])
-        )
-        points_y_acc["metricx_var"].append(
-            subset2evaluate.evaluate.eval_subset_accuracy(data_metricx_var[: int(len(data_old) * prop)], data_old)
-        )
-        points_y_clu["metricx_var"].append(
-            subset2evaluate.evaluate.eval_subset_clusters(data_metricx_var[: int(len(data_old) * prop)])
-        )
-
-    # add lists to the global list
-    for k, v in points_y_acc.items():
-        points_y_acc_all[k].append(v)
-    for k, v in points_y_clu.items():
-        points_y_clu_all[k].append(v)
-
-points_y_acc_all = {
+points_y_acc = {
     k: np.average(np.array(v), axis=0)
-    for k, v in points_y_acc_all.items()
+    for k, v in points_y_acc.items()
 }
-points_y_clu_all = {
+points_y_clu = {
     k: np.average(np.array(v), axis=0)
-    for k, v in points_y_clu_all.items()
+    for k, v in points_y_clu.items()
 }
+
 # %%
 utils_fig.plot_subset_selection(
     points=[
-        (utils.PROPS, points_y_acc_all["chrf_avg"], f"ChrF average {np.average(points_y_acc_all['chrf_avg']):.1%}"),
-        (utils.PROPS, points_y_acc_all["metricx_avg"], f"MetricX average {np.average(points_y_acc_all['metricx_avg']):.1%}"),
-        (utils.PROPS, points_y_acc_all["metricx_var"], f"MetricX variance {np.average(points_y_acc_all['metricx_var']):.1%}"),
+        (utils.PROPS, points_y_acc["random"], f"Random {np.average(points_y_acc['random']):.1%}"),
+        (utils.PROPS, points_y_acc["metric_avg"], f"MetricX average {np.average(points_y_acc['metric_avg']):.1%}"),
+        (utils.PROPS, points_y_acc["metric_var"], f"MetricX variance {np.average(points_y_acc['metric_var']):.1%}"),
     ],
+    colors=["black"] + utils_fig.COLORS,
     filename="13-main_outputbased_metrics_moment",
 )
 
-
 utils_fig.plot_subset_selection(
     points=[
-        (utils.PROPS, points_y_clu_all["chrf_avg"], f"ChrF average {np.average(points_y_clu_all['chrf_avg']):.2f}"),
-        (utils.PROPS, points_y_clu_all["metricx_avg"], f"MetricX average {np.average(points_y_clu_all['metricx_avg']):.2f}"),
-        (utils.PROPS, points_y_clu_all["metricx_var"], f"MetricX variance {np.average(points_y_clu_all['metricx_var']):.2f}"),
+        (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_avg"], f"MetricX avg. {np.average(points_y_clu['metric_avg']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_var"], f"MetricX var. {np.average(points_y_clu['metric_var']):.2f}"),
     ],
+    colors=["black"] + utils_fig.COLORS,
     filename="13-main_outputbased_metrics_moment",
 )

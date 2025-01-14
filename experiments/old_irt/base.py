@@ -81,7 +81,7 @@ class IRTModelBase(L.LightningModule):
 
         data_new = [x[0] for x in items_joint]
 
-        clu_new_metric, acc_new_metric = subset2evaluate.evaluate.run_evaluate_cluacc(
+        clu_new_metric, acc_new_metric = subset2evaluate.evaluate.eval_cluacc(
             data_new,
             self.data_old,
             # TODO: look at human and how it changes
@@ -89,7 +89,7 @@ class IRTModelBase(L.LightningModule):
             metric="MetricX-23"
         )
 
-        clu_new_human, acc_new_human = subset2evaluate.evaluate.run_evaluate_cluacc(
+        clu_new_human, acc_new_human = subset2evaluate.evaluate.eval_cluacc(
             data_new,
             self.data_old,
             # TODO: set this dynamically

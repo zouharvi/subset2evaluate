@@ -82,7 +82,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                     if cache:
                         cache_data[(method_kwargs["method"], data_old_name)] = data_new
 
-                clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(
+                clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
                     [
                         data_old_i_to_line[line["i"]]
                         for line in data_new

@@ -37,7 +37,7 @@ for data_old in tqdm.tqdm(data_old_all):
         # create a list of ABCDABCDABCDCDCDDDD
         data_new_flat = [doc for docs in itertools.zip_longest(*data_aggregated) for doc in docs]
         data_new_flat = [line for line in data_new_flat if line is not None]
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new_flat, data_old, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(acc_new)
 
     for _ in range(1):

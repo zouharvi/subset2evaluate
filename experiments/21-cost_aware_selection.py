@@ -58,14 +58,14 @@ for data_old in tqdm.tqdm(data_old_all):
         data_new_util = list(zip(data_new, data_utility))
         data_new_util.sort(key=lambda x: x[1], reverse=True)
         data_new = [x[0] for x in data_new_util]
-        return subset2evaluate.evaluate.run_evaluate_top_timebudget(data_new, data_old, metric="human")
+        return subset2evaluate.evaluate.eval_cluacc_timebudget(data_new, data_old, metric="human")
 
     acc_all = collections.defaultdict(list)
     clu_all = collections.defaultdict(list)
     for beta in [0, 1, 3]:
         # random is independent of beta but let's average it!
         data_random = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_top_timebudget(data_random, data_old, metric="human")
+        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc_timebudget(data_random, data_old, metric="human")
         acc_all["random"].append(np.average(acc_new))
         clu_all["random"].append(np.average(clu_new))
 

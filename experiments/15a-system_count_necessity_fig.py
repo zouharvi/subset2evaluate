@@ -47,28 +47,28 @@ for subset_size in tqdm.tqdm(points_x):
             data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
 
             # we dropped some systems but we can recover them with the same ordering from data_old
-            clu_new_avg, acc_new_avg = subset2evaluate.evaluate.run_evaluate_cluacc(
+            clu_new_avg, acc_new_avg = subset2evaluate.evaluate.eval_cluacc(
                 [
                     data_old_i_to_line[line["i"]]
                     for line in data_new_avg
                 ],
                 data_old,
             )
-            clu_new_var, acc_new_var = subset2evaluate.evaluate.run_evaluate_cluacc(
+            clu_new_var, acc_new_var = subset2evaluate.evaluate.eval_cluacc(
                 [
                     data_old_i_to_line[line["i"]]
                     for line in data_new_var
                 ],
                 data_old,
             )
-            clu_new_div, acc_new_div = subset2evaluate.evaluate.run_evaluate_cluacc(
+            clu_new_div, acc_new_div = subset2evaluate.evaluate.eval_cluacc(
                 [
                     data_old_i_to_line[line["i"]]
                     for line in data_new_div
                 ],
                 data_old,
             )
-            clu_new_irt, acc_new_irt = subset2evaluate.evaluate.run_evaluate_cluacc(
+            clu_new_irt, acc_new_irt = subset2evaluate.evaluate.eval_cluacc(
                 [
                     data_old_i_to_line[line["i"]]
                     for line in data_new_irt
@@ -87,7 +87,7 @@ clu_random = []
 for data_old in data_old_all:
     for _ in range(10):
         data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
-        clu_new, acc_new = subset2evaluate.evaluate.run_evaluate_cluacc(data_new, data_old)
+        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old)
         acc_random.append(np.average(acc_new))
         clu_random.append(np.average(clu_new))
 

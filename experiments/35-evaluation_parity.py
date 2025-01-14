@@ -31,7 +31,7 @@ for method_kwargs in tqdm.tqdm([
     par_clu_all = []
     par_acc_all = []
     for data_name, data_old in data_old_all:
-        par_clu, par_acc = subset2evaluate.evaluate.run_evaluate_cluacc_randnorm(
+        par_clu, par_acc = subset2evaluate.evaluate.eval_cluacc_randnorm(
             subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs),
             data_old,
             cluacc_precomputed=cluacc_precomputed[data_name],
