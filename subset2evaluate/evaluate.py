@@ -71,11 +71,13 @@ def precompute_randnorm(
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
+    workers=10,
 ) -> Tuple[List[float], List[float], float, float]:
     import subset2evaluate.select_subset
+
     clu_random = []
     acc_random = []
-    for seed in range(10):
+    for seed in range(random_seeds):
         clu_new, acc_new = run_evaluate_cluacc(
             subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
             data_old,
@@ -96,6 +98,7 @@ def precompute_randnorm(
             clu_random,
             acc_random,
             metric=metric,
+            workers=workers,
         )
         pars_clu_rand.append(par_clu_rand)
         pars_acc_rand.append(par_acc_rand)
@@ -167,7 +170,6 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
 def eval_subset_clusters(data: List[Dict], metric="human"):
     from scipy.stats import wilcoxon
     import warnings
-    # computes number of clusters
 
     # if we have just 3 samples, we can't say that there are clusters
     if len(data) < 3:
@@ -185,12 +187,13 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
     while sys_ord:
         sys_scores = get_scores(sys_ord.pop(0))
         diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
-        warnings.simplefilter("ignore", category=UserWarning)
-        if all([d == 0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
-            clusters.append([sys_scores])
-        else:
-            clusters[-1].append(sys_scores)
-    warnings.resetwarnings()
+
+        with warnings.catch_warnings(action="ignore"):
+            if all([d == 0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
+                clusters.append([sys_scores])
+            else:
+                clusters[-1].append(sys_scores)
+                
     return len(clusters)
 
 

@@ -49,6 +49,11 @@ def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
 
 
 def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
+    try:
+        import py_irt
+    except ImportError as e:
+        raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
+    
     import py_irt
     import py_irt.config
     import py_irt.dataset
@@ -57,6 +62,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     import py_irt.models
     import py_irt.models.abstract_model
     import pandas as pd
+
 
     if model not in py_irt.models.abstract_model._IRT_REGISTRY:
         raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
@@ -174,6 +180,11 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
 
 
 def _assert_comet_version():
+    try:
+        import comet
+    except ImportError as e:
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
+
     import comet
     if "HypothesislessRegression" not in dir(comet.models):
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
@@ -181,33 +192,33 @@ def _assert_comet_version():
 
 def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
-    tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
+    prev_tqdm_setting = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
-
-    import comet
-    import warnings
-    import logging
-
-    logging.disable(logging.INFO)
-    warnings.filterwarnings("ignore")
     _assert_comet_version()
 
-    if load_model is not None:
-        model = load_model
-    elif os.path.exists(model_path):
-        model = comet.load_from_checkpoint(model_path)
-    else:
-        model = comet.load_from_checkpoint(comet.download_model(model_path))
-    scores = model.predict([
-        {"src": line["src"]}
-        for line in data
-    ], progress_bar=False).scores
-    if reverse:
-        scores = [-x for x in scores]
+    import logging
+    import comet
+    import warnings
+
+    logging.disable(logging.INFO)
+
+    with warnings.catch_warnings(action="ignore"):
+        if load_model is not None:
+            model = load_model
+        elif os.path.exists(model_path):
+            model = comet.load_from_checkpoint(model_path)
+        else:
+            model = comet.load_from_checkpoint(comet.download_model(model_path))
+        scores = model.predict([
+            {"src": line["src"]}
+            for line in data
+        ], progress_bar=False).scores
+        if reverse:
+            scores = [-x for x in scores]
     
-    warnings.resetwarnings()
-    if tqdm_disable_prev is not None:
-        os.environ["TQDM_DISABLE"] = tqdm_disable_prev
+    logging.disable(logging.NOTSET)
+    if prev_tqdm_setting is not None:
+        os.environ["TQDM_DISABLE"] = prev_tqdm_setting
     else:
         os.environ.pop("TQDM_DISABLE")
 
@@ -221,42 +232,42 @@ def precomet_dual(data, model_path1, model_path2, return_model=False, load_model
     import os
     tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
+    _assert_comet_version()
 
     import comet
     import warnings
     import logging
 
     logging.disable(logging.INFO)
-    warnings.filterwarnings("ignore")
-    _assert_comet_version()
 
-    if load_model is not None:
-        model1, model2 = load_model
-    else:
-        if os.path.exists(model_path1):
-            model1 = comet.load_from_checkpoint(model_path1)
+    with warnings.catch_warnings(action="ignore"):
+        if load_model is not None:
+            model1, model2 = load_model
         else:
-            model1 = comet.load_from_checkpoint(comet.download_model(model_path1))
+            if os.path.exists(model_path1):
+                model1 = comet.load_from_checkpoint(model_path1)
+            else:
+                model1 = comet.load_from_checkpoint(comet.download_model(model_path1))
 
-        if os.path.exists(model_path2):
-            model2 = comet.load_from_checkpoint(model_path2)
-        else:
-            model2 = comet.load_from_checkpoint(comet.download_model(model_path2))
-    scores1 = model1.predict([
-        {"src": line["src"]}
-        for line in data
-    ], progress_bar=False).scores
-    scores2 = model2.predict([
-        {"src": line["src"]}
-        for line in data
-    ], progress_bar=False).scores
+            if os.path.exists(model_path2):
+                model2 = comet.load_from_checkpoint(model_path2)
+            else:
+                model2 = comet.load_from_checkpoint(comet.download_model(model_path2))
+        scores1 = model1.predict([
+            {"src": line["src"]}
+            for line in data
+        ], progress_bar=False).scores
+        scores2 = model2.predict([
+            {"src": line["src"]}
+            for line in data
+        ], progress_bar=False).scores
 
     if reverse:
         scores = [-s1 * s2 for s1, s2 in zip(scores1, scores2)]
     else:
         scores = [s1 * s2 for s1, s2 in zip(scores1, scores2)]
-
-    warnings.resetwarnings()
+    
+    logging.disable(logging.NOTSET)
     if tqdm_disable_prev is not None:
         os.environ["TQDM_DISABLE"] = tqdm_disable_prev
     else:
