@@ -3,15 +3,16 @@
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
 
-> [Selecting Examples to Efficiently Human-Evaluate Models](https://vilda.net/papers/subset2evaluate.pdf): Researchers create test sets to evaluate models with human annotations, which are the gold standard as opposed to automated metrics.
-> Natural language generation, a rapidly evolving field, has a recurring need for new test sets.
-> Oftentimes, to fit the budgetary constraints, only a random subset of the test set is chosen for evaluation.
-> This is grossly inefficient and in this work we provide methods to strategically select the most informative samples to be evaluated.
-> We describe variance- and diversity-based methods for when we know the system outputs and their evaluation with automated metrics beforehand.
-> These methods consistently outperform random subset selection, the most common approach.
-> We introduce PreCOMET to make our methods applicable to blind test sets, where the systems are unknown in advance.
-> The model is trained to predict item utility for human evaluation just based on the source alone.
-> We show on two natural language generation tasks, machine translation and summarization, that these methods make human evaluation more efficient and reduce costs without burdening annotators.
+> [Selecting Examples to Efficiently Human-Evaluate Models](https://vilda.net/papers/subset2evaluate.pdf):
+> Human evaluation for language generation is the gold-standard but expensive.
+> To fit the budgetary constraints, often only a random subset of the test set is chosen for evaluation.
+> The random selection is grossly inefficient and in this work we formalize the task of selecting most informative items for evaluation.
+> We show that methods based on variance in automated metric scores or diversity in system outputs, outperform the commonly used, yet inefficient, random selection.
+> However, these methods are not applicable for test set creation where the system outputs are not yet available.
+> This is applicable to blind test set creation or for selecting from a very large set of items.
+> To this end, we introduce PreCOMET which predicts item usefulness for human evaluation just based on the input alone.
+> We demonstrate the efficacy of our methods on two common language generations tasks, machine translation and summarization.
+> We show that only 30%-60% of human annotations are needed to produce the same evaluation result.
 
 <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em">
 

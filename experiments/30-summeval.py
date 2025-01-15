@@ -1,9 +1,26 @@
 # %%
 
 import subset2evaluate
+import subset2evaluate.evaluate
 import numpy as np
-
+# 
 data_old = subset2evaluate.utils.load_data_summeval(normalize=True)
+
+# %%
+
+for method_kwargs in [
+    dict(method="metric_var", metric="supert"),
+    dict(method="metric_avg", metric="supert"),
+    dict(method="pyirt_diffdisc", metric="supert"),
+    dict(method="diversity_bleu"),
+]:
+    par_clu, par_acc = subset2evaluate.evaluate.eval_cluacc_randnorm(
+        subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs),
+        data_old,
+        metric="human_mul",
+    )
+    print(method_kwargs["method"], f"ACC: {par_acc:.1%} | CLU: {par_clu:.1%}")
+
 
 # %%
 for target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_avg", "human_mul"]:
@@ -25,8 +42,6 @@ for target, metric in [
     ("human_fluency", "coverage"),
     ("human_avg", "supert"),
     ("human_mul", "supert"),
-    ("human_avg", "density"),
-    ("human_mul", "density"),
 ]:
     data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric=metric)
     clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
