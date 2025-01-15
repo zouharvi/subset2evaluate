@@ -16,7 +16,7 @@ points_y_clu = collections.defaultdict(list)
 
 # cache models because that's where we lose a lot of time
 MODELS = {
-    method: subset2evaluate.select_subset.run_select_subset(data_old_all[0][1], method=method, return_model=True)[1]
+    method: subset2evaluate.select_subset.basic(data_old_all[0][1], method=method, return_model=True)[1]
     for method in ["precomet_avg", "precomet_var"]
 }
 MODELS["random"] = None
@@ -24,7 +24,7 @@ MODELS["random"] = None
 for data_old_name, data_old in tqdm.tqdm(data_old_all):
     for repetitions, method in [(1, "precomet_avg"), (1, "precomet_var"), (100, "random")]:
         for _ in range(repetitions):
-            data_new = subset2evaluate.select_subset.run_select_subset(data_old, method=method, load_model=MODELS[method])
+            data_new = subset2evaluate.select_subset.basic(data_old, method=method, load_model=MODELS[method])
             clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric="human")
             points_y_acc[method].append(acc_new)
             points_y_clu[method].append(clu_new)

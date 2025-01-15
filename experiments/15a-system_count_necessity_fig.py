@@ -41,10 +41,10 @@ for subset_size in tqdm.tqdm(points_x):
                 for line in data_old_local
             ]
 
-            data_new_avg = subset2evaluate.select_subset.run_select_subset(data_old_local, method="metric_avg", metric="MetricX-23-c")
-            data_new_var = subset2evaluate.select_subset.run_select_subset(data_old_local, method="metric_var", metric="MetricX-23-c")
-            data_new_div = subset2evaluate.select_subset.run_select_subset(data_old_local, method="diversity_bleu")
-            data_new_irt = subset2evaluate.select_subset.run_select_subset(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
+            data_new_avg = subset2evaluate.select_subset.basic(data_old_local, method="metric_avg", metric="MetricX-23-c")
+            data_new_var = subset2evaluate.select_subset.basic(data_old_local, method="metric_var", metric="MetricX-23-c")
+            data_new_div = subset2evaluate.select_subset.basic(data_old_local, method="diversity_bleu")
+            data_new_irt = subset2evaluate.select_subset.basic(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
 
             # we dropped some systems but we can recover them with the same ordering from data_old
             clu_new_avg, acc_new_avg = subset2evaluate.evaluate.eval_cluacc(
@@ -86,7 +86,7 @@ acc_random = []
 clu_random = []
 for data_old in data_old_all:
     for _ in range(10):
-        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
+        data_new = subset2evaluate.select_subset.basic(data_old, method="random")
         clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old)
         acc_random.append(np.average(acc_new))
         clu_random.append(np.average(clu_new))

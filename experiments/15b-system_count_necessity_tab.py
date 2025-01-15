@@ -78,7 +78,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 if cache and (method_kwargs["method"], data_old_name) in cache_data:
                     data_new = cache_data[(method_kwargs["method"], data_old_name)]
                 else:
-                    data_new = subset2evaluate.select_subset.run_select_subset(data_old_artificial, **method_kwargs, retry_on_error=True)
+                    data_new = subset2evaluate.select_subset.basic(data_old_artificial, **method_kwargs, retry_on_error=True)
                     if cache:
                         cache_data[(method_kwargs["method"], data_old_name)] = data_new
 

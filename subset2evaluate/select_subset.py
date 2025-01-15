@@ -5,7 +5,7 @@ import copy
 import sys
 
 
-def run_select_subset(
+def basic(
     data: Union[List, str],
     method: str,
     metric=None,
@@ -71,9 +71,9 @@ def main_cli():
 
     args = argparse.ArgumentParser(
         description="""
-        Select subset of data. The returned data is ordered by the method's utility in descending order (first is best).
-        The segment utility is also stored in the 'subset2evaluate_utility' field of each item.
-    """
+            Select subset of data. The returned data is ordered by the method's utility in descending order (first is best).
+            The segment utility is also stored in the 'subset2evaluate_utility' field of each item.
+        """
     )
     args.add_argument(
         'data', type=str,
@@ -92,7 +92,7 @@ def main_cli():
     )
     args = args.parse_args()
 
-    data_new = run_select_subset(
+    data_new = basic(
         args.data,
         method=args.method,
         **ast.literal_eval(args.args)

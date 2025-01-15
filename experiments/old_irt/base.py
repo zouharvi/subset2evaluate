@@ -71,7 +71,6 @@ class IRTModelBase(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         # we ignore the inputs and use the current parameters which are aligned with the full data
 
-        # TODO: monitor accuracy & clusters here to know when to stop
         data_irt = self.pack_irt_params()
         items_joint = list(zip(self.data_old, data_irt["items"]))
         items_joint.sort(
@@ -84,7 +83,6 @@ class IRTModelBase(L.LightningModule):
         clu_new_metric, acc_new_metric = subset2evaluate.evaluate.eval_cluacc(
             data_new,
             self.data_old,
-            # TODO: look at human and how it changes
             # TODO: set this dynamically
             metric="MetricX-23"
         )

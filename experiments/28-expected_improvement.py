@@ -31,7 +31,7 @@ for data_old in tqdm.tqdm(data_old_all):
         acc_new_all_met_local = []
         clu_new_all_met_local = []
         for _ in range(5 if method_kwargs["method"] == "pyirt_diffdisc" else 10 if method_kwargs["method"] == "random" else 1):
-            data_new = subset2evaluate.select_subset.run_select_subset(
+            data_new = subset2evaluate.select_subset.basic(
                 data_old,
                 **method_kwargs,
                 metric="MetricX-23-c",

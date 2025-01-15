@@ -94,7 +94,6 @@ def nn_irt(data, metric, **kwargs):
     agent_indexer = create_agent_indexer_from_dataset(data_train + data_test)
     train_collator = collators.CaimiraCollator(agent_indexer, is_training=True)
 
-    # TODO: very likely will fail here because the data is not wrangled properly
     train_loader = torch_data.DataLoader(
         data_train,
         batch_size=BATCH_SIZE,
