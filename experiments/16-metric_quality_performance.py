@@ -2,7 +2,6 @@
 import subset2evaluate.select_subset
 import subset2evaluate.evaluate
 import subset2evaluate.utils
-import random
 import tqdm
 import numpy as np
 import scipy.stats
@@ -13,11 +12,9 @@ import matplotlib as mpl
 import collections
 import pickle
 
-random.seed(0)
-
 # use ALL the data
 # TODO: run on full
-data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
+data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
 accs_all = collections.defaultdict(list)
@@ -37,8 +34,7 @@ for data_old in tqdm.tqdm(data_old_all):
         continue
     metrics.remove("human")
     print(metrics)
-    # TODO: run on full
-    for metric in tqdm.tqdm(list(metrics)[:3]):
+    for metric in tqdm.tqdm(list(metrics)):
         try:    
             data_y_metric = [
                 line["scores"][sys][metric]
@@ -79,14 +75,12 @@ for data_old in tqdm.tqdm(data_old_all):
 
 # %%
 # backup
-with open("computed/16-metric_quality_performance.pkl", "wb") as f:
+with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
     pickle.dump((accs_all, clus_all, corrs_all), f)
 
 # %%
 
-data_x = np.linspace(0, 0.55, 10)
-# TODO: 4 columns?
-data_x = [0.0, 0.2, 0.4, float("inf")]
+data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
 
 def aggregate_data_y(data_y):
     assert len(corrs_all) == len(data_y)
@@ -96,89 +90,36 @@ def aggregate_data_y(data_y):
         data_y_new.append([y for x, y in zip(corrs_all, data_y) if x1 <= x < x2 and isinstance(y, np.float64)])
     return [np.average(l) for l in data_y_new]
 
-
-# figure for accuracy
 fig_utils.matplotlib_default()
 
+
 fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
-axs[0].plot(
-    data_x[:-1],
-    aggregate_data_y(accs_all["random"]),
-    label="random",
-    linewidth=2,
-    color="black",
-)
-axs[0].plot(
-    data_x[:-1],
-    aggregate_data_y(accs_all["diversity_bleu"]),
-    label="diversity_bleu",
-    linewidth=2,
-    color="gray",
-)
-axs[0].plot(
-    data_x[:-1],
-    aggregate_data_y(accs_all["metric_avg"]),
-    label="metric avg",
-    linewidth=2,
-)
-axs[0].plot(
-    data_x[:-1],
-    aggregate_data_y(accs_all["metric_var"]),
-    label="metric var",
-    linewidth=2,
-)
-
-axs[0].plot(
-    data_x[:-1],
-    aggregate_data_y(accs_all["pyirt_diffdisc"]),
-    label="IRT diff.$\\times$disc.",
-    linewidth=2,
-)
-
-axs[0].set_ylabel("System accuracy", labelpad=-5)
-axs[0].set_xticks(
-    data_x[:-1],
-    [f"{x+0.1:.1f}" for x in data_x[:-1]],
-)
-axs[0].set_ylim(None, 1)
-axs[0].legend(
-    handletextpad=0.4,
-    handlelength=0.8,
-    labelspacing=0.2,
-    facecolor="#ccc",
-    loc="upper left",
-    fontsize=8
-)
-# show y-axis as percentage
-axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
-axs[0].spines[['top', 'right']].set_visible(False)
-
 
 # figure for clusters
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["random"]),
-    label="random",
+    label="Random",
     linewidth=2,
     color="black",
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["diversity_bleu"]),
-    label="diversity_bleu",
+    label="Diversity",
     linewidth=2,
     color="gray",
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_avg"]),
-    label="metric avg",
+    label="metric avg.",
     linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_var"]),
-    label="metric var",
+    label="metric var.",
     linewidth=2,
 )
 
@@ -189,13 +130,72 @@ axs[1].plot(
     linewidth=2,
 )
 
-axs[1].set_ylabel("Number of clusters")
+axs[1].set_ylabel("Number of clusters", labelpad=-1)
 axs[1].set_xticks(
     data_x[:-1],
-    [f"{x+0.1:.1f}" for x in data_x[:-1]],
+    [f"{x+0.1:.2f}"[:3] for x in data_x[:-1]],
 )
 axs[1].set_xlabel("Metric correlation with human" + " " * 40)
 axs[1].spines[['top', 'right']].set_visible(False)
+
+
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["random"]),
+    label="Random",
+    linewidth=2,
+    color="black",
+)
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["diversity_bleu"]),
+    label="Diversity",
+    linewidth=2,
+    color="gray",
+)
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["metric_avg"]),
+    label="metric avg.",
+    linewidth=2,
+)
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["metric_var"]),
+    label="metric var.",
+    linewidth=2,
+)
+
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["pyirt_diffdisc"]),
+    label="IRT diff.$\\times$disc.",
+    linewidth=2,
+)
+
+axs[0].set_ylabel("System accuracy", labelpad=-1)
+axs[0].set_xticks(
+    data_x[:-1],
+    [f"{x+0.1:.2f}"[:3] for x in data_x[:-1]],
+)
+
+# show y-axis as percentage
+axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
+axs[0].spines[['top', 'right']].set_visible(False)
+
+axs[1].legend(
+    handletextpad=0.4,
+    handlelength=0.8,
+    labelspacing=0.2,
+    facecolor="#ccc",
+    loc="upper right",
+    bbox_to_anchor=(0.8, 1.2),
+    ncol=3,
+    fontsize=8,
+)
+plt.subplots_adjust(right=5.5)
+
+
 plt.tight_layout()
 plt.savefig("../figures_pdf/16-metric_quality_performance.pdf")
 plt.show()
