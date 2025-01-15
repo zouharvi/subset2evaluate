@@ -118,6 +118,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
 
         lines_score = collections.defaultdict(list)
         for fname in [
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
             f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
             f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
             f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
@@ -155,6 +156,13 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
         # putting it all together
         data = []
         line_id_true = 0
+
+        # remove systems that have no outputs
+        systems_bad = set()
+        for sys, scores in lines_score.items():
+            if all([x["human"] in {"None", "0"} for x in scores]):
+                systems_bad.add(sys)
+        systems = [sys for sys in systems if sys not in systems_bad]
 
         for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
             # filter None on the whole row
