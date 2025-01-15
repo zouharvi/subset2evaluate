@@ -75,7 +75,7 @@ def plot_subset_selection(
         )
 
     if IS_CLUSTERS:
-        plt.ylabel("Number of clusters" + " " * 5, labelpad=13)
+        plt.ylabel("Cluster count" + " " * 5, labelpad=13)
     else:
         plt.ylabel("System accuracy" + " " * 5, labelpad=-1)
     plt.xlabel("Proportion of original data", labelpad=-1)
