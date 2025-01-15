@@ -106,6 +106,14 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
         if lines_ref is None:
             return []
 
+        # take care of canaries because scores don't have them
+        if lines_src[0].lower().startswith("canary"):
+            lines_src.pop(0)
+        if lines_doc[0].lower().startswith("canary"):
+            lines_doc.pop(0)
+        if lines_ref[0].lower().startswith("canary"):
+            lines_ref.pop(0)
+
         line_sys = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
             sys = f.split("/")[-1].removesuffix(".txt")
@@ -113,6 +121,8 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 continue
 
             line_sys[sys] = open(f, "r").readlines()
+            if line_sys[sys][0].lower().startswith("canary"):
+                line_sys[sys].pop(0)
 
         systems = list(line_sys.keys())
 
