@@ -14,7 +14,7 @@ acc_random = []
 for seed in range(100):
     _, acc_new = subset2evaluate.evaluate.eval_cluacc(
         data_old,
-        subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+        subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
         metric="human"
     )
     acc_random.append(acc_new)
@@ -22,27 +22,27 @@ for seed in range(100):
 # %%
 
 _, acc_metric_var = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric="MetricX-23"),
+    subset2evaluate.select_subset.basic(data_old, method="metric_var", metric="MetricX-23"),
     data_old,
     metric="human"
 )
 _, acc_metric_avg = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric="MetricX-23"),
+    subset2evaluate.select_subset.basic(data_old, method="metric_avg", metric="MetricX-23"),
     data_old,
     metric="human"
 )
 _, acc_diffdisc = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True),
+    subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True),
     data_old,
     metric="human",
 )
 _, acc_precomet_diffdisc = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="precomet_diffdisc"),
+    subset2evaluate.select_subset.basic(data_old, method="precomet_diffdisc"),
     data_old,
     metric="human",
 )
 _, acc_precomet_var = subset2evaluate.evaluate.eval_cluacc(
-    subset2evaluate.select_subset.run_select_subset(data_old, method="precomet_var"),
+    subset2evaluate.select_subset.basic(data_old, method="precomet_var"),
     data_old,
     metric="human",
 )

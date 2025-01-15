@@ -64,7 +64,7 @@ for data_old in tqdm.tqdm(data_old_all):
     ]:
         # run multiple times to average out the effect
         for _ in range(5 if method_kwargs["method"] == "pyirt_diffdisc" else 100 if method_kwargs["method"] == "random" else 1):
-            data_new = subset2evaluate.select_subset.run_select_subset(
+            data_new = subset2evaluate.select_subset.basic(
                 data_old_aggregated,
                 **method_kwargs,
                 metric="MetricX-23-c",
@@ -133,7 +133,7 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new_all["diversity_bleu"].append(clu_new)
 
     for _ in range(5):
-        _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
+        _, params = subset2evaluate.select_subset.basic(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
         data_y = [line_irt["diff"] * line_irt["disc"] for line_old, line_irt in zip(data_old, params["items"])]
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["pyirt_diffdisc"].append(acc_new)

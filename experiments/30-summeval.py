@@ -15,7 +15,7 @@ for method_kwargs in [
     dict(method="diversity_bleu"),
 ]:
     par_clu, par_acc = subset2evaluate.evaluate.eval_cluacc_randnorm(
-        subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs),
+        subset2evaluate.select_subset.basic(data_old, **method_kwargs),
         data_old,
         metric="human_mul",
     )
@@ -27,7 +27,7 @@ for target in ["human_relevance", "human_coherence", "human_consistency", "human
     acc_all = []
     clu_all = []
     for _ in range(100):
-        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="random")
+        data_new = subset2evaluate.select_subset.basic(data_old, method="random")
         clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
         acc_all.append(acc_new)
         clu_all.append(clu_new)
@@ -43,7 +43,7 @@ for target, metric in [
     ("human_avg", "supert"),
     ("human_mul", "supert"),
 ]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_avg", metric=metric)
+    data_new = subset2evaluate.select_subset.basic(data_old, method="metric_avg", metric=metric)
     clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
@@ -57,7 +57,7 @@ for target, metric in [
     ("human_avg", "supert"),
     ("human_mul", "supert"),
 ]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="metric_var", metric=metric)
+    data_new = subset2evaluate.select_subset.basic(data_old, method="metric_var", metric=metric)
     clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
@@ -74,7 +74,7 @@ for target, metric in [
     acc_all = []
     clu_all = []
     for _ in range(5):
-        data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="pyirt_diffdisc", metric=metric, retry_on_error=True)
+        data_new = subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", metric=metric, retry_on_error=True)
         clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
         acc_all.append(acc_new)
         clu_all.append(clu_new)
@@ -83,6 +83,6 @@ for target, metric in [
 
 # %%
 for target in ["human_relevance", "human_coherence", "human_fluency", "human_consistency", "human_avg", "human_mul"]:
-    data_new = subset2evaluate.select_subset.run_select_subset(data_old, method="diversity_bleu")
+    data_new = subset2evaluate.select_subset.basic(data_old, method="diversity_bleu")
     clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric=target)
     print(target, f"ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")

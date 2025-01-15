@@ -17,7 +17,7 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
         # run multiple times to smooth variance
         for _ in range(repetitions):
             clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
-                subset2evaluate.select_subset.run_select_subset(data_old, **kwargs_dict, retry_on_error=False),
+                subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
                 data_old,
                 metric=target,
             )

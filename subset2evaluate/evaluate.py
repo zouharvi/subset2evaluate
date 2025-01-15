@@ -1,6 +1,5 @@
 from typing import Dict, List, Tuple
 import numpy as np
-import subset2evaluate
 import subset2evaluate.utils as utils
 
 
@@ -79,7 +78,7 @@ def precompute_randnorm(
     acc_random = []
     for seed in range(random_seeds):
         clu_new, acc_new = eval_cluacc(
-            subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             metric=metric,
         )
@@ -93,7 +92,7 @@ def precompute_randnorm(
 
     for seed in range(random_seeds, 2*random_seeds):
         par_clu_rand, par_acc_rand = eval_cluacc_par(
-            subset2evaluate.select_subset.run_select_subset(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             clu_random,
             acc_random,
@@ -126,29 +125,6 @@ def eval_cluacc_randnorm(
     )
 
     return par_clu/clu_random_norm, par_acc/acc_random_norm
-
-
-def eval_cluacc_timebudget(data_new, data_old, metric="human"):
-    # both list or descriptor is fine
-    data_old = utils.load_data(data_old)
-    data_new = utils.load_data(data_new)
-
-    clu_new = []
-    acc_new = []
-    for prop in utils.PROPS:
-        k = int(len(data_old) * prop)
-        data_new_inbudget = []
-        budget = k
-        for item in data_new:
-            if item["time"] <= budget:
-                budget -= item["time"]
-                data_new_inbudget.append(item)
-            else:
-                break
-        clu_new.append(eval_subset_clusters(data_new_inbudget, metric=metric))
-        acc_new.append(eval_subset_accuracy(data_new_inbudget, data_old, metric=metric))
-
-    return clu_new, acc_new
 
 
 def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):

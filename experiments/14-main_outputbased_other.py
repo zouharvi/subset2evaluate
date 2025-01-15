@@ -22,7 +22,7 @@ for data_old in tqdm.tqdm(data_old_all):
     ]:  
         for _ in range(repetitions):
             clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
-                subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs),
+                subset2evaluate.select_subset.basic(data_old, **method_kwargs),
                 data_old,
                 metric="human",
             )

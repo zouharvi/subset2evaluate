@@ -142,7 +142,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
                 sys, score = line_raw.strip().split("\t")
                 # for refA, refB, synthetic_ref, and other "systems" not evaluated
-                # TODO: maybe remove those from the systems list?
+                # NOTE: another option is remove the *systems*
                 if sys not in lines_score:
                     continue
                 # NOTE: there's no guarantee that this indexing is correct

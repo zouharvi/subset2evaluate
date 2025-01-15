@@ -19,7 +19,7 @@ for method_kwargs in tqdm.tqdm([
     clu_all = []
     acc_all = []
     for data_old in data_old_all:
-        data_new_raw = subset2evaluate.select_subset.run_select_subset(data_old, **method_kwargs)
+        data_new_raw = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
         # sort back
         data_new_raw.sort(key=lambda x: x["i"])
         assert all(["subset2evaluate_utility" in x for x in data_new_raw])

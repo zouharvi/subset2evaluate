@@ -58,7 +58,7 @@ for data_old in tqdm.tqdm(data_old_all):
         clu_new_all["diversity_bleu"].append(clu_new)
 
     for _ in range(5):
-        _, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
+        _, params = subset2evaluate.select_subset.basic(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
         data_y = [line_irt["diff"] * line_irt["disc"] for line_irt in params["items"]]
         clu_new, acc_new = evaluate_balanced_domains(data_y)
         acc_new_all["pyirt_diffdisc"].append(acc_new)

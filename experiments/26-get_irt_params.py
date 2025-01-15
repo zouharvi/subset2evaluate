@@ -22,7 +22,7 @@ data_params = []
 # train IRT on all data, distinguish where it came from
 # run multiple times and average item parameters
 for _ in tqdm.tqdm(range(5)):
-    _data, params = subset2evaluate.select_subset.run_select_subset(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="human", epochs=1000, retry_on_error=True, enforce_positive_disc=True)
+    _data, params = subset2evaluate.select_subset.basic(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="human", epochs=1000, retry_on_error=True, enforce_positive_disc=True)
     data_params.append([
         {**line, "irt": line_irt}
         for line, line_irt in zip(data_old, params["items"])
