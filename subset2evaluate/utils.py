@@ -424,7 +424,7 @@ def load_data(data: Union[List, str]):
     elif data == "summeval":
         return load_data_summeval(normalize=True)
     else:
-        # load from file
+        # custom datasets, load from file
         with open(data, 'r') as fp:
             data = [json.loads(line) for line in fp.readlines()]
         return data

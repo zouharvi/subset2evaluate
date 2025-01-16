@@ -80,10 +80,10 @@ def test_custom(data_file, method, method_metric, human_metric):
     print('Method: clu {}, acc {}'.format(clu_method, acc_method))
     print('='*100)
 
-# Running these datasets get error because of missing datapoints, e.g., some samples miss some system outputs or annotations.
+# Running these datasets get error because of missing datapoints, e.g., some samples miss some system outputs or annotations
+
 # test_custom(data_file='other_data/e2e_challenge.jsonl', method='diversity_bleu', method_metric=None, human_metric='quality')
 # test_custom(data_file='other_data/e2e_challenge.jsonl', method='diversity_bleu', method_metric=None, human_metric='naturalness')
-
 # test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='quality')
 # test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='naturalness')
 # test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='informativeness')
@@ -92,3 +92,8 @@ def test_custom(data_file, method, method_metric, human_metric):
 test_custom(data_file='other_data/story_gen_roc.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')
 test_custom(data_file='other_data/story_gen_wc.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')
 test_custom(data_file='other_data/persona_chat.jsonl', method='diversity_bleu', method_metric=None, human_metric='Overall')
+
+test_custom(data_file='other_data/sum_cnndm1_openai.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')   # human_metric: overall, accuracy, coverage, coherence
+test_custom(data_file='other_data/sum_cnndm3_openai.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')
+test_custom(data_file='other_data/sum_dialsum.jsonl', method='diversity_bleu', method_metric=None, human_metric='coherence')
+test_custom(data_file='other_data/sum_newsroom.jsonl', method='diversity_bleu', method_metric=None, human_metric='coherence')
