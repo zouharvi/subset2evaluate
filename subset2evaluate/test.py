@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+sys.path.append('/Users/cuipeng/Documents/Projects/subset2evaluate')
 import subset2evaluate
 
 
@@ -64,3 +66,29 @@ def test_summeval_method_diversity():
     # it is a bit different on GitHub actions, therefore higher error margin
     assert abs(np.average(clu_new) - 2.9000) < 0.2
     assert abs(np.average(acc_new) - 0.8934) < 0.2
+
+
+def test_custom(data_file, method, method_metric, human_metric):
+    # e2e challenge
+    data_full = subset2evaluate.utils.load_data(data_file)
+    data_rnd = subset2evaluate.select_subset.basic(data_full, method='random')
+    clu_rnd, acc_rnd = subset2evaluate.evaluate.eval_cluacc(data_rnd, data_full, metric=human_metric)
+
+    data_sorted = subset2evaluate.select_subset.basic(data_full, method=method, metric=method_metric)
+    clu_method, acc_method = subset2evaluate.evaluate.eval_cluacc(data_sorted, data_full, metric=human_metric)
+    print('Random: clu {}, acc {}'.format(clu_rnd, acc_rnd))
+    print('Method: clu {}, acc {}'.format(clu_method, acc_method))
+    print('='*100)
+
+# Running these datasets get error because of missing datapoints, e.g., some samples miss some system outputs or annotations.
+# test_custom(data_file='other_data/e2e_challenge.jsonl', method='diversity_bleu', method_metric=None, human_metric='quality')
+# test_custom(data_file='other_data/e2e_challenge.jsonl', method='diversity_bleu', method_metric=None, human_metric='naturalness')
+
+# test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='quality')
+# test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='naturalness')
+# test_custom(data_file='other_data/emnlp_2017.jsonl', method='diversity_bleu', method_metric=None, human_metric='informativeness')
+
+
+test_custom(data_file='other_data/story_gen_roc.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')
+test_custom(data_file='other_data/story_gen_wc.jsonl', method='diversity_bleu', method_metric=None, human_metric='overall')
+test_custom(data_file='other_data/persona_chat.jsonl', method='diversity_bleu', method_metric=None, human_metric='Overall')

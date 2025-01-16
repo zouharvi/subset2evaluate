@@ -1,6 +1,7 @@
 from typing import List, Union
 from typing import Dict
 import numpy as np
+import json
 PROPS = np.geomspace(0.05, 0.5, 10)
 
 
@@ -423,6 +424,10 @@ def load_data(data: Union[List, str]):
     elif data == "summeval":
         return load_data_summeval(normalize=True)
     else:
-        raise Exception("Could not parse data")
+        # load from file
+        with open(data, 'r') as fp:
+            data = [json.loads(line) for line in fp.readlines()]
+        return data
+        # raise Exception("Could not parse data")
 
     return data

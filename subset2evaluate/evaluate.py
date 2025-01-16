@@ -157,7 +157,8 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
     sys_ord = [sys for sys, _ in sys_ord]
 
     def get_scores(system):
-        return [line["scores"][system][metric] for line in data]
+        # return [line["scores"][system][metric] for line in data ]
+        return [line["scores"][system][metric] for line in data if system in line['scores']]
 
     clusters = [[get_scores(sys_ord.pop(0))]]
     while sys_ord:
@@ -182,6 +183,8 @@ def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
     systems = list(data_new[0]["scores"].keys())
     for line in data_new:
         for sys in systems:
+            if sys not in line['scores']:
+                continue  # compatibility with missing data
             scores_new[sys].append(line["scores"][sys][metric])
 
     scores_new = {
