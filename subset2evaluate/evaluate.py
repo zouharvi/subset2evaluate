@@ -226,7 +226,7 @@ def main_cli():
     import argparse
 
     args = argparse.ArgumentParser(
-        description="Meta-evaluate subset selection methods with cluster count and system accuracy."
+        description="Meta-evaluate subset selection methods with cluster count and pairwise accuracy."
     )
     args.add_argument(
         'data_old', type=str, default='wmt23/en-cs',

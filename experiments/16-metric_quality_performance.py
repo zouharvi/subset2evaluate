@@ -173,7 +173,7 @@ axs[0].plot(
     linewidth=2,
 )
 
-axs[0].set_ylabel("System accuracy", labelpad=-1)
+axs[0].set_ylabel("Pairwise accuracy", labelpad=-1)
 axs[0].set_xticks(
     data_x[:-1],
     [f"{x+0.1:.2f}"[:3] for x in data_x[:-1]],

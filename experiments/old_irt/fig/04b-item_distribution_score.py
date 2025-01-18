@@ -1,5 +1,5 @@
 """
-Look at individual segments and how they correspond to system averages.
+Look at individual items and how they correspond to system averages.
 """
 
 import subset2evaluate.utils as utils
