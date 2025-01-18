@@ -4,7 +4,7 @@ import subset2evaluate.utils as utils
 import numpy as np
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
-
+# %%
 
 def benchmark_method(repetitions=10, kwargs_dict={}):
     data_old = utils.load_data_wmt(year="wmt23", langs="en-cs", normalize=True)
