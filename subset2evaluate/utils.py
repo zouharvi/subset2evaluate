@@ -434,7 +434,7 @@ def load_data(data: Union[List, str]):
         return [json.loads(x) for x in open(data, "r")]
     elif data.startswith("wmt"):
         data_year, data_lang = data.split("/")
-        if data_lang == "all":
+        if data_year == "wmt" and data_lang == "all":
             data = load_data_wmt_all()
         else:
             data = load_data_wmt(year=data_year, langs=data_lang, normalize=True)

@@ -3,10 +3,11 @@ import subset2evaluate
 
 
 def test_wmt_loader():
-    data = subset2evaluate.utils.load_data("wmt23/all")
+    data = subset2evaluate.utils.load_data("wmt/all")
     assert isinstance(data, dict)
-    assert len(data) == 33
+    assert len(data) == 35
     assert len(data[("wmt23", "en-cs")]) == 1098
+    assert len([k for k, v in data.items() if k[0].startswith("wmt23")]) == 9
     assert "src" in data[("wmt23", "en-cs")][0]
     assert "tgt" in data[("wmt23", "en-cs")][0]
     assert "scores" in data[("wmt23", "en-cs")][0]
