@@ -27,15 +27,23 @@ def metric_var(data, metric, **kwargs) -> List[float]:
 
 
 def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
+    import scipy.stats
     if metric_target is None:
         metric_target = metric
     
     data_ord = subset2evaluate.evaluate.get_sys_absolute(data, metric=metric_target)
+    systems = data_ord.keys()
+    data_ord = [data_ord[sys] for sys in systems]
+
+    def _fn(item):
+        sys_absolute = subset2evaluate.evaluate.get_sys_absolute([item], metric=metric)
+        return [sys_absolute[sys] for sys in systems]
+    
     return [
-        subset2evaluate.evaluate.eval_order_accuracy(
-            subset2evaluate.evaluate.get_sys_absolute([x], metric=metric),
+        scipy.stats.spearmanr(
+            _fn(x),
             data_ord
-        )
+        ).correlation
         for x in data
     ]
 

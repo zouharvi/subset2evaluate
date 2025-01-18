@@ -143,6 +143,20 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
     return np.average(result)
 
 
+def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="human"):
+    # evaluates spearman correlation of systems
+    import scipy.stats
+
+    systems = list(data_old[0]["scores"].keys())
+
+    scores_old = get_sys_absolute(data_old, metric=metric)
+    scores_new = get_sys_absolute(data_new, metric=metric)
+
+    values_old = [scores_old[sys] for sys in systems]
+    values_new = [scores_new[sys] for sys in systems]
+    return scipy.stats.spearmanr(values_old, values_new).correlation
+
+
 def eval_subset_clusters(data: List[Dict], metric="human"):
     from scipy.stats import wilcoxon
     import warnings
