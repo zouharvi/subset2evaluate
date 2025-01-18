@@ -230,7 +230,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
     return data
 
 
-def load_data_wmt_all(min_segments=500, **kwargs):
+def load_data_wmt_all(min_items=500, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
@@ -329,7 +329,7 @@ def load_data_wmt_all(min_segments=500, **kwargs):
     }
     # filter out empty datasets
     # some years/langs have issues with human annotations coverage
-    return {k: v for k, v in data.items() if len(v) > min_segments}
+    return {k: v for k, v in data.items() if len(v) > min_items}
 
 
 def load_data_summeval(normalize=True):

@@ -1,6 +1,7 @@
 from typing import Any, List, Tuple, Union
 from functools import partial
 import numpy as np
+import subset2evaluate.evaluate
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -22,6 +23,20 @@ def metric_var(data, metric, **kwargs) -> List[float]:
     return [
         np.var([sys_v[metric] for sys_v in item["scores"].values()])
         for item in data
+    ]
+
+
+def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
+    if metric_target is None:
+        metric_target = metric
+    
+    data_ord = subset2evaluate.evaluate.get_sys_absolute(data, metric=metric_target)
+    return [
+        subset2evaluate.evaluate.eval_order_accuracy(
+            subset2evaluate.evaluate.get_sys_absolute([x], metric=metric),
+            data_ord
+        )
+        for x in data
     ]
 
 
@@ -350,6 +365,8 @@ METHODS = {
     "diversity_bleu": diversity_bleu,
     "diversity_chrf": diversity_chrf,
     "diversity_unigram": diversity_unigram,
+
+    "pointwise_alignment": pointwise_alignment,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),

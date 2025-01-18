@@ -76,7 +76,7 @@ data_full = subset2evaluate.utils.load_data("wmt23/en-cs")
 len(data_full)
 > 1098
 
-# take only top 100 segments to "human-evaluate"
+# take only top 100 items to "human-evaluate"
 data_new = subset2evaluate.select_subset.basic(data_full, method="random")
 subset2evaluate.evalute.eval_subset_clusters(data_new[:100])
 > 1
@@ -96,7 +96,7 @@ data_full = subset2evaluate.utils.load_data("summeval")
 len(data_full)
 > 100
 
-# take only top 25 segments to "human-evaluate"
+# take only top 25 items to "human-evaluate"
 data_new = subset2evaluate.select_subset.basic(data_full, method="random")
 subset2evaluate.evaluate.eval_subset_clusters(data_new[:25], metric="human_relevance")
 > 2

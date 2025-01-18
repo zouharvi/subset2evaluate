@@ -72,7 +72,7 @@ def main_cli():
     args = argparse.ArgumentParser(
         description="""
             Select subset of data. The returned data is ordered by the method's utility in descending order (first is best).
-            The segment utility is also stored in the 'subset2evaluate_utility' field of each item.
+            The item utility is also stored in the 'subset2evaluate_utility' field of each item.
         """
     )
     args.add_argument(

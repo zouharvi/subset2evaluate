@@ -61,7 +61,13 @@ benchmark_method(repetitions=10, kwargs_dict={"enforce_positive_disc": True, "me
 
 # %%
 print("Random")
-benchmark_method(repetitions=10, kwargs_dict={"method": "random"})
+# benchmark_method(repetitions=10, kwargs_dict={"method": "random"})
+benchmark_method_all(repetitions=10, kwargs_dict={"method": "random"})
+
+# %%
+print("Pointwise alignment")
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "pointwise_alignment", "metric": "MetricX-23"})
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "pointwise_alignment", "metric": "human"})
 
 # %%
 print("PreCOMET-{avg,var}")
@@ -73,6 +79,12 @@ print("Human-var")
 benchmark_method(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "human"})
 print("Human-avg")
 benchmark_method(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "human"})
+
+# %%
+print("MetricX-var")
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "MetricX-23"})
+print("MetricX-avg")
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "MetricX-23"})
 
 # %%
 print("PreCOMET variants")
