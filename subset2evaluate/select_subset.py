@@ -62,6 +62,61 @@ def basic(
         return data, model
     else:
         return data
+    
+
+def costaware(
+    data: Union[List, str],
+    budget: float,
+    time_limit: float = 60,
+    **kwargs
+) -> List:
+    """
+    Requires items to have "subset2evaluate_utility" field, which commonly means that the data need to run
+    through the subset2evaluate.select_subset.basic(..) method first.
+
+    Each item also needs to have positive "cost" field.
+    """
+    import scipy.optimize
+    import numpy as np
+
+    assert all(["subset2evaluate_utility" in x for x in data]), "Items need to have 'subset2evaluate_utility' field."
+    assert all(["cost" in x for x in data]), "Items need to have 'cost' field."
+
+    # make sure utility is always positive
+    data_new_utility = np.array([x["subset2evaluate_utility"] for x in data])
+    min_data = min(data_new_utility)
+    max_data = max(data_new_utility)
+    data_new_utility = (data_new_utility - min_data) / (max_data - min_data) / 2
+    data_new_utility += 0.1
+
+    opt = scipy.optimize.milp(
+        # minimize negative utility
+        c=-data_new_utility,
+        bounds=scipy.optimize.Bounds(0, 1),
+        constraints=scipy.optimize.LinearConstraint(
+            A=[line["cost"] for line in data],
+            lb=0,
+            ub=budget,
+        ),
+        # has to be integer
+        integrality=np.full_like(data, 1),
+        options=dict(
+            time_limit=time_limit,
+        )
+    )
+
+    # greedily fill budget
+    top_k = list(np.argsort(opt.x))
+    data_new = []
+    while len(top_k) != 0:
+        new_line = data[top_k.pop()]
+        if sum([line["cost"] for line in data_new+[new_line]]) >= budget:
+            break
+        data_new.append(new_line)
+
+    # data_new = [line for x, line in zip(opt.x, data) if x == 1.0]
+
+    return data_new
 
 
 def main_cli():

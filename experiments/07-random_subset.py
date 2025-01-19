@@ -9,7 +9,7 @@ import subset2evaluate.select_subset
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
-points_y_acc_all = []
+points_y_cor_all = []
 points_y_clu_all = []
 
 for data_old in tqdm.tqdm(data_old_all):
@@ -26,7 +26,7 @@ for data_old in tqdm.tqdm(data_old_all):
         points_y_acc.append(cor_new)
         points_y_clu.append(clu_new)
 
-    points_y_acc_all.append(np.average(points_y_acc, axis=0))
+    points_y_cor_all.append(np.average(points_y_acc, axis=0))
     points_y_clu_all.append(np.average(points_y_clu, axis=0))
 
 print(f"Average ACC {np.average(points_y_acc):.1%}")
@@ -35,7 +35,7 @@ print(f"Average CLU {np.average(points_y_clu):.2f}")
 
 # %%
 def plot_extra_acc(ax):
-    for points_y_acc in points_y_acc_all:
+    for points_y_acc in points_y_cor_all:
         ax.plot(
             utils.PROPS,
             points_y_acc,
