@@ -14,25 +14,19 @@ cor_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
 metric_bleu = sacrebleu.metrics.BLEU(effective_order=True)
 
-# TODO: instead of reimplementing the utility functions here, use line["subset2evaluate_utility"]
-
-def utility_diversity(line):
-    return -np.average([
-        metric_bleu.sentence_score(
-            text_a,
-            [text_b],
-        ).score
-        for text_a, text_b in itertools.product(line["tgt"].values(), line["tgt"].values())
-    ])
-
 
 for data_old in tqdm.tqdm(data_old_all):
-    def evaluate_balanced_domains(data_y):
+    def evaluate_balanced_domains(data_scored):
         data_aggregated = collections.defaultdict(list)
-        for line in data_old:
-            data_aggregated[line["domain"]].append({**line, "score": data_y[line["i"]]})
-        # sort within each domain by score
-        data_aggregated = [sorted(domain, key=lambda x: x["score"], reverse=True) for domain in data_aggregated.values()]
+        for line in data_scored:
+            data_aggregated[line["domain"]].append(line)
+        
+        # sort within each domain by utility
+        data_aggregated = [
+            sorted(domain, key=lambda x: x["subset2evaluate_utility"], reverse=True)
+            for domain in data_aggregated.values()
+        ]
+
         # interveawe the lists
         # this is a cheap trick that somewhat guarantees that data_new_flat[:k] has balanced domains
         # create a list of ABCDABCDABCDCDCDDDD
@@ -40,40 +34,21 @@ for data_old in tqdm.tqdm(data_old_all):
         data_new_flat = [line for line in data_new_flat if line is not None]
         clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(cor_new)
-
-    for _ in range(1):
-        data_y = [np.var([line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
+    
+    for repetitions, method_kwargs in [
+        (100, dict(method="random")),
+        (1, dict(method="metric_avg", metric="MetricX-23")),
+        (1, dict(method="metric_var", metric="MetricX-23")),
+        (1, dict(method="diversity_bleu")),
+        (1, dict(method="pointwise_alignment", metric="MetricX-23")),
+        (5, dict(method="pyirt_diffdisc", metric="MetricX-23", model="4pl_score", epochs=1000, retry_on_error=True)),
+    ]:
+        data_y = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
         clu_new, cor_new = evaluate_balanced_domains(data_y)
-        cor_new_all["metric_var"].append(cor_new)
-        clu_new_all["metric_var"].append(clu_new)
+        cor_new_all[method_kwargs["method"]].append(cor_new)
+        clu_new_all[method_kwargs["method"]].append(clu_new)
 
-        data_y = [np.average([-line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
-        clu_new, cor_new = evaluate_balanced_domains(data_y)
-        cor_new_all["metric_avg"].append(cor_new)
-        clu_new_all["metric_avg"].append(clu_new)
-
-        data_y = [utility_diversity(line) for line in data_old]
-        clu_new, cor_new = evaluate_balanced_domains(data_y)
-        cor_new_all["diversity_bleu"].append(cor_new)
-        clu_new_all["diversity_bleu"].append(clu_new)
-
-    for _ in range(5):
-        _, params = subset2evaluate.select_subset.basic(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
-        data_y = [line_irt["diff"] * line_irt["disc"] for line_irt in params["items"]]
-        clu_new, cor_new = evaluate_balanced_domains(data_y)
-        cor_new_all["pyirt_diffdisc"].append(cor_new)
-        clu_new_all["pyirt_diffdisc"].append(clu_new)
-
-    for _ in range(100):
-        data_y = [np.random.random() for line in data_old]
-        clu_new, cor_new = evaluate_balanced_domains(data_y)
-        cor_new_all["random"].append(cor_new)
-        clu_new_all["random"].append(clu_new)
-
-
-print("Aggregate utility:")
-for method, cor_new in cor_new_all.items():
-    print(method, f"ACC: {np.average(cor_new):.1%}")
-
-for method, clu_new in clu_new_all.items():
-    print(method, f"CLU: {np.average(clu_new):.2f}")
+for method in cor_new_all.keys():
+    cor_new = cor_new_all[method]
+    clu_new = clu_new_all[method]
+    print(method, f"COR: {np.average(cor_new):.1%} | CLU: {np.average(clu_new):.2f}")

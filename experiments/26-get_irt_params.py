@@ -14,8 +14,8 @@ args = argparse.ArgumentParser()
 args.add_argument("i", type=int)
 args = args.parse_args()
 
-# 33 items
-data_old = list(utils.load_data_wmt_all(normalize=True).values())[args.i]
+# 53 items
+data_old = list(utils.load_data_wmt_all(normalize=True, min_items=400).values())[args.i]
 data_train = collections.defaultdict(list)
 data_params = []
 
@@ -51,6 +51,6 @@ data_params = average_irt_params(data_params)
 os.makedirs("computed/irt_params", exist_ok=True)
 pickle.dump(data_params, open(f"computed/irt_params/{args.i}.pkl", "wb"))
 
-# for i in $(seq 0 32); do
+# for i in $(seq 0 52); do
 #     sbatch_gpu_short "irt_params_$i" "python3 experiments/26-get_irt_params.py $i"
 # done;

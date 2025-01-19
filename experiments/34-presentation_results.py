@@ -48,9 +48,6 @@ _, acc_precomet_var = subset2evaluate.evaluate.eval_clucor(
 )
 
 # %%
-import importlib
-importlib.reload(utils_fig)
-
 utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, np.average(acc_random, axis=0), f"Random {np.average(acc_random):.1%}"),
