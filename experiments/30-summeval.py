@@ -17,72 +17,27 @@ for method_kwargs in [
     par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
         subset2evaluate.select_subset.basic(data_old, **method_kwargs),
         data_old,
-        metric="human_mul",
+        metric="human_sum",
     )
     print(method_kwargs["method"], f"ACC: {par_acc:.1%} | CLU: {par_clu:.1%}")
 
-
 # %%
-for target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum", "human_mul"]:
-    cor_all = []
-    clu_all = []
-    for _ in range(100):
-        data_new = subset2evaluate.select_subset.basic(data_old, method="random")
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=target)
-        cor_all.append(cor_new)
-        clu_all.append(clu_new)
-    print(target, f"ACC: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")
+# ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum", "human_mul"]
 
-# %%
 
-for target, metric in [
-    ("human_relevance", "chrf"),
-    ("human_coherence", "density"),
-    ("human_consistency", "coverage")
-    ("human_fluency", "coverage"),
-    ("human_sum", "supert"),
-    ("human_mul", "supert"),
-]:
-    data_new = subset2evaluate.select_subset.basic(data_old, method="metric_avg", metric=metric)
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=target)
-    print(target, f"ACC: {np.average(cor_new):.1%} | CLU: {np.average(clu_new):.2f}")
-
-# %%
-
-for target, metric in [
-    ("human_relevance", "chrf"),
-    ("human_coherence", "density"),
-    ("human_consistency", "coverage")
-    ("human_fluency", "coverage"),
-    ("human_sum", "supert"),
-    ("human_mul", "supert"),
-]:
-    data_new = subset2evaluate.select_subset.basic(data_old, method="metric_var", metric=metric)
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=target)
-    print(target, f"ACC: {np.average(cor_new):.1%} | CLU: {np.average(clu_new):.2f}")
-
-# %%
-
-for target, metric in [
-    ("human_relevance", "chrf"),
-    ("human_coherence", "density"),
-    ("human_consistency", "coverage")
-    ("human_fluency", "coverage"),
-    ("human_sum", "supert"),
-    ("human_mul", "supert"),
+for repetitions, method_kwargs in [
+    (100, dict(method="random")),
+    (1, dict(method="pointwise_alignment", metric="supert")),
+    (1, dict(method="metric_avg", metric="supert")),
+    (1, dict(method="metric_var", metric="supert")),
+    (1, dict(method="diversity_bleu")),
+    (5, dict(method="pyirt_diffdisc", metric="supert", retry_on_error=True)),
 ]:
     cor_all = []
     clu_all = []
-    for _ in range(5):
-        data_new = subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", metric=metric, retry_on_error=True)
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=target)
+    for _ in range(repetitions):
+        data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="human_sum")
         cor_all.append(cor_new)
         clu_all.append(clu_new)
-    print(target, f"ACC: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")
-
-
-# %%
-for target in ["human_relevance", "human_coherence", "human_fluency", "human_consistency", "human_sum", "human_mul"]:
-    data_new = subset2evaluate.select_subset.basic(data_old, method="diversity_bleu")
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=target)
-    print(target, f"ACC: {np.average(cor_new):.1%} | CLU: {np.average(clu_new):.2f}")
+    print(method_kwargs["method"], f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")

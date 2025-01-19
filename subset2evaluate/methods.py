@@ -388,6 +388,9 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
+    "precomet": partial(precomet, reverse=False),
+
+    "precomet_pal": partial(precomet, model_path="../../PreCOMET/lightning_logs/pal/checkpoints/e4.ckpt", reverse=False),
     "precomet_var": partial(precomet, model_path="zouharvi/PreCOMET-var", reverse=True),
     "precomet_avg": partial(precomet, model_path="zouharvi/PreCOMET-avg", reverse=True),
     "precomet_diversity": partial(precomet, model_path="zouharvi/PreCOMET-diversity", reverse=True),

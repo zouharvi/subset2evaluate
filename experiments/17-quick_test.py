@@ -46,9 +46,6 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
 
     print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")
 
-# with step size 20 and 10 samplings
-# - ACC: 87.71% | CLU: 1.10
-
 
 # %%
 print("PyIRT-score Fisher Information Content")

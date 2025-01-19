@@ -249,6 +249,19 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt23", "ja-en"),
             ("wmt23", "zh-en"),
 
+            # NOTE: intentionally not the first so that [:9] is reserved for evaluation
+            ("wmt24", "cs-uk"),
+            ("wmt24", "en-cs"),
+            ("wmt24", "en-de"),
+            ("wmt24", "en-es"),
+            ("wmt24", "en-hi"),
+            ("wmt24", "en-is"),
+            ("wmt24", "en-ja"),
+            ("wmt24", "en-ru"),
+            ("wmt24", "en-uk"),
+            ("wmt24", "en-zh"),
+            ("wmt24", "ja-zh"),            
+
             ("wmt22", "cs-en"),
             ("wmt22", "cs-uk"),
             ("wmt22", "de-en"),
@@ -428,7 +441,7 @@ def pred_irt(model_theta, item):
     raise Exception("Uknown item", item)
 
 
-def load_data(data: Union[List, str]):
+def load_data(data: Union[List, str], **kwargs):
     import os
     import json
 
@@ -439,11 +452,11 @@ def load_data(data: Union[List, str]):
     elif data.startswith("wmt"):
         data_year, data_lang = data.split("/")
         if data_year == "wmt" and data_lang == "all":
-            data = load_data_wmt_all()
+            data = load_data_wmt_all(**kwargs)
         else:
-            data = load_data_wmt(year=data_year, langs=data_lang, normalize=True)
+            data = load_data_wmt(year=data_year, langs=data_lang, **kwargs)
     elif data == "summeval":
-        return load_data_summeval(normalize=True)
+        return load_data_summeval(**kwargs)
     else:
         raise Exception("Could not parse data")
 

@@ -38,7 +38,6 @@ clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_v
 # %%
 import itertools
 
-# TODO: balance domains here maybe?
 for method_kwargs in [
     dict(method="random"),
     dict(method="random"),
