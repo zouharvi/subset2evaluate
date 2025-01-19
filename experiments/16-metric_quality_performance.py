@@ -13,7 +13,6 @@ import collections
 import pickle
 
 # use ALL the data
-# TODO: run on full
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
@@ -67,6 +66,11 @@ for data_old in tqdm.tqdm(data_old_all):
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_irt, data_old)
             clus_all['pyirt_diffdisc'].append(np.average(clu_new))
             accs_all['pyirt_diffdisc'].append(np.average(cor_new))
+
+            data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_alignment", metric=metric)
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_ali, data_old)
+            clus_all['metric_alignment'].append(np.average(clu_new))
+            accs_all['metric_alignment'].append(np.average(cor_new))
 
         except Exception as e:
             print(e)

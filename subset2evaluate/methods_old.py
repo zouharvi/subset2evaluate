@@ -115,7 +115,7 @@ def nn_irt(data, metric, **kwargs):
 
     class TrainerConfig(BaseModel):
         # Train time
-        # TODO: we define max_epochs twice?
+        # NOTE: we define max_epochs twice?
         max_epochs: int = 100
         max_steps: Optional[int] = None
         sampler: Optional[str] = None
@@ -140,7 +140,7 @@ def nn_irt(data, metric, **kwargs):
 
     class CaimiraConfig(IrtModelConfig):
         # Number of dimensions in item embeddings
-        # TODO: turn this into real embeddings
+        # NOTE: turn this into real embeddings
         n_dim_item_embed: int = len(data)
 
         # Number of dimensions for the agent embedding
@@ -165,7 +165,7 @@ def nn_irt(data, metric, **kwargs):
         n_agent_types: int = 1
         n_dim: int = 32
         fit_guess_bias: float = False
-        # TODO: turn off?
+        # NOTE: turn off?
         fit_agent_type_embeddings: bool = True
 
     model = IrtLitModule(
@@ -237,7 +237,7 @@ def our_irt(data, metric, **kwargs):
         for model_i, model in enumerate(models)
     ]
 
-    # TODO: in the future run first training with dev set to find out the best epoch count
+    # NOTE: in the future run first training with dev set to find out the best epoch count
     # and then run again on full data with that epoch count
 
     # use all data for both training and validation for now

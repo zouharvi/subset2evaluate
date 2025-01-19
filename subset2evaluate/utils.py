@@ -423,7 +423,7 @@ def load_rose_data():
             "src": line["source"],
             "ref": line["reference"],
             "tgt": line["model_outputs"],
-            # TODO: no metrics!
+            # NOTE: no metrics!
             "scores": line["annotations"],
         })
 

@@ -4,7 +4,6 @@ import subset2evaluate.utils as utils
 import numpy as np
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
-# %%
 
 def benchmark_method(repetitions=10, kwargs_dict={}):
     data_old = utils.load_data_wmt(year="wmt23", langs="en-cs", normalize=True)
@@ -33,11 +32,14 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
     points_y_acc = []
     points_y_clu = []
 
+    load_model = None
+
     for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
+            data_new, load_model = subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False, load_model=load_model, return_model=True)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
-                subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
+                data_new,
                 data_old,
                 metric="human"
             )
@@ -48,45 +50,10 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
 
 
 # %%
-print("PyIRT-score Fisher Information Content")
-benchmark_method(repetitions=10, kwargs_dict={"method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score"})
-
-# %%
-# works a bit worse
-print("PyIRT-score Fisher Information Content with enforced positive discrimination")
-benchmark_method(repetitions=10, kwargs_dict={"enforce_positive_disc": True, "method": "pyirt_fic", "metric": "MetricX-23-c", "epochs": 1000, "model_type": "4pl_score"})
-
-# %%
 print("Random")
 # benchmark_method(repetitions=10, kwargs_dict={"method": "random"})
 benchmark_method_all(repetitions=10, kwargs_dict={"method": "random"})
 
 # %%
-print("Pointwise alignment")
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_alignment", "metric": "MetricX-23"})
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_alignment", "metric": "human"})
-
-# %%
-print("PreCOMET-{avg,var}")
-benchmark_method(repetitions=1, kwargs_dict={"method": "comet_var"})
-benchmark_method(repetitions=1, kwargs_dict={"method": "comet_avg"})
-
-# %%
-print("Human-var")
-benchmark_method(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "human"})
-print("Human-avg")
-benchmark_method(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "human"})
-
-# %%
-print("MetricX-var")
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "MetricX-23"})
-print("MetricX-avg")
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "MetricX-23"})
-
-# %%
-print("PreCOMET variants")
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_var"})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_avg"})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diff"})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_disc"})
-benchmark_method(repetitions=1, kwargs_dict={"method": "precomet_diffdisc"})
+print("K-means")
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "kmeans"})
