@@ -206,11 +206,11 @@ def _assert_comet_version():
     try:
         import comet
     except ImportError as e:
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
 
     import comet
     if "HypothesislessRegression" not in dir(comet.models):
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/comet-src.git`")
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
 
 
 def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:

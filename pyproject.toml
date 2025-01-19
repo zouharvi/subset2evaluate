@@ -44,3 +44,5 @@ subset2evaluate-eval = "subset2evaluate.evaluate:main_cli"
 # python3 -m build
 # twine check dist/*
 # python3 -m twine upload dist/* -u __token__
+
+# pip install -e . --config-settings editable_mode=strict
