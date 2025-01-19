@@ -82,7 +82,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                     if cache:
                         cache_data[(method_kwargs["method"], data_old_name)] = data_new
 
-                clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+                clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
                     [
                         data_old_i_to_line[line["i"]]
                         for line in data_new
@@ -91,7 +91,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                     metric="human"
                 )
                 clus_all[method_kwargs["method"]][subset_size].append(clu_new)
-                accs_all[method_kwargs["method"]][subset_size].append(acc_new)
+                accs_all[method_kwargs["method"]][subset_size].append(cor_new)
 
 
 # %%

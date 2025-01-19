@@ -3,22 +3,22 @@ import numpy as np
 import subset2evaluate.utils as utils
 
 
-def eval_cluacc(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
+def eval_clucor(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
 
     clu_new = []
-    acc_new = []
+    cor_new = []
     for prop in props:
         k = int(len(data_old) * prop)
         clu_new.append(eval_subset_clusters(data_new[:k], metric=metric))
-        acc_new.append(eval_subset_accuracy(data_new[:k], data_old, metric=metric))
+        cor_new.append(eval_subset_correlation(data_new[:k], data_old, metric=metric))
 
-    return clu_new, acc_new
+    return clu_new, cor_new
 
 
-def eval_cluacc_par(
+def eval_clucor_par(
         data_new: List[Dict],
         data_old: List[Dict],
         clus_tgt: List[float],
@@ -44,7 +44,7 @@ def eval_cluacc_par(
     
     def _par_acc(data_new, data_old, acc_tgt, metric):
         for k in range(5, len(data_new) + 1):
-            if eval_subset_accuracy(data_new[:k], data_old, metric=metric) >= acc_tgt:
+            if eval_subset_correlation(data_new[:k], data_old, metric=metric) >= acc_tgt:
                 break
         return k
 
@@ -77,13 +77,13 @@ def precompute_randnorm(
     clu_random = []
     acc_random = []
     for seed in range(random_seeds):
-        clu_new, acc_new = eval_cluacc(
+        clu_new, cor_new = eval_clucor(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             metric=metric,
         )
         clu_random.append(clu_new)
-        acc_random.append(acc_new)
+        acc_random.append(cor_new)
     clu_random = np.average(clu_random, axis=0)
     acc_random = np.average(acc_random, axis=0)
 
@@ -91,7 +91,7 @@ def precompute_randnorm(
     pars_acc_rand = []
 
     for seed in range(random_seeds, 2*random_seeds):
-        par_clu_rand, par_acc_rand = eval_cluacc_par(
+        par_clu_rand, par_acc_rand = eval_clucor_par(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             clu_random,
@@ -104,21 +104,21 @@ def precompute_randnorm(
 
     return (clu_random, acc_random), (np.average(pars_clu_rand), np.average(pars_acc_rand))
 
-def eval_cluacc_randnorm(
+def eval_clucor_randnorm(
     data_new: List[Dict],
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
-    cluacc_precomputed = None
+    clucor_precomputed = None
 ) -> Tuple[float, float]:
 
-    if cluacc_precomputed is not None:
-        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = cluacc_precomputed
+    if clucor_precomputed is not None:
+        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = clucor_precomputed
     else:
         (clu_random, acc_random), (clu_random_norm, acc_random_norm) = precompute_randnorm(data_old, random_seeds=random_seeds, metric=metric)
 
     # compute the parity of the new data
-    par_clu, par_acc = eval_cluacc_par(
+    par_clu, par_acc = eval_clucor_par(
         data_new, data_old,
         clu_random, acc_random,
         metric=metric
@@ -149,8 +149,8 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
 
     systems = list(data_old[0]["scores"].keys())
 
-    scores_old = get_sys_absolute(data_old, metric=metric)
-    scores_new = get_sys_absolute(data_new, metric=metric)
+    scores_old = get_model_absolute(data_old, metric=metric)
+    scores_new = get_model_absolute(data_new, metric=metric)
 
     values_old = [scores_old[sys] for sys in systems]
     values_new = [scores_new[sys] for sys in systems]
@@ -256,7 +256,7 @@ def main_cli():
     )
     args = args.parse_args()
 
-    clu_new, acc_new = eval_cluacc(args.data_old, args.data_new, args.metric)
+    clu_new, cor_new = eval_clucor(args.data_old, args.data_new, args.metric)
 
     print(f"Clusters: {np.average(clu_new):.2f}")
-    print(f"Accuracy: {np.average(acc_new):.1%}")
+    print(f"Accuracy: {np.average(cor_new):.1%}")

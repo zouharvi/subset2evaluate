@@ -12,9 +12,9 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 # %%
 # aggregate scores
 
-acc_new_all_hum = collections.defaultdict(list)
+cor_new_all_hum = collections.defaultdict(list)
 clu_new_all_hum = collections.defaultdict(list)
-acc_new_all_met = collections.defaultdict(list)
+cor_new_all_met = collections.defaultdict(list)
 clu_new_all_met = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
@@ -26,9 +26,9 @@ for data_old in tqdm.tqdm(data_old_all):
         # dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000),
     ]:
         # run multiple times to average out the effect
-        acc_new_all_hum_local = []
+        cor_new_all_hum_local = []
         clu_new_all_hum_local = []
-        acc_new_all_met_local = []
+        cor_new_all_met_local = []
         clu_new_all_met_local = []
         for _ in range(5 if method_kwargs["method"] == "pyirt_diffdisc" else 10 if method_kwargs["method"] == "random" else 1):
             data_new = subset2evaluate.select_subset.basic(
@@ -37,17 +37,17 @@ for data_old in tqdm.tqdm(data_old_all):
                 metric="MetricX-23-c",
                 retry_on_error=True,
             )
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric="human")
-            acc_new_all_hum_local.append(np.average(acc_new))
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="human")
+            cor_new_all_hum_local.append(np.average(cor_new))
             clu_new_all_hum_local.append(np.average(clu_new))
 
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric="MetricX-23-c")
-            acc_new_all_met_local.append(np.average(acc_new))
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="MetricX-23-c")
+            cor_new_all_met_local.append(np.average(cor_new))
             clu_new_all_met_local.append(np.average(clu_new))
 
-        acc_new_all_hum[method_kwargs["method"]].append(np.average(acc_new_all_hum_local))
+        cor_new_all_hum[method_kwargs["method"]].append(np.average(cor_new_all_hum_local))
         clu_new_all_hum[method_kwargs["method"]].append(np.average(clu_new_all_hum_local))
-        acc_new_all_met[method_kwargs["method"]].append(np.average(acc_new_all_met_local))
+        cor_new_all_met[method_kwargs["method"]].append(np.average(cor_new_all_met_local))
         clu_new_all_met[method_kwargs["method"]].append(np.average(clu_new_all_met_local))
 
 

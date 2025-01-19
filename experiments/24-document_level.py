@@ -27,7 +27,7 @@ def utility_diversity(line):
 # aggregate scores
 
 
-acc_new_all = collections.defaultdict(list)
+cor_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
@@ -75,14 +75,14 @@ for data_old in tqdm.tqdm(data_old_all):
                 for doc in data_new
                 for i in doc["i"]
             ]
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_flat, data_old, metric="human")
-            acc_new_all[method_kwargs["method"]].append(np.average(acc_new))
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
+            cor_new_all[method_kwargs["method"]].append(np.average(cor_new))
             clu_new_all[method_kwargs["method"]].append(np.average(clu_new))
 
 print("Aggregate scores:")
 
-for method, acc_new in acc_new_all.items():
-    print(method, f"ACC: {np.average(acc_new):.1%}")
+for method, cor_new in cor_new_all.items():
+    print(method, f"ACC: {np.average(cor_new):.1%}")
 
 for method, clu_new in clu_new_all.items():
     print(method, f"CLU: {np.average(clu_new):.2f}")
@@ -90,7 +90,7 @@ for method, clu_new in clu_new_all.items():
 # %%
 # aggregate utilities
 
-acc_new_all = collections.defaultdict(list)
+cor_new_all = collections.defaultdict(list)
 clu_new_all = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
@@ -113,42 +113,42 @@ for data_old in tqdm.tqdm(data_old_all):
             for doc in data_old_aggregated
             for i in doc["i"]
         ]
-        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new_flat, data_old, metric="human")
-        return np.average(clu_new), np.average(acc_new)
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
+        return np.average(clu_new), np.average(cor_new)
 
     for _ in range(1):
         data_y = [np.var([line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
-        clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["metric_var"].append(acc_new)
+        clu_new, cor_new = evaluate_aggregate_second(data_y)
+        cor_new_all["metric_var"].append(cor_new)
         clu_new_all["metric_var"].append(clu_new)
 
         data_y = [np.average([-line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
-        clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["metric_avg"].append(acc_new)
+        clu_new, cor_new = evaluate_aggregate_second(data_y)
+        cor_new_all["metric_avg"].append(cor_new)
         clu_new_all["metric_avg"].append(clu_new)
 
         data_y = [utility_diversity(line) for line in data_old]
-        clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["diversity_bleu"].append(acc_new)
+        clu_new, cor_new = evaluate_aggregate_second(data_y)
+        cor_new_all["diversity_bleu"].append(cor_new)
         clu_new_all["diversity_bleu"].append(clu_new)
 
     for _ in range(5):
         _, params = subset2evaluate.select_subset.basic(data_old, return_model=True, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", epochs=1000, retry_on_error=True)
         data_y = [line_irt["diff"] * line_irt["disc"] for line_old, line_irt in zip(data_old, params["items"])]
-        clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["pyirt_diffdisc"].append(acc_new)
+        clu_new, cor_new = evaluate_aggregate_second(data_y)
+        cor_new_all["pyirt_diffdisc"].append(cor_new)
         clu_new_all["pyirt_diffdisc"].append(clu_new)
 
     for _ in range(100):
         data_y = [np.random.random() for line in data_old]
-        clu_new, acc_new = evaluate_aggregate_second(data_y)
-        acc_new_all["random"].append(acc_new)
+        clu_new, cor_new = evaluate_aggregate_second(data_y)
+        cor_new_all["random"].append(cor_new)
         clu_new_all["random"].append(clu_new)
 
 
 print("Aggregate utility:")
-for method, acc_new in acc_new_all.items():
-    print(method, f"ACC: {np.average(acc_new):.1%}")
+for method, cor_new in cor_new_all.items():
+    print(method, f"ACC: {np.average(cor_new):.1%}")
 
 for method, clu_new in clu_new_all.items():
     print(method, f"CLU: {np.average(clu_new):.2f}")

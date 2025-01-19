@@ -25,8 +25,8 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     for repetitions, method in [(1, "precomet_diffdisc"), (1, "precomet_diversity"), (100, "random")]:
         for _ in range(repetitions):
             data_new = subset2evaluate.select_subset.basic(data_old, method=method, load_model=MODELS[method])
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old, metric="human")
-            points_y_acc[method].append(acc_new)
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="human")
+            points_y_acc[method].append(cor_new)
             points_y_clu[method].append(clu_new)
 
 

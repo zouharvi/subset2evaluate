@@ -1,5 +1,6 @@
 # used for fellowhsip application
 
+import subset2evaluate
 import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt

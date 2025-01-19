@@ -351,7 +351,7 @@ def load_data_summeval(normalize=True):
         scores_values = list(scores.values())
 
         # multiply all human
-        scores["human_avg"] = reduce(lambda x, y: x + y, scores_values)
+        scores["human_sum"] = reduce(lambda x, y: x + y, scores_values)
         scores["human_mul"] = reduce(lambda x, y: x * y, scores_values)
         return scores
 

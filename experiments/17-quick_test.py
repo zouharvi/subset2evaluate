@@ -13,14 +13,14 @@ def benchmark_method(repetitions=10, kwargs_dict={}):
 
     # run multiple times to smooth variance
     for _ in range(repetitions):
-        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
             subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
             data_old,
             metric="human"
         )
-        points_y_acc.append(acc_new)
+        points_y_acc.append(cor_new)
         points_y_clu.append(clu_new)
-        print(f"- ACC: {np.average(acc_new):.1%} | CLU: {np.average(clu_new):.2f}")
+        print(f"- ACC: {np.average(cor_new):.1%} | CLU: {np.average(clu_new):.2f}")
 
     if repetitions > 1:
         print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")
@@ -36,12 +36,12 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
     for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
                 subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
                 data_old,
                 metric="human"
             )
-            points_y_acc.append(acc_new)
+            points_y_acc.append(cor_new)
             points_y_clu.append(clu_new)
 
     print(f"ACC: {np.average(points_y_acc):.1%} | CLU: {np.average(points_y_clu):.2f}")

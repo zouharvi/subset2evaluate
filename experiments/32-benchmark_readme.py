@@ -1,5 +1,6 @@
 # %%
 import subset2evaluate
+import subset2evaluate.evaluate
 import tqdm
 import numpy as np
 import json
@@ -16,12 +17,12 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
     for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
                 subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
                 data_old,
                 metric=target,
             )
-            points_y_acc.append(acc_new)
+            points_y_acc.append(cor_new)
             points_y_clu.append(clu_new)
 
     print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_acc):.1%} | {np.average(points_y_clu):.2f}")
@@ -32,7 +33,7 @@ def benchmark_method_mt(**kwargs):
 
 
 def benchmark_method_summeval(**kwargs):
-    benchmark_method(data="summeval", target="human_mul", **kwargs)
+    benchmark_method(data="summeval", target="human_sum", **kwargs)
 
 
 # %%

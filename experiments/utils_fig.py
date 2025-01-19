@@ -77,7 +77,7 @@ def plot_subset_selection(
     if IS_CLUSTERS:
         plt.ylabel("Cluster count" + " " * 5, labelpad=13)
     else:
-        plt.ylabel("Pairwise accuracy" + " " * 5, labelpad=-1)
+        plt.ylabel("Rank correlation" + " " * 5, labelpad=-1)
     plt.xlabel("Proportion of original data", labelpad=-1)
 
     plt.xticks(
@@ -98,14 +98,15 @@ def plot_subset_selection(
         handletextpad=0.2,
         handlelength=1,
         labelspacing=0.2,
-        facecolor="#ccc",
+        facecolor="#ddd",
+        framealpha=0.9,
         scatteryoffsets=[0.5] * len(points),
     )
 
     if IS_CLUSTERS:
         plt.ylim(1.2, 5.0)
     else:
-        plt.ylim(0.85, 0.97)
+        plt.ylim(0.88, 0.99)
         # plt.ylim(0.75, 1.0)
     plt.tight_layout(pad=0.1)
 
