@@ -21,12 +21,12 @@ for data_old in tqdm.tqdm(data_old_all):
         (100, dict(method="random")),
     ]:
         for _ in range(repetitions):
-            clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
                 subset2evaluate.select_subset.basic(data_old, **method_kwargs),
                 data_old,
                 metric="human",
             )
-            points_y_acc[method_kwargs["method"]].append(acc_new)
+            points_y_acc[method_kwargs["method"]].append(cor_new)
             points_y_clu[method_kwargs["method"]].append(clu_new)
 
 # %%

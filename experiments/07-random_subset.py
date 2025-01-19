@@ -18,12 +18,12 @@ for data_old in tqdm.tqdm(data_old_all):
 
     # repeat each sampling 100 times to smooth it out
     for _ in range(100):
-        clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
             subset2evaluate.select_subset.basic(data_old, method="random"),
             data_old,
             metric="human"
         )
-        points_y_acc.append(acc_new)
+        points_y_acc.append(cor_new)
         points_y_clu.append(clu_new)
 
     points_y_acc_all.append(np.average(points_y_acc, axis=0))

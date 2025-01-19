@@ -31,12 +31,12 @@ def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[floa
     if metric_target is None:
         metric_target = metric
     
-    data_ord = subset2evaluate.evaluate.get_sys_absolute(data, metric=metric_target)
+    data_ord = subset2evaluate.evaluate.get_model_absolute(data, metric=metric_target)
     systems = data_ord.keys()
     data_ord = [data_ord[sys] for sys in systems]
 
     def _fn(item):
-        sys_absolute = subset2evaluate.evaluate.get_sys_absolute([item], metric=metric)
+        sys_absolute = subset2evaluate.evaluate.get_model_absolute([item], metric=metric)
         return [sys_absolute[sys] for sys in systems]
     
     return [

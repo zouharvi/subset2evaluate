@@ -21,14 +21,14 @@ data_new.sort(
     reverse=True
 )
 
-clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(data_new, data_old)
-print(f"{np.average(clu_new):.2f} {np.average(acc_new):.1%}")
+clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old)
+print(f"{np.average(clu_new):.2f} {np.average(cor_new):.1%}")
 
 # TODO: train PreCOMET on this
 
 # %%
-clu_new, acc_new = subset2evaluate.evaluate.eval_cluacc(
+clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="random"),
     data_old,
 )
-print(f"Random: {np.average(clu_new):.2f} {np.average(acc_new):.1%}")
+print(f"Random: {np.average(clu_new):.2f} {np.average(cor_new):.1%}")

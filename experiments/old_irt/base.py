@@ -80,14 +80,14 @@ class IRTModelBase(L.LightningModule):
 
         data_new = [x[0] for x in items_joint]
 
-        clu_new_metric, acc_new_metric = subset2evaluate.evaluate.eval_cluacc(
+        clu_new_metric, cor_new_metric = subset2evaluate.evaluate.eval_clucor(
             data_new,
             self.data_old,
             # TODO: set this dynamically
             metric="MetricX-23"
         )
 
-        clu_new_human, acc_new_human = subset2evaluate.evaluate.eval_cluacc(
+        clu_new_human, cor_new_human = subset2evaluate.evaluate.eval_clucor(
             data_new,
             self.data_old,
             # TODO: set this dynamically
@@ -95,20 +95,20 @@ class IRTModelBase(L.LightningModule):
         )
 
         # print(
-        # f"Metric CLU: {np.average(clu_new_metric):.2f} | ACC: {np.average(acc_new_metric):.1%} | ",
-        # f"Human  CLU: {np.average(clu_new_human):.2f} | ACC: {np.average(acc_new_human):.1%}",
+        # f"Metric CLU: {np.average(clu_new_metric):.2f} | ACC: {np.average(cor_new_metric):.1%} | ",
+        # f"Human  CLU: {np.average(clu_new_human):.2f} | ACC: {np.average(cor_new_human):.1%}",
         # )
 
         self.log("cluster_count_metric", np.average(clu_new_metric))
-        self.log("subset_consistency_accuracy_metric", np.average(acc_new_metric))
+        self.log("subset_consistency_accuracy_metric", np.average(cor_new_metric))
         self.log("cluster_count_human", np.average(clu_new_human))
-        self.log("subset_consistency_accuracy_human", np.average(acc_new_human))
+        self.log("subset_consistency_accuracy_human", np.average(cor_new_human))
 
         self.results_log.append({
             "cluster_count_metric": np.average(clu_new_metric),
-            "subset_consistency_accuracy_metric": np.average(acc_new_metric),
+            "subset_consistency_accuracy_metric": np.average(cor_new_metric),
             "cluster_count_human": np.average(clu_new_human),
-            "subset_consistency_accuracy_human": np.average(acc_new_human),
+            "subset_consistency_accuracy_human": np.average(cor_new_human),
         })
         self.params_log.append(self.pack_irt_params())
 

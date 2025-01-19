@@ -58,9 +58,9 @@ for method_kwargs in tqdm.tqdm([
                 data_new.append(new_line)
             # data_new = [line for x, line in zip(opt.x, data_new_raw) if x == 1.0]
             clu_new = subset2evaluate.evaluate.eval_subset_clusters(data_new)
-            acc_new = subset2evaluate.evaluate.eval_subset_accuracy(data_new, data_old)
+            cor_new = subset2evaluate.evaluate.eval_subset_accuracy(data_new, data_old)
 
             clu_all.append(clu_new)
-            acc_all.append(acc_new)
+            acc_all.append(cor_new)
 
     print(f"{method_kwargs['method']:>15}", f"{np.average(clu_all):.2f} {np.average(acc_all):.1%}")

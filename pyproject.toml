@@ -5,9 +5,13 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["subset2evaluate"]
 
+# in case we want to change the local package dir
+# [tool.setuptools.package-dir]
+# subset2evaluate = "src"
+
 [project]
 name = "subset2evaluate"
-version = "0.0.1a8"
+version = "0.0.1a9"
 description = "Find informative examples to efficiently (human-)evaluate NLG models."
 license = {text = "MIT License"}
 readme = "README.md"
