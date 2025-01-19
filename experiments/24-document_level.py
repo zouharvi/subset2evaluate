@@ -42,7 +42,7 @@ for data_old in tqdm.tqdm(data_old_all):
         (1, dict(method="metric_avg", metric="MetricX-23")),
         (1, dict(method="metric_var", metric="MetricX-23")),
         (1, dict(method="diversity_bleu")),
-        (1, dict(method="pointwise_alignment", metric="MetricX-23")),
+        (1, dict(method="metric_alignment", metric="MetricX-23")),
         (5, dict(method="pyirt_diffdisc", metric="MetricX-23", model="4pl_score", epochs=1000, retry_on_error=True)),
     ]:
         for _ in range(repetitions):

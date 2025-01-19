@@ -27,7 +27,7 @@ for method_kwargs in [
 
 for repetitions, method_kwargs in [
     (100, dict(method="random")),
-    (1, dict(method="pointwise_alignment", metric="supert")),
+    (1, dict(method="metric_alignment", metric="supert")),
     (1, dict(method="metric_avg", metric="supert")),
     (1, dict(method="metric_var", metric="supert")),
     (1, dict(method="diversity_bleu")),
