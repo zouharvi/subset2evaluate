@@ -29,7 +29,7 @@ for method_kwargs in tqdm.tqdm([
     dict(method="precomet_diffdisc"),
 ]):
     par_clu_all = []
-    par_acc_all = []
+    par_cor_all = []
     for data_name, data_old in data_old_all:
         par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
@@ -37,5 +37,5 @@ for method_kwargs in tqdm.tqdm([
             clucor_precomputed=clucor_precomputed[data_name],
         )
         par_clu_all.append(np.average(par_clu))
-        par_acc_all.append(np.average(par_acc))
-    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_acc_all):.1%}")
+        par_cor_all.append(np.average(par_acc))
+    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_cor_all):.1%}")

@@ -181,6 +181,41 @@ subset2evaluate-eval wmt23/en-cs wmt23_encs_sorted.jsonl
 > Accuracy: 86.7%
 ```
 
+## Advanced Usage
+
+The package also supports cost-aware subset selection, which is useful for the cases where we know the estimated annotation costs of items.
+For example, annotating a five paragraph-long summarization output likely takes 3-6 times more than a single paragraph output.
+For cost-aware selection, the package requires two things:
+1. the data has already been ran through `select_subset.basic` method (such that each item now has `subset2evaluate_utility` property), ans
+2. each item has a `cost` value
+The WMT data already have the cost values for each item (estimated annotation time):
+```
+import subset2evaluate
+data_full = subset2evaluate.utils.load_data("wmt23/en-zh")
+data_full[0]["cost"]
+> 0.2973610038416405
+
+# run basic selection
+data_new = subset2evaluate.select_subset.basic(data_full, method="metric_var", metric="MetricX-23")
+
+# only the first 23 items fit our budget of 50
+sum([line["cost"] for line in data_new[:23]])
+> 49.18571270950981
+
+subset2evaluate.evaluate.eval_subset_correlation(data_new[:23], data_full)
+> 0.8714285714285712
+
+# let's run cost-aware selection
+data_costaware = subset2evaluate.select_subset.costaware(data_new, budget=50)
+
+# indeed the whole output fits our budget
+sum([line["cost"] for line in data_costaware])
+> 49.98968875693353
+
+subset2evaluate.evaluate.eval_subset_correlation(data_costaware, data_full)
+> 0.9107142857142855
+```
+
 ## Contact & Contributions
 
 We are look forward to contributions, especially (1) using subset2evaluate for other tasks, (2) adding new methods, (3) finding bugs and increasing package usability.

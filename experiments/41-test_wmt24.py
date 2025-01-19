@@ -54,7 +54,7 @@ for method_kwargs in [
     dict(method="precomet_diffdisc"),
 ]:
     par_clu_all = []
-    par_acc_all = []
+    par_cor_all = []
     for data_name, data_old in tqdm.tqdm(data_old_all):
         data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
 
@@ -109,6 +109,6 @@ for method_kwargs in [
             data_old,
         )
         par_clu_all.append(np.average(par_clu))
-        par_acc_all.append(np.average(par_acc))
-    # print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_acc_all):.1%}")
-    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.2f} | ACC: {np.average(par_acc_all):.1%}")
+        par_cor_all.append(np.average(par_acc))
+    # print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_cor_all):.1%}")
+    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.2f} | ACC: {np.average(par_cor_all):.1%}")

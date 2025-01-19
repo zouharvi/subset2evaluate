@@ -198,7 +198,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 "ref": line_ref.strip(),
                 "tgt": {model: line_model[model][line_i].strip() for model in models},
                 # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
-                "time": 0.15 * word_count + 33.7,
+                "cost": 0.15 * word_count + 33.7,
                 "domain": line_domain,
                 "doc": line_doc,
                 "scores": {model: {metric: float(v) for metric, v in lines_score[model][line_i].items()} for model in models},
@@ -207,14 +207,18 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
 
         # normalize times
         if data:
-            data_flat = [line["time"] for line in data]
-            mean = np.average(data_flat)
-            std = np.std(data_flat)
+            data_flat = [line["cost"] for line in data]
+            cost_avg = np.average(data_flat)
+            cost_std = np.std(data_flat)
             for line in data:
-                # make it have var=1 and avg=0
-                # line["time"] = (line["time"]-data_flat[0])/(data_flat[1]-data_flat[0]) + 1
-                # z-normalize
-                line["time"] = (line["time"] - mean) / std + 1
+                # z-normalize and make mean 1
+                line["cost"] = (line["cost"] - cost_avg) / cost_std + 1
+            
+            data_flat = [line["cost"] for line in data]
+            cost_min = np.min(data_flat)
+            for line in data:
+                # make sure it's positive
+                line["cost"] = (line["cost"] - cost_min) / (1 - cost_min)
 
         # this is min-max normalization
         if normalize and not binarize:

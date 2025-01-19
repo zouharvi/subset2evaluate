@@ -57,7 +57,7 @@ utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu['precomet_diversity'], f"PreCOMET$^\\mathrm{{div.}}$ {np.average(points_y_clu['precomet_diversity']):.2f}"),
-        (utils.PROPS, points_y_clu['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\times diff.}}$ {np.average(points_y_clu['precomet_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu['precomet_diffdisc'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff.}}$ {np.average(points_y_clu['precomet_diffdisc']):.2f}"),
         # (utils.PROPS, points_y_clu['precomet_diffdisc_direct'], f"PreCOMET$^\\mathrm{{diff.\\hspace{{-0.5}}×diff}}$ $\\hspace{{-3.3}}_\\mathrm{{direct}}\\hspace{{1.8}}$ {np.average(points_y_clu['precomet_diffdisc_direct']):.2f}"),
     ],
     colors=["black"] + utils_fig.COLORS,

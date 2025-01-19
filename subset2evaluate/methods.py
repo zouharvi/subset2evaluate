@@ -28,6 +28,7 @@ def metric_var(data, metric, **kwargs) -> List[float]:
 
 def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
     import scipy.stats
+    import warnings
     if metric_target is None:
         metric_target = metric
     
@@ -36,14 +37,18 @@ def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[floa
     data_ord = [data_ord[sys] for sys in systems]
 
     def _fn(item):
+
+
         sys_absolute = subset2evaluate.evaluate.get_model_absolute([item], metric=metric)
-        return [sys_absolute[sys] for sys in systems]
+        sys_absolute = [sys_absolute[sys] for sys in systems]
+        with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="ignore"):
+            corr = scipy.stats.spearmanr(sys_absolute, data_ord).correlation
+        if np.isnan(corr):
+            return 0.0
+        return corr
     
     return [
-        scipy.stats.spearmanr(
-            _fn(x),
-            data_ord
-        ).correlation
+        _fn(x)
         for x in data
     ]
 
