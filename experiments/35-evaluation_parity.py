@@ -23,6 +23,7 @@ clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_v
 for method_kwargs in tqdm.tqdm([
     dict(method="metric_var", metric="MetricX-23"),
     dict(method="metric_avg", metric="MetricX-23"),
+    dict(method="metric_alignment", metric="MetricX-23"),
     dict(method="diversity_bleu"),
     dict(method="pyirt_diffdisc", metric="MetricX-23"),
     dict(method="precomet_diversity"),
@@ -38,4 +39,4 @@ for method_kwargs in tqdm.tqdm([
         )
         par_clu_all.append(np.average(par_clu))
         par_cor_all.append(np.average(par_acc))
-    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_cor_all):.1%}")
+    print(f'{method_kwargs["method"]:<15}', f"COR: {np.average(par_cor_all):.1%} | CLU: {np.average(par_clu_all):.1%}")

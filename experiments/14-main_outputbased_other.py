@@ -16,7 +16,7 @@ points_y_clu = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
     for repetitions, method_kwargs in [
-        (1, dict(method="pointwise_alignment", metric="MetricX-23")),
+        (1, dict(method="metric_alignment", metric="MetricX-23")),
         (5, dict(method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23", retry_on_error=True)),
         (1, dict(method="diversity_bleu")),
         (100, dict(method="random")),
@@ -45,7 +45,7 @@ utils_fig.plot_subset_selection(
         (utils.PROPS, points_y_acc["random"], f"Random {np.average(points_y_acc['random']):.1%}"),
         (utils.PROPS, points_y_acc['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_acc['pyirt_diffdisc']):.1%}"),
         (utils.PROPS, points_y_acc['diversity_bleu'], f"Diversity {np.average(points_y_acc['diversity_bleu']):.1%}"),
-        (utils.PROPS, points_y_acc["pointwise_alignment"], f"MetricX align. {np.average(points_y_acc['pointwise_alignment']):.1%}"),
+        (utils.PROPS, points_y_acc["metric_alignment"], f"MetricX align. {np.average(points_y_acc['metric_alignment']):.1%}"),
         # (utils.PROPS, points_y_acc['pyirt_feas'], f"feasability {np.average(points_y_acc['pyirt_feas']):.1%}"),
         # (utils.PROPS, points_y_acc['pyirt_diff'], f"difficulty {np.average(points_y_acc['pyirt_diff']):.1%}"),
         # (utils.PROPS, points_y_acc['pyirt_disc'], f"discriminability {np.average(points_y_acc['pyirt_disc']):.1%}"),
@@ -59,7 +59,7 @@ utils_fig.plot_subset_selection(
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_clu['pyirt_diffdisc']):.2f}"),
         (utils.PROPS, points_y_clu['diversity_bleu'], f"Diversity {np.average(points_y_clu['diversity_bleu']):.2f}"),
-        (utils.PROPS, points_y_clu["pointwise_alignment"], f"MetricX align. {np.average(points_y_clu['pointwise_alignment']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_alignment"], f"MetricX align. {np.average(points_y_clu['metric_alignment']):.2f}"),
         # (utils.PROPS, points_y_clu['pyirt_feas'], f"feasability {np.average(points_y_clu_['pyirt_feas']):.2f}"),
         # (utils.PROPS, points_y_clu['pyirt_diff'], f"difficulty {np.average(points_y_clu_['pyirt_diff']):.2f}"),
         # (utils.PROPS, points_y_clu['pyirt_disc'], f"discriminability {np.average(points_y_clu_['pyirt_disc']):.2f}"),

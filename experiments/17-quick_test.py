@@ -63,8 +63,8 @@ benchmark_method_all(repetitions=10, kwargs_dict={"method": "random"})
 
 # %%
 print("Pointwise alignment")
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "pointwise_alignment", "metric": "MetricX-23"})
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "pointwise_alignment", "metric": "human"})
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_alignment", "metric": "MetricX-23"})
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_alignment", "metric": "human"})
 
 # %%
 print("PreCOMET-{avg,var}")

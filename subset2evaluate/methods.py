@@ -26,7 +26,7 @@ def metric_var(data, metric, **kwargs) -> List[float]:
     ]
 
 
-def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
+def metric_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
     import scipy.stats
     import warnings
     if metric_target is None:
@@ -51,6 +51,41 @@ def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[floa
         _fn(x)
         for x in data
     ]
+
+
+def kmeans(data, budget, load_model=None, return_model=False, **kwargs) -> List[float]:
+    import sklearn.cluster
+    import sentence_transformers
+    import warnings
+
+    if load_model is not None:
+        model_embd = load_model
+    else:
+        with warnings.catch_warnings(action="ignore", category=FutureWarning):
+            model_embd = sentence_transformers.SentenceTransformer("all-MiniLM-L6-v2")
+    data_embd = model_embd.encode([line["src"] for line in data])
+
+    # baseline don't pick any item
+    for line in data:
+        line["subset2evaluate_utility"] = 0
+    
+    kmeans = sklearn.cluster.KMeans(n_clusters=budget, random_state=0).fit(data_embd)
+    data_new = []
+    # get closest to cluster center
+    for i, center in enumerate(kmeans.cluster_centers_):
+        dist = np.linalg.norm(data_embd - center, axis=1)
+        idx = np.argmin(dist)
+        data[idx]["subset2evaluate_utility"] = 1
+        data_new += [data[idx]]*1
+        # cluster_size = np.sum(kmeans.labels_ == i)
+        # # data_new += [data[idx]]*cluster_size
+    
+    data_y = [item["subset2evaluate_utility"] for item in data]
+
+    if return_model:
+        return data_y, model_embd
+    else:
+        return data_y
 
 
 def _fn_information_content(item_old, item_irt, data_irt) -> float:
@@ -379,7 +414,9 @@ METHODS = {
     "diversity_chrf": diversity_chrf,
     "diversity_unigram": diversity_unigram,
 
-    "pointwise_alignment": pointwise_alignment,
+    "kmeans": kmeans,
+
+    "metric_alignment": metric_alignment,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),

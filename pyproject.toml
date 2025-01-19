@@ -32,6 +32,11 @@ dependencies = [
   # "unbabel_comet @ git+https://github.com/zouharvi/PreCOMET.git",
   # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]
+classifiers = [
+    'Environment :: Console',
+    'Intended Audience :: Science/Research',
+    'Topic :: Scientific/Engineering :: Artificial Intelligence',
+]
 
 [project.urls]
 Repository = "https://github.com/zouharvi/subset2evaluate"

@@ -4,13 +4,17 @@ import random
 import argparse
 
 args = argparse.ArgumentParser()
-args.add_argument("--no-wmt23", action="store_true")
+args.add_argument("--exclude", default="wmt23")
 args = args.parse_args()
 
 data_all = []
 
-for i in range(9 if args.no_wmt23 else 0, 33):
-    data_all += pickle.load(open(f"computed/irt_params/{i}.pkl", "rb"))
+for i in range(53):
+    data_name, data_val = pickle.load(open(f"computed/irt_params/{i}.pkl", "rb"))
+    if data_name[0] == args.exclude:
+        print("Skipping", data_name)
+    else:
+        data_all += data_val
 
 data_diff = [
     {
