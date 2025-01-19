@@ -20,18 +20,18 @@ clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_v
 
 # %%
 
-for method_kwargs in tqdm.tqdm([
-    dict(method="metric_var", metric="MetricX-23"),
-    dict(method="metric_avg", metric="MetricX-23"),
-    dict(method="metric_alignment", metric="MetricX-23"),
-    dict(method="diversity_bleu"),
-    dict(method="pyirt_diffdisc", metric="MetricX-23"),
-    dict(method="precomet_diversity"),
-    dict(method="precomet_diffdisc"),
-]):
+for method_kwargs in [
+    # dict(method="metric_var", metric="MetricX-23"),
+    # dict(method="metric_avg", metric="MetricX-23"),
+    # dict(method="metric_alignment", metric="MetricX-23"),
+    # dict(method="diversity_bleu"),
+    # dict(method="pyirt_diffdisc", metric="MetricX-23"),
+    # dict(method="precomet_diversity"),
+    dict(method="local_precomet_diffdisc"),
+]:
     par_clu_all = []
     par_cor_all = []
-    for data_name, data_old in data_old_all:
+    for data_name, data_old in tqdm.tqdm(data_old_all):
         par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
             data_old,

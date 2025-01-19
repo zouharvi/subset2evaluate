@@ -48,8 +48,12 @@ def basic(
     else:
         out = out_fn()
 
+    # make sure that we always return a tuple if return_model is True
     if return_model:
-        out, model = out
+        if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, dict) for x in out[0]]):
+            out, model = out
+        else:
+            out, model = out, None
 
     out: List[Tuple[float, Dict]]
 
@@ -137,7 +141,7 @@ def main_cli():
     )
     args.add_argument(
         '--method', default="metric_var",
-        choices=methods.METHODS.keys(),
+        choices=[k for k in methods.METHODS.keys() if not k.startswith("local_")],
         help="Subset selection method.",
     )
     args.add_argument(
