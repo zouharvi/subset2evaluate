@@ -1,5 +1,5 @@
 """
-Look at individual items and how they correspond to system averages.
+Look at individual items and how they correspond to model averages.
 """
 
 import subset2evaluate.utils as utils
@@ -18,44 +18,44 @@ def linear(x, a, b):
 
 
 data_wmt = utils.load_data_wmt(normalize=True)
-systems = list(data_wmt[0]["scores"].keys())
+models = list(data_wmt[0]["scores"].keys())
 
 utils_fig.matplotlib_default()
 
-system_scores = {
-    sys:
+model_scores = {
+    model:
     np.average([
-        line["scores"][sys]["MetricX-23-c"]
+        line["scores"][model]["MetricX-23-c"]
         for line in data_wmt
     ])
-    for sys in systems
+    for model in models
 }
-data_x = list(system_scores.values())
+data_x = list(model_scores.values())
 data_x_ticks = np.linspace(min(data_x), max(data_x), 100)
 
-system_index = systems
-system_index.sort(key=lambda sys: system_scores[sys], reverse=True)
-system_index = {
-    sys: system_index.index(sys) + 1
-    for sys in systems
+model_index = models
+model_index.sort(key=lambda model: model_scores[model], reverse=True)
+model_index = {
+    model: model_index.index(model) + 1
+    for model in models
 }
-print(system_index)
-print(system_scores)
+print(model_index)
+print(model_scores)
 
 fig, axs = plt.subplots(2, 2, figsize=(5, 5))
 
 for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
     ax.set_title(f"Item {item_i}")
 
-    data_y = [data_wmt[item_i]["scores"][sys]["MetricX-23-c"] for sys in systems]
+    data_y = [data_wmt[item_i]["scores"][model]["MetricX-23-c"] for model in models]
 
     p, _ = curve_fit(linear, data_x, data_y, maxfev=50000)
     ax.plot(data_x_ticks, linear(data_x_ticks, *p))
 
-    for sys in systems:
+    for model in models:
         ax.scatter(
-            [system_scores[sys]],
-            [data_wmt[item_i]["scores"][sys]["MetricX-23-c"]],
+            [model_scores[model]],
+            [data_wmt[item_i]["scores"][model]["MetricX-23-c"]],
             color="#ccc",
             linewidth=1,
             edgecolor="black",
@@ -64,15 +64,15 @@ for ax, item_i in zip(axs.flatten(), [40, 50, 60, 70]):
             zorder=10,
         )
         ax.text(
-            system_scores[sys],
-            data_wmt[item_i]["scores"][sys]["MetricX-23-c"],
-            system_index[sys],
+            model_scores[model],
+            data_wmt[item_i]["scores"][model]["MetricX-23-c"],
+            model_index[model],
             fontsize=7,
             ha="center", va="center",
             zorder=10,
         )
     ax.set_ylabel("Item score")
-    ax.set_xlabel("System average")
+    ax.set_xlabel("Model average")
 
 plt.tight_layout()
 

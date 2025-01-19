@@ -19,7 +19,7 @@ for line in data_raw:
         "i": line["original_id"],
         "src": line["original"],
         "tgt": line["processed_generation"],
-        "system": line["system"],
+        "model": line["model"],
         "human": np.average([float(line[f"rating_{i}"]) for i in range(1, 5+1)]),
         "human_zscore": np.average([float(line[f"rating_{i}_z_score"]) for i in range(1, 5+1)]),
     }
@@ -31,11 +31,11 @@ data = [
         "i": v[0]["i"],
         "src": v[0]["src"],
         "tgt": {
-            x["system"]: x["tgt"]
+            x["model"]: x["tgt"]
             for x in v
         },
         "scores": {
-            x["system"]: {
+            x["model"]: {
                 "human": x["human"],
                 "human_zscore": x["human_zscore"],
             }
@@ -57,7 +57,7 @@ for line in data_raw:
         "i": line["Input.id"],
         "src": line["Input.original"],
         "tgt": line["Input.simplified"],
-        "system": line["Input.system"],
+        "model": line["Input.model"],
         "scores": {
             "human_adequacy": float(line["Answer.adequacy"]),
             "human_fluency": float(line["Answer.fluency"]),
@@ -72,11 +72,11 @@ data = [
         "i": v[0]["i"],
         "src": v[0]["src"],
         "tgt": {
-            x["system"]: x["tgt"]
+            x["model"]: x["tgt"]
             for x in v
         },
         "scores": {
-            x["system"]: x["scores"]
+            x["model"]: x["scores"]
             for x in v
         }
     }
@@ -91,13 +91,13 @@ for line in tqdm.tqdm(data):
     line["ref2"] = line["tgt"].pop("Human 2 Writing")
     line["scores"].pop("Human 2 Writing")
 
-    systems = list(line["tgt"].keys())
-    for sys in systems:
-        line["scores"][sys]["sari"] = sari.compute(sources=[line["src"]], predictions=[line["tgt"][sys]], references=[[line["ref1"], line["ref2"]]])["sari"]
+    models = list(line["tgt"].keys())
+    for model in models:
+        line["scores"][model]["sari"] = sari.compute(sources=[line["src"]], predictions=[line["tgt"][model]], references=[[line["ref1"], line["ref2"]]])["sari"]
 
 # %%
 for line in data:
-    for sys, scores in line["scores"].items():
+    for model, scores in line["scores"].items():
         scores["human_sum"] = scores["human_adequacy"] + scores["human_fluency"] + scores["human_simplicity"]
         scores["human_mul"] = scores["human_adequacy"] * scores["human_fluency"] * scores["human_simplicity"]
 # %%

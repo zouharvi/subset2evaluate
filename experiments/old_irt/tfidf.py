@@ -5,8 +5,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class IRTModelTFIDF(IRTModelBase):
-    def __init__(self, data, systems, **kwargs):
-        super().__init__(systems=systems, **kwargs)
+    def __init__(self, data, models, **kwargs):
+        super().__init__(models=models, **kwargs)
 
         encoder = TfidfVectorizer(max_features=768)
         self.text_src = torch.nn.Parameter(

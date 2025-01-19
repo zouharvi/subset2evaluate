@@ -9,29 +9,29 @@ import json
 
 data_irt_d0 = json.load(open("computed/irt_score_d0.json", "r"))
 data_irt_d1 = json.load(open("computed/irt_score_d1.json", "r"))
-systems = list(data_irt_d0["systems"].keys())
+models = list(data_irt_d0["models"].keys())
 utils_fig.matplotlib_default()
 plt.figure(figsize=(2.0, 1.7))
 
 
-theta_min = min(min(data_irt_d0["systems"].values()), min(data_irt_d1["systems"].values()))
-theta_max = max(max(data_irt_d0["systems"].values()), max(data_irt_d1["systems"].values()))
+theta_min = min(min(data_irt_d0["models"].values()), min(data_irt_d1["models"].values()))
+theta_max = max(max(data_irt_d0["models"].values()), max(data_irt_d1["models"].values()))
 points_x = np.linspace(theta_min - 0.4, theta_max + 0.4, 100)
 
 
 points_y_pred_d0 = [
     np.average([
-        utils.pred_irt(data_irt_d0["systems"][sys], item)
+        utils.pred_irt(data_irt_d0["models"][model], item)
         for item in data_irt_d0["items"]
     ])
-    for sys in systems
+    for model in models
 ]
 points_y_pred_d1 = [
     np.average([
-        utils.pred_irt(data_irt_d1["systems"][sys], item)
+        utils.pred_irt(data_irt_d1["models"][model], item)
         for item in data_irt_d1["items"]
     ])
-    for sys in systems
+    for model in models
 ]
 
 

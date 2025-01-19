@@ -26,11 +26,11 @@ def renormalize(data_y):
     # return [y+offset for y in data_y]
 
 
-systems = list(data_old[0]["scores"].keys())
+models = list(data_old[0]["scores"].keys())
 points_metric = [
-    sent["scores"][sys][args.metric]
+    sent["scores"][model][args.metric]
     for sent in data_old
-    for sys in systems
+    for model in models
 ]
 # plt.hist(
 #     points_score,

@@ -12,7 +12,7 @@ random.seed(0)
 
 data_old_all = list(utils.load_data_wmt_all(normalize=True).items())[:9]
 
-# number of systems in each language pair
+# number of models in each language pair
 print([len(data_old[0]["scores"]) for data_old_name, data_old in data_old_all])
 SUBSET_SIZE = [2, 4]
 
@@ -25,22 +25,22 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
     # run multiple times
     for data_old_name, data_old in tqdm.tqdm(data_old_all, desc="Language pair"):
         for _ in tqdm.tqdm(range(5), desc="Repetition"):
-            systems = list(data_old[0]["scores"].keys())
-            systems_true = random.sample(systems, k=8)
-            systems_artificial = random.sample(sorted(set(systems) - set(systems_true)), k=subset_size)
+            models = list(data_old[0]["scores"].keys())
+            models_true = random.sample(models, k=8)
+            models_artificial = random.sample(sorted(set(models) - set(models_true)), k=subset_size)
 
             data_old_true = [
                 {
                     **line,
                     "scores": {
-                        sys: v
-                        for sys, v in line["scores"].items()
-                        if sys in systems_true
+                        model: v
+                        for model, v in line["scores"].items()
+                        if model in models_true
                     },
                     "tgt": {
-                        sys: v
-                        for sys, v in line["tgt"].items()
-                        if sys in systems_true
+                        model: v
+                        for model, v in line["tgt"].items()
+                        if model in models_true
                     }
                 }
                 for line in data_old
@@ -50,20 +50,20 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 {
                     **line,
                     "scores": {
-                        sys: v
-                        for sys, v in line["scores"].items()
-                        if sys in systems_artificial
+                        model: v
+                        for model, v in line["scores"].items()
+                        if model in models_artificial
                     },
                     "tgt": {
-                        sys: v
-                        for sys, v in line["tgt"].items()
-                        if sys in systems_artificial
+                        model: v
+                        for model, v in line["tgt"].items()
+                        if model in models_artificial
                     }
                 }
                 for line in data_old
             ]
 
-            # we dropped some systems but we can recover them with the same ordering from data_old
+            # we dropped some models but we can recover them with the same ordering from data_old
             for cache, method_kwargs in [
                 (False, dict(method="random")),
                 (True,  dict(method="precomet_var")),

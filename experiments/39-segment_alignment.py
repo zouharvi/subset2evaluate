@@ -10,12 +10,12 @@ import copy
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 
 data_old = data_old_all[0]
-data_old_ord = subset2evaluate.evaluate.get_sys_absolute(data_old, metric="MetricX-23")
+data_old_ord = subset2evaluate.evaluate.get_model_absolute(data_old, metric="MetricX-23")
 
 data_new = copy.deepcopy(data_old)
 data_new.sort(
     key=lambda x: subset2evaluate.evaluate.eval_order_accuracy(
-        subset2evaluate.evaluate.get_sys_absolute([x], metric="MetricX-23"),
+        subset2evaluate.evaluate.get_model_absolute([x], metric="MetricX-23"),
         data_old_ord
     ),
     reverse=True

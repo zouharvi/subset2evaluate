@@ -14,11 +14,11 @@ import numpy as np
 class MIRTDataset(Dataset):
     def __init__(self, data, metric='MetricX-23', embd_model_id='paraphrase-mpnet-base-v2'):
         self.item_ids = []
-        self.system_ids = []
+        self.model_ids = []
         self.scores = []
         self.embeddings = []
         self.item_map = {}
-        self.system_map = {}
+        self.model_map = {}
 
         self.encoder = SentenceTransformer(embd_model_id)
         all_embd = self.encoder.encode([example['src'] for example in data])
@@ -26,12 +26,12 @@ class MIRTDataset(Dataset):
         for e_id, example in enumerate(data):
             if example['i'] not in self.item_map:
                 self.item_map[example['i']] = example['i']
-            for s_id, system in enumerate(example['scores']):
-                if system not in self.system_map:
-                    self.system_map[system] = len(self.system_map)
+            for s_id, model in enumerate(example['scores']):
+                if model not in self.model_map:
+                    self.model_map[model] = len(self.model_map)
                 self.item_ids.append(self.item_map[example['i']])
-                self.system_ids.append(self.system_map[system])
-                self.scores.append(example['scores'][system][metric])
+                self.model_ids.append(self.model_map[model])
+                self.scores.append(example['scores'][model][metric])
                 self.embeddings.append(all_embd[e_id])
 
     def __len__(self):
@@ -40,21 +40,21 @@ class MIRTDataset(Dataset):
     def __getitem__(self, idx):
         return {
             'item_id': self.item_ids[idx],
-            'system_id': self.system_ids[idx],
+            'model_id': self.model_ids[idx],
             'score': self.scores[idx],
             'embedding': self.embeddings[idx]
         }
 
 
 class MultiDimensionalIRT(torch.nn.Module):
-    def __init__(self, num_items, num_systems, dim):
+    def __init__(self, num_items, num_models, dim):
         super(MultiDimensionalIRT, self).__init__()
         self.param_disc = torch.nn.Embedding(num_items, dim)
-        self.param_ability = torch.nn.Embedding(num_systems, dim)
+        self.param_ability = torch.nn.Embedding(num_models, dim)
         self.param_diff = torch.nn.Embedding(num_items, 1)
 
-    def forward(self, item_id, system_id):
-        ability = self.param_ability(system_id)
+    def forward(self, item_id, model_id):
+        ability = self.param_ability(model_id)
         disc = self.param_disc(item_id)
         difficulty = self.param_diff(item_id)
 
@@ -69,9 +69,9 @@ class MultiDimensionalIRT(torch.nn.Module):
 
 
 class MultiDimensionalIRTEmbedding(torch.nn.Module):
-    def __init__(self, embd_size, num_systems, dim):
+    def __init__(self, embd_size, num_models, dim):
         super(MultiDimensionalIRTEmbedding, self).__init__()
-        self.param_ability = torch.nn.Embedding(num_systems, dim)
+        self.param_ability = torch.nn.Embedding(num_models, dim)
 
         self.disc_layers = nn.Sequential(
             nn.Linear(embd_size, embd_size // 2),
@@ -88,10 +88,10 @@ class MultiDimensionalIRTEmbedding(torch.nn.Module):
             nn.Linear(embd_size // 2, 1)
         )
 
-    def forward(self, item_embd, system_id):
+    def forward(self, item_embd, model_id):
         disc = self.disc_layers(item_embd)
         diff = self.diff_layers(item_embd)
-        ability = self.param_ability(system_id)
+        ability = self.param_ability(model_id)
 
         return torch.nn.functional.sigmoid(torch.sum(ability * disc, dim=-1, keepdim=True) - diff)
 
@@ -116,9 +116,9 @@ def train(batch_size, num_epoch, lr, embed, dim, split=0.9):
     logging.info('{} train examples, {} test examples'.format(len(dataset_train), len(dataset_val)))
 
     if embed:
-        irt_model = MultiDimensionalIRTEmbedding(embd_size=len(all_dataset.embeddings[0]), dim=dim, num_systems=len(all_dataset.system_map))
+        irt_model = MultiDimensionalIRTEmbedding(embd_size=len(all_dataset.embeddings[0]), dim=dim, num_models=len(all_dataset.model_map))
     else:
-        irt_model = MultiDimensionalIRT(num_items=len(all_dataset.item_map), num_systems=len(all_dataset.system_map), dim=dim)
+        irt_model = MultiDimensionalIRT(num_items=len(all_dataset.item_map), num_models=len(all_dataset.model_map), dim=dim)
 
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size)
@@ -132,9 +132,9 @@ def train(batch_size, num_epoch, lr, embed, dim, split=0.9):
         for batch_id, batch_data in enumerate(train_dataloader):
             optimizer.zero_grad()
             if embed:
-                output = irt_model(item_embd=batch_data['embedding'], system_id=batch_data['system_id'])
+                output = irt_model(item_embd=batch_data['embedding'], model_id=batch_data['model_id'])
             else:
-                output = irt_model(item_id=batch_data['item_id'], system_id=batch_data['system_id'])
+                output = irt_model(item_id=batch_data['item_id'], model_id=batch_data['model_id'])
             loss = criterion(output, batch_data['score'].unsqueeze(-1))
             train_loss += loss
             loss.backward()
@@ -145,9 +145,9 @@ def train(batch_size, num_epoch, lr, embed, dim, split=0.9):
             irt_model.eval()
             for batch_data in val_dataloader:
                 if embed:
-                    output = irt_model(item_embd=batch_data['embedding'], system_id=batch_data['system_id'])
+                    output = irt_model(item_embd=batch_data['embedding'], model_id=batch_data['model_id'])
                 else:
-                    output = irt_model(item_id=batch_data['item_id'], system_id=batch_data['system_id'])
+                    output = irt_model(item_id=batch_data['item_id'], model_id=batch_data['model_id'])
                 loss = criterion(output, batch_data['score'].unsqueeze(-1))
                 val_loss += loss
 
@@ -206,8 +206,8 @@ def rank(param_file, ):
     fisher_info = {}  # item
     for item_id in param['disc']:
         fisher_info[item_id] = []
-        for system_id in param['ability']:
-            pred_score = np.sum(np.array(param['disc'][item_id]) * np.array(param['ability'][system_id])) - param['diff'][item_id]
+        for model_id in param['ability']:
+            pred_score = np.sum(np.array(param['disc'][item_id]) * np.array(param['ability'][model_id])) - param['diff'][item_id]
             d_value = []  # each dim
             for d in range(32):
                 fi = pred_score * (1 - pred_score) * param['disc'][item_id][d]**2

@@ -21,7 +21,7 @@ def confidence_interval(data):
 
 points_x = []
 points_y = []
-mean_true = subset2evaluate.evaluate.get_sys_absolute(data_old)
+mean_true = subset2evaluate.evaluate.get_model_absolute(data_old)
 
 _random = random.Random(0)
 
@@ -35,8 +35,8 @@ for prop in tqdm.tqdm(utils.PROPS):
         data_new = _random.sample(data_old, k=k)
         points_y_local.append(np.average(
             [
-                abs(mean_true[sys] - sys_mean)
-                for sys, sys_mean in subset2evaluate.evaluate.get_sys_absolute(data_new).items()
+                abs(mean_true[model] - model_mean)
+                for model, model_mean in subset2evaluate.evaluate.get_model_absolute(data_new).items()
             ]
         ))
 

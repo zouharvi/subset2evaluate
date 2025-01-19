@@ -40,16 +40,16 @@ for data_old in tqdm.tqdm(data_old_all):
             "doc": doc,
             "i": [line["i"] for line in lines],
             "scores": {
-                sys: {
-                    metric: np.average([line["scores"][sys][metric] for line in lines])
-                    for metric in lines[0]["scores"][sys].keys()
+                model: {
+                    metric: np.average([line["scores"][model][metric] for line in lines])
+                    for metric in lines[0]["scores"][model].keys()
                 }
-                for sys in lines[0]["scores"].keys()
+                for model in lines[0]["scores"].keys()
             },
             "tgt": {
                 # concatenate all documents
-                sys: "\n".join([line["tgt"][sys] for line in lines])
-                for sys in lines[0]["tgt"].keys()
+                model: "\n".join([line["tgt"][model] for line in lines])
+                for model in lines[0]["tgt"].keys()
             }
         }
         for doc, lines in data_old_aggregated.items()
@@ -117,12 +117,12 @@ for data_old in tqdm.tqdm(data_old_all):
         return np.average(clu_new), np.average(acc_new)
 
     for _ in range(1):
-        data_y = [np.var([line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
+        data_y = [np.var([line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["metric_var"].append(acc_new)
         clu_new_all["metric_var"].append(clu_new)
 
-        data_y = [np.average([-line["scores"][sys]["MetricX-23-c"] for sys in line["scores"].keys()]) for line in data_old]
+        data_y = [np.average([-line["scores"][model]["MetricX-23-c"] for model in line["scores"].keys()]) for line in data_old]
         clu_new, acc_new = evaluate_aggregate_second(data_y)
         acc_new_all["metric_avg"].append(acc_new)
         clu_new_all["metric_avg"].append(clu_new)

@@ -10,10 +10,10 @@ import subset2evaluate.evaluate
 def featurize(line):
     return np.array(
         [
-            np.average([sys_v["COMET"] for sys_v in line["scores"].values()]),
-            # np.average([sys_v["MetricX-23"] for sys_v in line["scores"].values()]),
-            np.var([sys_v["COMET"] for sys_v in line["scores"].values()]),
-            # np.var([sys_v["MetricX-23"] for sys_v in line["scores"].values()]),
+            np.average([model_v["COMET"] for model_v in line["scores"].values()]),
+            # np.average([model_v["MetricX-23"] for model_v in line["scores"].values()]),
+            np.var([model_v["COMET"] for model_v in line["scores"].values()]),
+            # np.var([model_v["MetricX-23"] for model_v in line["scores"].values()]),
             len(line["src"]),
             len(line["ref"]),
         ]

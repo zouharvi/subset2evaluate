@@ -78,8 +78,8 @@ def plot_irt(x):
 
     pos_theta_tick = axs[1, 0].get_ylim()[0] + (axs[1, 0].get_ylim()[1] - axs[1, 0].get_ylim()[0]) * 0.1
     axs[1, 0].plot(
-        data["systems"].values(),
-        len(list(data["systems"].values())) * [pos_theta_tick],
+        data["models"].values(),
+        len(list(data["models"].values())) * [pos_theta_tick],
         marker="|",
         alpha=0.5,
         color="black",

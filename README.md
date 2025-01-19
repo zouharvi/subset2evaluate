@@ -7,8 +7,8 @@ It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém
 > Human evaluation for language generation is the gold-standard but expensive.
 > To fit the budgetary constraints, often only a random subset of the test set is chosen for evaluation.
 > The random selection is grossly inefficient and in this work we formalize the task of selecting most informative items for evaluation.
-> We show that methods based on variance in automated metric scores or diversity in system outputs, outperform the commonly used, yet inefficient, random selection.
-> However, these methods are not applicable for test set creation where the system outputs are not yet available.
+> We show that methods based on variance in automated metric scores or diversity in modeloutputs, outperform the commonly used, yet inefficient, random selection.
+> However, these methods are not applicable for test set creation where the modeloutputs are not yet available.
 > This is applicable to blind test set creation or for selecting from a very large set of items.
 > To this end, we introduce PreCOMET which predicts item usefulness for human evaluation just based on the input alone.
 > We demonstrate the efficacy of our methods on two common language generations tasks, machine translation and summarization.
@@ -25,8 +25,8 @@ General recommendations based on MT evaluation:
 | When to use? | What is it? | How to use? |
 |-|-|-|
 | Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="metric_var", metric="MetricX-23"` |
-| Metric not available but system outputs available. | Diversity of system outputs. | `method="diversity_bleu"` |
-| System outputs not available, only sources. | Estimated diversity in system outputs. | `method="precomet_diversity"` |
+| Metric not available but modeloutputs available. | Diversity of mmodelutputs. | `method="diversity_bleu"` |
+| Model outputs not available, only sources. | Estimated diversity in modeloutputs. | `method="precomet_diversity"` |
 
 The package supports multiple methods.
 We show benchmark of the methods on machine translation evaluation:

@@ -25,11 +25,11 @@ def plot_irt(data):
         height_ratios=(7, 1),
         figsize=(4, 3),
     )
-    sys_mean = np.average(list(data["systems"].values()))
+    model_mean = np.average(list(data["models"].values()))
 
     # main plot
     axs[0, 1].scatter(
-        [item["diff"] - sys_mean for item in data["items"]],
+        [item["diff"] - model_mean for item in data["items"]],
         [item["disc"] for item in data["items"]],
         s=5,
         alpha=0.7,
@@ -43,7 +43,7 @@ def plot_irt(data):
 
     # top histogram (difficulty)
     axs[1, 1].hist(
-        [item["diff"] - sys_mean for item in data["items"]],
+        [item["diff"] - model_mean for item in data["items"]],
         bins=np.linspace(*axs[0, 1].get_xlim(), 40),
         orientation="vertical",
         color="black",
@@ -71,8 +71,8 @@ def plot_irt(data):
 
     pos_theta_tick = axs[0, 1].get_ylim()[0] + (axs[0, 1].get_ylim()[1] - axs[0, 1].get_ylim()[0]) * 0.1
     axs[0, 1].plot(
-        [5 * (x - sys_mean) for x in data["systems"].values()],
-        len(list(data["systems"].values())) * [pos_theta_tick],
+        [5 * (x - model_mean) for x in data["models"].values()],
+        len(list(data["models"].values())) * [pos_theta_tick],
         marker=".",
         alpha=1,
         markersize=10,
@@ -80,8 +80,8 @@ def plot_irt(data):
         color=figutils.COLORS[0],
     )
     axs[0, 1].text(
-        0 - sys_mean * 0.7, pos_theta_tick * 0.4,
-        "System\nability ($\\theta$)",
+        0 - model_mean * 0.7, pos_theta_tick * 0.4,
+        "Model\nability ($\\theta$)",
         ha="right",
         va="top",
         color=figutils.COLORS[0],
@@ -147,14 +147,14 @@ data_old = list(utils.load_data_wmt_all(normalize=True).values())[2]
 
 #     return data_y
 # data_y = []
-# systems = list(data_old_norm[0]["scores"].keys())
+# models = list(data_old_norm[0]["scores"].keys())
 # for line in data_old_norm:
-#     for sys in systems:
-#         data_y.append(line["scores"][sys]["MetricX-23-c"])
+#     for model in models:
+#         data_y.append(line["scores"][model]["MetricX-23-c"])
 # data_y = list(renormalize(data_y))
 # for line in data_old_norm:
-#     for sys in systems:
-#         line["scores"][sys]["MetricX-23-c"] = data_y.pop(0)
+#     for model in models:
+#         line["scores"][model]["MetricX-23-c"] = data_y.pop(0)
 #     # offset = 0.5 - mean
 #     # return [y+offset for y in data_y]
 

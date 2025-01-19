@@ -32,19 +32,19 @@ for prop in tqdm.tqdm(utils.PROPS):
     # repeat each sampling 10 times to smooth it out
     for _ in range(10):
         data_new = _random.sample(data_old, k=k)
-        points_y_local.append(subset2evaluate.evaluate.get_sys_absolute(data_new))
+        points_y_local.append(subset2evaluate.evaluate.get_model_absolute(data_new))
 
     points_y_struct.append(points_y_local)
 
-systems = list(points_y_struct[0][0].keys())
-systems_highlighted = random.Random(3).sample(systems, k=5)
+models = list(points_y_struct[0][0].keys())
+models_highlighted = random.Random(3).sample(models, k=5)
 
 # take the first run
 points_y_single = [points_y_local[0] for points_y_local in points_y_struct]
 points_y_interval = [
     {
-        sys: confidence_interval([x[sys] for x in points_y_local])
-        for sys in systems
+        model: confidence_interval([x[model] for x in points_y_local])
+        for model in models
     }
     for points_y_local in points_y_struct
 ]
@@ -52,30 +52,30 @@ points_y_interval = [
 utils_fig.matplotlib_default()
 plt.figure(figsize=(6, 2.5))
 
-for sys in systems:
+for model in models:
     plt.plot(
         points_x,
-        [x[sys] for x in points_y_single],
+        [x[model] for x in points_y_single],
         marker=".",
         markersize=10,
         color="black",
         clip_on=False,
-        alpha=1 if sys in systems_highlighted else 0.25,
+        alpha=1 if model in models_highlighted else 0.25,
         linewidth=3,
     )
     plt.fill_between(
         points_x,
-        [x[sys][0] for x in points_y_interval],
-        [x[sys][1] for x in points_y_interval],
+        [x[model][0] for x in points_y_interval],
+        [x[model][1] for x in points_y_interval],
         color=utils_fig.COLORS[1],
         alpha=0.2,
         linewidth=0,
     )
-for sys in systems_highlighted:
+for model in models_highlighted:
     plt.text(
         x=points_x[-1] + 10,
-        y=points_y_single[-1][sys],
-        s=sys.replace("DocTransformer", "Doc"),
+        y=points_y_single[-1][model],
+        s=model.replace("DocTransformer", "Doc"),
         fontsize=8,
         ha="left", va="center",
     )
