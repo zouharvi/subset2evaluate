@@ -23,11 +23,11 @@ corrs_all = []
 
 
 for data_old in tqdm.tqdm(data_old_all):
-    systems = list(data_old[0]["scores"].keys())
+    models = list(data_old[0]["scores"].keys())
     data_y_human = [
-        line["scores"][sys]["human"]
+        line["scores"][model]["human"]
         for line in data_old
-        for sys in systems
+        for model in models
     ]
     metrics = set(list(data_old[0]["scores"].values())[0])
     if "human" not in metrics:
@@ -37,9 +37,9 @@ for data_old in tqdm.tqdm(data_old_all):
     for metric in tqdm.tqdm(list(metrics)):
         try:    
             data_y_metric = [
-                line["scores"][sys][metric]
+                line["scores"][model][metric]
                 for line in data_old
-                for sys in systems
+                for model in models
             ]
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
 

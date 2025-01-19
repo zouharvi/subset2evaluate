@@ -14,8 +14,8 @@ def featurize(line):
     # return np.abs(scores-val_median)
     return np.array(
         [
-            np.average([sys_v["MetricX-23-c"] for sys_v in line["scores"].values()]),
-            np.average([sys_v["COMET"] for sys_v in line["scores"].values()]),
+            np.average([model_v["MetricX-23-c"] for model_v in line["scores"].values()]),
+            np.average([model_v["COMET"] for model_v in line["scores"].values()]),
             len(line["src"]),
             # len(line["ref"]),
         ]

@@ -16,10 +16,10 @@ data_x = np.linspace(-2, 4, 100)
 _, axs = plt.subplots(ncols=2, figsize=(6.2, 3))
 
 
-def plot_scenario(ax, item, systems, title):
+def plot_scenario(ax, item, models, title):
     ax.plot(
         data_x,
-        [utils.pred_irt(system_theta, item) for system_theta in data_x],
+        [utils.pred_irt(model_theta, item) for model_theta in data_x],
         color=utils_fig.COLORS[0],
     )
     ax.text(
@@ -31,14 +31,14 @@ def plot_scenario(ax, item, systems, title):
         color=utils_fig.COLORS[0],
     )
     ax.scatter(
-        [x for x, _ in systems],
-        [utils.pred_irt(x, item) + y for x, y in systems],
+        [x for x, _ in models],
+        [utils.pred_irt(x, item) + y for x, y in models],
         marker="o",
         s=100,
         color="#888",
-        label="Individual\nMT systems"
+        label="Individual\nMT models"
     )
-    ax.set_xlabel("System ability")
+    ax.set_xlabel("Model ability")
     ax.set_ylabel("Metric/human score for translation")
 
     ax.set_title(title, fontsize=14)

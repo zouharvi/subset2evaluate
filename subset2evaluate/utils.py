@@ -23,10 +23,10 @@ def _data_minmax_normalize(data):
     }
 
     for line in data:
-        for sys, met_all in line["scores"].items():
+        for model, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
                 # (x-min)/(max-min) normalize
-                line["scores"][sys][met_k] = (met_v - data_flat[met_k][0]) / (data_flat[met_k][1] - data_flat[met_k][0])
+                line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (data_flat[met_k][1] - data_flat[met_k][0])
 
 
 def _data_median_binarize(data):
@@ -47,9 +47,9 @@ def _data_median_binarize(data):
     }
 
     for line in data:
-        for sys, met_all in line["scores"].items():
+        for model, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
-                line["scores"][sys][met_k] = 1 * (met_v >= data_flat[met_k])
+                line["scores"][model][met_k] = 1 * (met_v >= data_flat[met_k])
 
 
 def ensure_wmt_exists():
@@ -114,17 +114,17 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
         if lines_ref[0].lower().startswith("canary"):
             lines_ref.pop(0)
 
-        line_sys = {}
+        line_model = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
-            sys = f.split("/")[-1].removesuffix(".txt")
-            if sys in {"synthetic_ref", "refA", "chrf_bestmbr"}:
+            model = f.split("/")[-1].removesuffix(".txt")
+            if model in {"synthetic_ref", "refA", "chrf_bestmbr"}:
                 continue
 
-            line_sys[sys] = open(f, "r").readlines()
-            if line_sys[sys][0].lower().startswith("canary"):
-                line_sys[sys].pop(0)
+            line_model[model] = open(f, "r").readlines()
+            if line_model[model][0].lower().startswith("canary"):
+                line_model[model].pop(0)
 
-        systems = list(line_sys.keys())
+        models = list(line_model.keys())
 
         lines_score = collections.defaultdict(list)
         for fname in [
@@ -145,44 +145,44 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
             return []
 
         for line_raw in open(fname, "r").readlines():
-            sys, score = line_raw.strip().split()
-            lines_score[sys].append({"human": score})
+            model, score = line_raw.strip().split()
+            lines_score[model].append({"human": score})
 
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
             metric = f.split("/")[-1].removesuffix("-refA.seg.score")
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
-                sys, score = line_raw.strip().split("\t")
-                # for refA, refB, synthetic_ref, and other "systems" not evaluated
-                # NOTE: another option is remove the *systems*
-                if sys not in lines_score:
+                model, score = line_raw.strip().split("\t")
+                # for refA, refB, synthetic_ref, and other "modeltems" not evaluated
+                # NOTE: another option is remove the *models*
+                if model not in lines_score:
                     continue
                 # NOTE: there's no guarantee that this indexing is correct
-                lines_score[sys][line_i % len(lines_src)][metric] = float(score)
+                lines_score[model][line_i % len(lines_src)][metric] = float(score)
 
         # filter out lines that have no human score
         lines_score = {k: v for k, v in lines_score.items() if len(v) > 0}
-        systems = [sys for sys in systems if sys in lines_score]
+        models = [model for model in models if model in lines_score]
 
         # putting it all together
         data = []
         line_id_true = 0
 
-        # remove systems that have no outputs
-        systems_bad = set()
-        for sys, scores in lines_score.items():
+        # remove models that have no outputs
+        models_bad = set()
+        for model, scores in lines_score.items():
             if all([x["human"] in {"None", "0"} for x in scores]):
-                systems_bad.add(sys)
-        systems = [sys for sys in systems if sys not in systems_bad]
+                models_bad.add(model)
+        models = [model for model in models if model not in models_bad]
 
         for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
             # filter None on the whole row
             # TODO: maybe still consider segments with 0?
             # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
-            if any([lines_score[sys][line_i]["human"] in {"None", "0"} for sys in systems]):
+            if any([lines_score[model][line_i]["human"] in {"None", "0"} for model in models]):
                 continue
-            # metrics = set(lines_score[systems[0]][line_i].keys())
+            # metrics = set(lines_score[models[0]][line_i].keys())
             # # if we're missing some metric, skip the line
-            # if any([set(lines_score[sys][line_i].keys()) != metrics for sys in systems]):
+            # if any([set(lines_score[model][line_i].keys()) != metrics for model in models]):
             #     continue
 
             line_domain, line_doc = line_doc.strip().split("\t")
@@ -196,12 +196,12 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
                 "i": line_id_true,
                 "src": line_src.strip(),
                 "ref": line_ref.strip(),
-                "tgt": {sys: line_sys[sys][line_i].strip() for sys in systems},
+                "tgt": {model: line_model[model][line_i].strip() for model in models},
                 # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
                 "time": 0.15 * word_count + 33.7,
                 "domain": line_domain,
                 "doc": line_doc,
-                "scores": {sys: {metric: float(v) for metric, v in lines_score[sys][line_i].items()} for sys in systems},
+                "scores": {model: {metric: float(v) for metric, v in lines_score[model][line_i].items()} for model in models},
             })
             line_id_true += 1
 
@@ -377,13 +377,13 @@ def load_data_summeval(normalize=True):
         {
             **line,
             "scores": {
-                sys: {
+                model: {
                     metric:
                     score if metric != "supert" else score[0]
                     for metric, score in metrics.items()
                     if metric != "rouge"
                 }
-                for sys, metrics in line["scores"].items()
+                for model, metrics in line["scores"].items()
             }
         }
         for line in data
@@ -405,22 +405,22 @@ def load_rose_data():
             "i": line["example_id"],
             "src": line["source"],
             "ref": line["reference"],
-            "tgt": line["system_outputs"],
+            "tgt": line["model_outputs"],
             # TODO: no metrics!
             "scores": line["annotations"],
         })
 
 
-def pred_irt(system_theta, item):
+def pred_irt(model_theta, item):
     import numpy as np
     if "feas" in item:
         # NOTE: true for 4PL, not for 3PL
-        # return  item["feas"] / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
-        return item["feas"] + (1 - item["feas"]) / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
+        # return  item["feas"] / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
+        return item["feas"] + (1 - item["feas"]) / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
     if "disc" in item:
-        return 1 / (1 + np.exp(-item["disc"] * (system_theta - item["diff"])))
+        return 1 / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
     if "diff" in item:
-        return 1 / (1 + np.exp(system_theta - item["diff"]))
+        return 1 / (1 + np.exp(model_theta - item["diff"]))
     raise Exception("Uknown item", item)
 
 

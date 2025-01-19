@@ -4,8 +4,8 @@ from base import IRTModelBase
 
 
 class IRTModelScalar(IRTModelBase):
-    def __init__(self, data, systems, **kwargs):
-        super().__init__(systems=systems, **kwargs)
+    def __init__(self, data, models, **kwargs):
+        super().__init__(models=models, **kwargs)
 
         # normally distribute at the beginning
         # discrimination
@@ -36,7 +36,7 @@ class IRTModelScalar(IRTModelBase):
         ]
 
     def load_irt_params(self, params):
-        self.systems = torch.nn.Parameter(torch.Tensor(params["systems"]))
+        self.models = torch.nn.Parameter(torch.Tensor(params["models"]))
         self.param_disc = torch.nn.Parameter(torch.Tensor(params["items"]["disc"]))
         self.param_diff = torch.nn.Parameter(torch.Tensor(params["items"]["diff"]))
         self.param_feas = torch.nn.Parameter(torch.Tensor(params["items"]["feas"]))

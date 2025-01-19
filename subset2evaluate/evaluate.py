@@ -131,14 +131,14 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
     # evaluates against ordering from data_old
     import itertools
 
-    systems = list(data_old[0]["scores"].keys())
+    models = list(data_old[0]["scores"].keys())
 
-    scores_old = get_sys_absolute(data_old, metric=metric)
-    scores_new = get_sys_absolute(data_new, metric=metric)
+    scores_old = get_model_absolute(data_old, metric=metric)
+    scores_new = get_model_absolute(data_new, metric=metric)
 
     result = []
-    for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((scores_old[sys1] < scores_old[sys2]) == (scores_new[sys1] < scores_new[sys2]))
+    for model1, model2 in itertools.combinations(models, 2):
+        result.append((scores_old[model1] < scores_old[model2]) == (scores_new[model1] < scores_new[model2]))
 
     return np.average(result)
 
@@ -166,60 +166,60 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
         return 1
 
     # sort from top
-    sys_ord = list(get_sys_absolute(data, metric=metric).items())
-    sys_ord.sort(key=lambda x: x[1], reverse=True)
-    sys_ord = [sys for sys, _ in sys_ord]
+    model_ord = list(get_model_absolute(data, metric=metric).items())
+    model_ord.sort(key=lambda x: x[1], reverse=True)
+    model_ord = [model for model, _ in model_ord]
 
-    def get_scores(system):
-        return [line["scores"][system][metric] for line in data]
+    def get_scores(model):
+        return [line["scores"][model][metric] for line in data]
 
-    clusters = [[get_scores(sys_ord.pop(0))]]
-    while sys_ord:
-        sys_scores = get_scores(sys_ord.pop(0))
-        diffs = [x - y for x, y in zip(sys_scores, clusters[-1][-1])]
+    clusters = [[get_scores(model_ord.pop(0))]]
+    while model_ord:
+        model_scores = get_scores(model_ord.pop(0))
+        diffs = [x - y for x, y in zip(model_scores, clusters[-1][-1])]
 
         with warnings.catch_warnings(action="ignore"):
             if all([d == 0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
-                clusters.append([sys_scores])
+                clusters.append([model_scores])
             else:
-                clusters[-1].append(sys_scores)
+                clusters[-1].append(model_scores)
                 
     return len(clusters)
 
 
-def get_sys_absolute(data_new, metric="human") -> Dict[str, float]:
+def get_model_absolute(data_new, metric="human") -> Dict[str, float]:
     import collections
     import numpy as np
 
     scores_new = collections.defaultdict(list)
 
-    systems = list(data_new[0]["scores"].keys())
+    models = list(data_new[0]["scores"].keys())
     for line in data_new:
-        for sys in systems:
-            scores_new[sys].append(line["scores"][sys][metric])
+        for model in models:
+            scores_new[model].append(line["scores"][model][metric])
 
     scores_new = {
-        sys: np.average(scores_new[sys])
-        for sys in systems
+        model: np.average(scores_new[model])
+        for model in models
     }
 
     return scores_new
 
 
-def get_sys_ordering(data_new: List[Dict], metric="human"):
-    scores_new = get_sys_absolute(data_new, metric)
+def get_model_ordering(data_new: List[Dict], metric="human"):
+    scores_new = get_model_absolute(data_new, metric)
 
     # sort to get ordering
     scores_new = list(scores_new.items())
     # sort from highest
     scores_new.sort(key=lambda x: x[1], reverse=True)
 
-    sys_ord = {
-        sys: sys_i
-        for sys_i, (sys, sys_v) in enumerate(scores_new)
+    model_ord = {
+        model: model_i
+        for model_i, (model, model_v) in enumerate(scores_new)
     }
 
-    return sys_ord
+    return model_ord
 
 
 def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, float]):
@@ -227,11 +227,11 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
     import itertools
     import numpy as np
 
-    systems = list(scores_old.keys())
+    models = list(scores_old.keys())
 
     result = []
-    for sys1, sys2 in itertools.combinations(systems, 2):
-        result.append((scores_old[sys1] < scores_old[sys2]) == (scores_new[sys1] < scores_new[sys2]))
+    for model1, model2 in itertools.combinations(models, 2):
+        result.append((scores_old[model1] < scores_old[model2]) == (scores_new[model1] < scores_new[model2]))
 
     return np.average(result)
 

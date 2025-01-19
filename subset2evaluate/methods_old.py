@@ -11,7 +11,7 @@ import random
 def _fn_information_content_old(item_irt, data_irt) -> float:
     # This formula is based on the simplified formula of Rodriquez et al 2021
     information = 0
-    for theta in data_irt["systems"].values():
+    for theta in data_irt["models"].values():
         prob = utils.pred_irt(
             theta,
             item_irt
@@ -21,15 +21,15 @@ def _fn_information_content_old(item_irt, data_irt) -> float:
 
 
 def metric_consistency(data, metric, **kwargs) -> List[float]:
-    metric_scores = subset2evaluate.evaluate.get_sys_absolute(data, metric=metric)
+    metric_scores = subset2evaluate.evaluate.get_model_absolute(data, metric=metric)
     rank_correlation = {}
-    sys_names = list(metric_scores.keys())
+    model_names = list(metric_scores.keys())
     for example in data:
         consistency = 0
         total = 0
-        for i in range(len(sys_names)):
-            for j in range(i + 1, len(sys_names)):
-                if (metric_scores[sys_names[i]] - metric_scores[sys_names[j]]) * (example['scores'][sys_names[i]][metric] - example['scores'][sys_names[j]][metric]) > 0:
+        for i in range(len(model_names)):
+            for j in range(i + 1, len(model_names)):
+                if (metric_scores[model_names[i]] - metric_scores[model_names[j]]) * (example['scores'][model_names[i]][metric] - example['scores'][model_names[j]][metric]) > 0:
                     consistency += 1
                 else:
                     consistency -= 1
@@ -59,19 +59,19 @@ def nn_irt(data, metric, **kwargs):
 
     BATCH_SIZE = 256
 
-    systems = list(data[0]["scores"].keys())
+    models = list(data[0]["scores"].keys())
 
     def wrangle_data(data_local):
         data_out = []
         for line in data_local:
-            for sys, sys_v in line["scores"].items():
+            for model, model_v in line["scores"].items():
                 data_out.append({
-                    "agent_name": sys,
-                    "agent_id": systems.index(sys),
+                    "agent_name": model,
+                    "agent_id": models.index(model),
                     "agent_type": "general",
                     "query_id": line["i"],
                     "query_rep": torch.nn.functional.one_hot(torch.tensor([line["i"]]), num_classes=len(data)).float(),
-                    "ruling": sys_v[metric],
+                    "ruling": model_v[metric],
                 })
         return data_out
 
@@ -160,7 +160,7 @@ def nn_irt(data, metric, **kwargs):
         def arch(self):
             return "caimira"
 
-        n_agents: int = len(systems)
+        n_agents: int = len(models)
         # 1 for now because we don't know what it really is
         n_agent_types: int = 1
         n_dim: int = 32
@@ -222,19 +222,19 @@ def our_irt(data, metric, **kwargs):
     os.environ["WANDB_SILENT"] = "true"
     from lightning.pytorch.loggers import WandbLogger
 
-    systems = list(data[0]["scores"].keys())
+    models = list(data[0]["scores"].keys())
 
     ModelClass = {
         "scalar": IRTModelScalar,
         "tfidf": IRTModelTFIDF,
         "embd": IRTModelEmbd,
     }[kwargs["model"]]
-    model = ModelClass(data, systems, data_old=data, **kwargs)
+    model = ModelClass(data, models, data_old=data, **kwargs)
 
     data_flat = [
-        ((sent_i, sys_i), sent["scores"][sys][metric])
+        ((sent_i, model_i), sent["scores"][model][metric])
         for sent_i, sent in enumerate(data)
-        for sys_i, sys in enumerate(systems)
+        for model_i, model in enumerate(models)
     ]
 
     # TODO: in the future run first training with dev set to find out the best epoch count
@@ -302,7 +302,7 @@ def our_irt(data, metric, **kwargs):
     data_irt = model.params_log[best_val_step]
 
     return [
-        model.fn_utility(x, data_irt["systems"])
+        model.fn_utility(x, data_irt["models"])
         for x in data_irt["items"]
     ]
 
@@ -310,16 +310,16 @@ def our_irt(data, metric, **kwargs):
 def get_nice_subset(data_old, target_size=100, step_size=10, metric="human") -> List[float]:
     raise NotImplementedError("This method is not yet implemented for use.")
     import numpy as np
-    order_full = subset2evaluate.evaluate.get_sys_ordering(data_old, metric=metric)
+    order_full = subset2evaluate.evaluate.get_model_ordering(data_old, metric=metric)
 
-    print(f"Previous average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
+    print(f"Previous average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)) for line in data_old]):.1%}")
 
     while len(data_old) > target_size:
-        order_full = subset2evaluate.evaluate.get_sys_ordering(data_old, metric=metric)
-        data_old.sort(key=lambda line: subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)))
+        order_full = subset2evaluate.evaluate.get_model_ordering(data_old, metric=metric)
+        data_old.sort(key=lambda line: subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)))
         data_old = data_old[step_size:]
 
-    print(f"New average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_sys_ordering([line], metric=metric)) for line in data_old]):.1%}")
+    print(f"New average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)) for line in data_old]):.1%}")
     return data_old
 
 
@@ -430,6 +430,6 @@ METHODS = {
     "premlp_irt_diffdisc": partial(premlp_irt, fn_utility="diffdisc"),
     "premlp_irt_diff": partial(premlp_irt, fn_utility="diff"),
     "premlp_irt_disc": partial(premlp_irt, fn_utility="disc"),
-    "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([sys_v["human"] for sys_v in line["scores"].values()])),
-    "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([sys_v["human"] for sys_v in line["scores"].values()])),
+    "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([model_v["human"] for model_v in line["scores"].values()])),
+    "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([model_v["human"] for model_v in line["scores"].values()])),
 }

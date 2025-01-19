@@ -31,13 +31,13 @@ data_x_all = [
 
 def utility_metricx_avg(item):
     return -np.average(
-        [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
+        [model_v["MetricX-23-c"] for model_v in item["scores"].values()]
     )
 
 
 def utility_metricx_var(item):
     return np.var(
-        [sys_v["MetricX-23-c"] for sys_v in item["scores"].values()]
+        [model_v["MetricX-23-c"] for model_v in item["scores"].values()]
     )
 
 

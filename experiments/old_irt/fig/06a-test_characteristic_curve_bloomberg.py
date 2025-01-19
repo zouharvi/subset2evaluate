@@ -12,7 +12,7 @@ args.add_argument("suffix", default="d0")
 args = args.parse_args()
 
 data_irt = json.load(open(f"computed/irt_score_{args.suffix}.json", "r"))
-systems = list(data_irt["systems"].keys())
+models = list(data_irt["models"].keys())
 utils_fig.matplotlib_default()
 plt.figure(figsize=(1.7, 1.7))
 
@@ -24,10 +24,10 @@ points_x = np.linspace(theta_min - 0.2, theta_max + 0.2, 100)
 
 points_y_pred = [
     np.average([
-        utils.pred_irt(data_irt["systems"][sys], item)
+        utils.pred_irt(data_irt["models"][model], item)
         for item in data_irt["items"]
     ])
-    for sys in systems
+    for model in models
 ]
 
 

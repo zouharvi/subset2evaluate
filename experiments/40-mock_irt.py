@@ -12,12 +12,12 @@ def pred_irt(theta, item):
 
 
 points_x = np.linspace(-3, 5.0, 100)
-systems = [-1, 4]
+models = [-1, 4]
 
 fig, axs = plt.subplots(2, 2, figsize=(8, 4))
 
 
-def plot_item(ax, item, systems=systems):
+def plot_item(ax, item, models=models):
     ax.plot(
         points_x,
         [pred_irt(theta, item) for theta in points_x],
@@ -25,8 +25,8 @@ def plot_item(ax, item, systems=systems):
         linewidth=2.5,
     )
     ax.scatter(
-        systems,
-        [pred_irt(theta, item) for theta in systems],
+        models,
+        [pred_irt(theta, item) for theta in models],
         color=utils_fig.COLORS[0],
         zorder=10,
     )
@@ -40,8 +40,8 @@ def plot_item(ax, item, systems=systems):
 item = {"diff": 0.0, "disc": 1.0, "feas": 1.0}
 plot_item(axs[0, 0], item)
 axs[0, 0].annotate(
-    "IRT predicts low\nscore for a system\nwith low ability",
-    xy=(systems[0], pred_irt(systems[0], item)),
+    "IRT predicts low\nscore for a model\nwith low ability",
+    xy=(models[0], pred_irt(models[0], item)),
     xytext=(1, 0.4),
     arrowprops=dict(arrowstyle="->", color=utils_fig.COLORS[0]),
     fontstyle="italic",
@@ -52,7 +52,7 @@ item = {"diff": 3.0, "disc": 1.0, "feas": 1.0}
 plot_item(axs[0, 1], item)
 axs[0, 1].annotate(
     "For difficult ($b_s$) items,\nonly high $\\theta$s lead to\nprediction of success",
-    xy=(systems[1], pred_irt(systems[1], item)),
+    xy=(models[1], pred_irt(models[1], item)),
     xytext=(3, 0.8),
     arrowprops=dict(arrowstyle="->", color=utils_fig.COLORS[0]),
     fontstyle="italic",
@@ -62,9 +62,9 @@ axs[0, 1].annotate(
 
 
 item = {"diff": 0.0, "disc": 9.0, "feas": 1.0}
-plot_item(axs[1, 0], item, systems=[-0.2, 0.5])
+plot_item(axs[1, 0], item, models=[-0.2, 0.5])
 axs[1, 0].annotate(
-    "Discriminative ($a_s$)\nitems distinguish\nbetween systems of\nclose abilities ($\\theta$)",
+    "Discriminative ($a_s$)\nitems distinguish\nbetween models of\nclose abilities ($\\theta$)",
     xy=(-0.2, pred_irt(-0.2, item)),
     xytext=(1.3, 0.3),
     arrowprops=dict(arrowstyle="->", color=utils_fig.COLORS[0]),
@@ -83,8 +83,8 @@ axs[1, 0].annotate(
 item = {"diff": 0.0, "disc": 1.0, "feas": 0.8}
 plot_item(axs[1, 1], item)
 axs[1, 1].annotate(
-"Low feasibility ($c_s$)\nprevents any system from\never getting the full score.",
-    xy=(systems[1], pred_irt(systems[1], item)),
+"Low feasibility ($c_s$)\nprevents any model from\never getting the full score.",
+    xy=(models[1], pred_irt(models[1], item)),
     xytext=(4.8, 0.2),
     arrowprops=dict(arrowstyle="->", color=utils_fig.COLORS[0]),
     fontstyle="italic",
@@ -95,7 +95,7 @@ axs[1, 1].annotate(
 for ax in axs.flatten():
     ax.set_xlim(-3, 5)
     ax.set_ylim(-0.1, 1.1)
-    ax.set_xlabel("System ability $\\theta$", labelpad=-1)
+    ax.set_xlabel("Model ability $\\theta$", labelpad=-1)
     ax.set_ylabel("Predicted success", labelpad=-2)
     ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
     ax.set_yticklabels(['0%', '25%', '50%', '75%', '100%'])

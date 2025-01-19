@@ -23,19 +23,19 @@ for subset_size in tqdm.tqdm(points_x):
     accs_new = []
     for data_old in data_old_all:
         data_old_i_to_line = {line["i"]: line for line in data_old}
-        systems = list(data_old[0]["scores"].keys())
+        models = list(data_old[0]["scores"].keys())
 
         # run multiple times
         for _ in range(4):
-            systems_local = random.sample(systems, k=min(subset_size, len(systems)))
+            models_local = random.sample(models, k=min(subset_size, len(models)))
             data_old_local = copy.deepcopy(data_old)
             data_old_local = [
                 {
                     **line,
                     "scores": {
-                        sys: v
-                        for sys, v in line["scores"].items()
-                        if sys in systems_local
+                        model: v
+                        for model, v in line["scores"].items()
+                        if model in models_local
                     }
                 }
                 for line in data_old_local
@@ -46,7 +46,7 @@ for subset_size in tqdm.tqdm(points_x):
             data_new_div = subset2evaluate.select_subset.basic(data_old_local, method="diversity_bleu")
             data_new_irt = subset2evaluate.select_subset.basic(data_old_local, method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c", retry_on_error=True)
 
-            # we dropped some systems but we can recover them with the same ordering from data_old
+            # we dropped some models but we can recover them with the same ordering from data_old
             clu_new_avg, acc_new_avg = subset2evaluate.evaluate.eval_cluacc(
                 [
                     data_old_i_to_line[line["i"]]
@@ -135,7 +135,7 @@ plt.hlines(
 )
 # plt.ylim(0.77, 1)
 plt.ylabel("Average accuracy")
-plt.xlabel("Number of systems in training data" + " " * 5)
+plt.xlabel("Number of models in training data" + " " * 5)
 plt.xticks(range(min(points_x), max(points_x), 3))
 plt.legend(
     handletextpad=0.2,
@@ -147,7 +147,7 @@ plt.legend(
 )
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
-plt.savefig("figures_pdf/15-system_count_necessity_acc.pdf")
+plt.savefig("figures_pdf/15-model_count_necessity_acc.pdf")
 plt.show()
 
 # %%
@@ -188,7 +188,7 @@ plt.hlines(
 )
 # plt.ylim(0.91, None)
 plt.ylabel("Average cluster count" + " " * 10, labelpad=10)
-plt.xlabel("Number of systems in training data" + " " * 5)
+plt.xlabel("Number of models in training data" + " " * 5)
 plt.xticks(range(min(points_x), max(points_x), 3))
 plt.legend(
     handletextpad=0.2,
@@ -200,5 +200,5 @@ plt.legend(
 )
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.tight_layout()
-plt.savefig("figures_pdf/15-system_count_necessity_clu.pdf")
+plt.savefig("figures_pdf/15-model_count_necessity_clu.pdf")
 plt.show()

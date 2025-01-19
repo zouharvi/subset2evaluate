@@ -13,17 +13,17 @@ args.add_argument("--epochs", type=int, default=5000)
 args.add_argument("--out", default="/dev/null")
 args = args.parse_args()
 
-# WMT: 1k items, 15 systems
+# WMT: 1k items, 15 models
 data_wmt = utils.load_data_wmt(normalize=True, binarize=False)
-# data_wmt = utils.load_data_squad(n_items=10_000, n_systems=15)
+# data_wmt = utils.load_data_squad(n_items=10_000, n_models=15)
 
-systems = list(data_wmt[0]["scores"].keys())
-model = IRTModelScalar(len(data_wmt), systems)
+models = list(data_wmt[0]["scores"].keys())
+model = IRTModelScalar(len(data_wmt), models)
 
 data_loader = [
-    ((sent_i, sys_i), sent["scores"][sys][args.metric])
+    ((sent_i, model_i), sent["scores"][model][args.metric])
     for sent_i, sent in enumerate(data_wmt)
-    for sys_i, sys in enumerate(systems)
+    for model_i, model in enumerate(models)
 ]
 
 # subsample training data

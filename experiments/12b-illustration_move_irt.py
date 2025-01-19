@@ -34,7 +34,7 @@ _, axs = plt.subplots(ncols=3, figsize=(9.3, 3))
 def plot_scenario(ax, item_new, title):
     ax.plot(
         data_x,
-        [utils.pred_irt(system_theta, item_base) for system_theta in data_x],
+        [utils.pred_irt(model_theta, item_base) for model_theta in data_x],
         color="black",
     )
     ax.text(
@@ -47,7 +47,7 @@ def plot_scenario(ax, item_new, title):
 
     ax.plot(
         data_x,
-        [utils.pred_irt(system_theta, item_new) for system_theta in data_x],
+        [utils.pred_irt(model_theta, item_new) for model_theta in data_x],
         color=utils_fig.COLORS[0],
     )
     ax.text(

@@ -14,14 +14,14 @@ def random_subset(data, seed=None, **kwargs) -> List[float]:
 
 def metric_avg(data, metric, **kwargs) -> List[float]:
     return [
-        -np.average([sys_v[metric] for sys_v in item["scores"].values()])
+        -np.average([model_v[metric] for model_v in item["scores"].values()])
         for item in data
     ]
 
 
 def metric_var(data, metric, **kwargs) -> List[float]:
     return [
-        np.var([sys_v[metric] for sys_v in item["scores"].values()])
+        np.var([model_v[metric] for model_v in item["scores"].values()])
         for item in data
     ]
 
@@ -50,7 +50,7 @@ def pointwise_alignment(data, metric, metric_target=None, **kwargs) -> List[floa
 
 def _fn_information_content(item_old, item_irt, data_irt) -> float:
     information = 0
-    for theta in data_irt["systems"].values():
+    for theta in data_irt["models"].values():
         x1 = np.exp(item_irt["disc"] * (theta + item_irt["diff"]))
         x2 = np.exp(item_irt["disc"] * item_irt["diff"])
         x3 = np.exp(item_irt["disc"] * theta)
@@ -90,25 +90,25 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     if model not in py_irt.models.abstract_model._IRT_REGISTRY:
         raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
 
-    systems = list(data[0]["scores"].keys())
+    models = list(data[0]["scores"].keys())
 
     if load_model is not None:
         data_irt = load_model
     else:
         # we need median binarization if we are not using 4pl_score model
         median = np.median([
-            system_v[metric]
+            model_v[metric]
             for line in data
-            for system_v in line["scores"].values()
+            for model_v in line["scores"].values()
         ])
         dataset = pd.DataFrame({
-            "system": systems,
+            "model": models,
             **{
                 f"item_{line['i']}": [
-                    line["scores"][system][metric]
+                    line["scores"][model][metric]
                     if "_score" in model else
-                    line["scores"][system][metric] >= median
-                    for system in systems
+                    line["scores"][model][metric] >= median
+                    for model in models
                 ]
                 for line in data
             }
@@ -124,7 +124,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
 
         dataset = py_irt.dataset.Dataset.from_pandas(
             dataset,
-            subject_column="system",
+            subject_column="model",
             item_columns=[f"item_{line['i']}" for line in data],
             embeddings=embeddings,
         )
@@ -161,7 +161,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
         if "feas" in params:
             # 3PL/4PL
             data_irt = {
-                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "models": {model: model_v for model, model_v in zip(models, params["ability"])},
                 "items": [
                     {"disc": disc, "diff": diff, "feas": feas}
                     for disc, diff, feas in zip(
@@ -173,7 +173,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
             }
         elif "disc" in params:
             data_irt = {
-                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "models": {model: model_v for model, model_v in zip(models, params["ability"])},
                 "items": [
                     {"disc": disc, "diff": diff}
                     for disc, diff in zip(
@@ -184,7 +184,7 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
             }
         else:
             data_irt = {
-                "systems": {sys: sys_v for sys, sys_v in zip(systems, params["ability"])},
+                "models": {model: model_v for model, model_v in zip(models, params["ability"])},
                 "items": [
                     {"diff": diff}
                     for diff in params["diff"]
