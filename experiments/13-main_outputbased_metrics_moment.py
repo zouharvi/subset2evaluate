@@ -44,8 +44,8 @@ points_y_clu = {
 utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_acc["random"], f"Random {np.average(points_y_acc['random']):.1%}"),
-        (utils.PROPS, points_y_acc["metric_avg"], f"MetricX average {np.average(points_y_acc['metric_avg']):.1%}"),
-        (utils.PROPS, points_y_acc["metric_var"], f"MetricX variance {np.average(points_y_acc['metric_var']):.1%}"),
+        (utils.PROPS, points_y_acc["metric_avg"], f"MetricAvg {np.average(points_y_acc['metric_avg']):.1%}"),
+        (utils.PROPS, points_y_acc["metric_var"], f"MetricVar {np.average(points_y_acc['metric_var']):.1%}"),
     ],
     colors=["black"] + utils_fig.COLORS,
     filename="13-main_outputbased_metrics_moment",
@@ -54,8 +54,8 @@ utils_fig.plot_subset_selection(
 utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
-        (utils.PROPS, points_y_clu["metric_avg"], f"MetricX avg. {np.average(points_y_clu['metric_avg']):.2f}"),
-        (utils.PROPS, points_y_clu["metric_var"], f"MetricX var. {np.average(points_y_clu['metric_var']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_avg"], f"MetricAvg {np.average(points_y_clu['metric_avg']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_var"], f"MetricVar {np.average(points_y_clu['metric_var']):.2f}"),
     ],
     colors=["black"] + utils_fig.COLORS,
     filename="13-main_outputbased_metrics_moment",

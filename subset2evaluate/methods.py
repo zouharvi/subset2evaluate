@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Literal, Tuple, Union
 from functools import partial
 import numpy as np
 import subset2evaluate.evaluate
@@ -53,21 +53,29 @@ def metric_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
     ]
 
 
-def kmeans(data, budget, load_model=None, return_model=False, **kwargs) -> List[float]:
+def kmeans(data, budget, load_model=None, return_model=False, features: Literal["src", "tgt_rand", "tgt_0"]="src", **kwargs) -> List[float]:
     import sklearn.cluster
     import sentence_transformers
     import warnings
+    import random
 
-    print(load_model)
 
     if load_model is not None:
         model_embd = load_model
     else:
         with warnings.catch_warnings(action="ignore", category=FutureWarning):
-            # model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
-            # model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
-            model_embd = sentence_transformers.SentenceTransformer("LaBSE")
-    data_embd = model_embd.encode([line["src"] for line in data])
+            model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    if features == "src":
+        data_x = [line["src"] for line in data]
+    elif features == "tgt_rand":
+        r_feature = random.Random(0)
+        data_x = [r_feature.choice(list(line["tgt"].values())) for line in data]
+    elif features == "tgt_0":
+        data_x = [list(line["tgt"].values())[0] for line in data]
+    else:
+        raise Exception(f"Unknown feature type: {features}")
+    
+    data_embd = model_embd.encode(data_x)
 
     # baseline don't pick any item
     data_y = [0 for _ in data]

@@ -3,7 +3,7 @@
 import subset2evaluate
 import subset2evaluate.evaluate
 import numpy as np
-# 
+
 data_old = subset2evaluate.utils.load_data_summeval(normalize=True)
 
 # %%
@@ -41,3 +41,34 @@ for repetitions, method_kwargs in [
         cor_all.append(cor_new)
         clu_all.append(clu_new)
     print(method_kwargs["method"], f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")
+
+
+# %%
+
+cor_all = []
+clu_all = []
+load_model = None
+for prop in subset2evaluate.utils.PROPS:
+    B = int(len(data_old) * prop)
+    data_new, load_model = subset2evaluate.select_subset.basic(
+        data_old,
+        method="kmeans", budget=B,
+        features="tgt_rand",
+        load_model=load_model, return_model=True,
+    )
+    data_new = data_new[:B]
+    cor_new = subset2evaluate.evaluate.eval_subset_correlation(data_new, data_old, metric="human_sum")
+    clu_new = subset2evaluate.evaluate.eval_subset_clusters(data_new, metric="human_sum")
+
+    clu_all.append(clu_new)
+    cor_all.append(cor_new)
+print("kmeans", f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")
+
+# %%
+# find best metric: supert
+
+corrs = list(subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="human_sum").items())
+corrs.sort(key=lambda x: x[1], reverse=True)
+
+for metric, cor in corrs[:10]:
+    print(metric, f"COR: {cor:.1%}")
