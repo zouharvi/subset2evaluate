@@ -53,7 +53,7 @@ for prop in subset2evaluate.utils.PROPS:
     data_new, load_model = subset2evaluate.select_subset.basic(
         data_old,
         method="kmeans", budget=B,
-        features="tgt_rand",
+        features="src",
         load_model=load_model, return_model=True,
     )
     data_new = data_new[:B]
