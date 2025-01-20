@@ -374,10 +374,9 @@ def load_data_summeval(normalize=True):
 
     data = []
     for i, v in data_by_id.items():
-        # "coherence": 2, "consistency": 1, "fluency": 4, "relevance": 2
         data.append({
             "i": i,
-            "src": None,
+            "src": v[0]["text"],
             "ref": None,
             "tgt": {line["model_id"]: line["decoded"] for line in v},
             "scores": {
@@ -412,7 +411,7 @@ def load_data_summeval(normalize=True):
     return data
 
 
-def load_rose_data():
+def load_data_rose():
     import datasets
     data_raw = datasets.load_dataset("Salesforce/rose", "cnndm_protocol")
     data_raw = list(data_raw.values())[0]
