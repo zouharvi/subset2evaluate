@@ -18,6 +18,9 @@ for data_old in tqdm.tqdm(data_old_all):
     for repetitions, method_kwargs in [
         (1, dict(method="metric_var", metric="MetricX-23")),
         (1, dict(method="metric_avg", metric="MetricX-23")),
+        (1, dict(method="metric_align", metric="MetricX-23")),
+        (5, dict(method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23", retry_on_error=True)),
+        (1, dict(method="diversity_bleu")),
         (100, dict(method="random")),
     ]:
         for _ in range(repetitions):
@@ -46,12 +49,12 @@ utils_fig.plot_subset_selection_tall(
         (utils.PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
         (utils.PROPS, points_y_cor["metric_avg"], f"MetricAvg {np.average(points_y_cor['metric_avg']):.1%}"),
         (utils.PROPS, points_y_cor["metric_var"], f"MetricVar {np.average(points_y_cor['metric_var']):.1%}"),
-        (utils.PROPS, np.array(points_y_cor["metric_var"])-np.random.random(len(points_y_cor["metric_var"]))/20, f"Placeholder 1"),
-        (utils.PROPS, np.array(points_y_cor["metric_var"])-np.random.random(len(points_y_cor["metric_var"]))/20+0.01, f"Placeholder 2"),
-        (utils.PROPS, np.array(points_y_cor["metric_var"])-np.random.random(len(points_y_cor["metric_var"]))/20+0.01, f"Placeholder 3"),
+        (utils.PROPS, points_y_cor["metric_align"], f"MetricAlign {np.average(points_y_cor['metric_align']):.1%}"),
+        (utils.PROPS, points_y_cor['diversity_bleu'], f"Diversity {np.average(points_y_cor['diversity_bleu']):.1%}"),
+        (utils.PROPS, points_y_cor['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_cor['pyirt_diffdisc']):.1%}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
-    filename="13-main_outputbased_metrics_moment",
+    filename="13-main_outputbased",
 )
 
 utils_fig.plot_subset_selection_tall(
@@ -59,10 +62,10 @@ utils_fig.plot_subset_selection_tall(
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu["metric_avg"], f"MetricAvg {np.average(points_y_clu['metric_avg']):.2f}"),
         (utils.PROPS, points_y_clu["metric_var"], f"MetricVar {np.average(points_y_clu['metric_var']):.2f}"),
-        (utils.PROPS, np.array(points_y_clu["metric_var"])-np.random.random(len(points_y_clu["metric_var"]))/20, f"Placeholder 1"),
-        (utils.PROPS, np.array(points_y_clu["metric_var"])-np.random.random(len(points_y_clu["metric_var"]))/20+0.01, f"Placeholder 2"),
-        (utils.PROPS, np.array(points_y_clu["metric_var"])-np.random.random(len(points_y_clu["metric_var"]))/20+0.01, f"Placeholder 3"),
+        (utils.PROPS, points_y_clu["metric_align"], f"MetricAlign {np.average(points_y_clu['metric_align']):.2f}"),
+        (utils.PROPS, points_y_clu['diversity_bleu'], f"Diversity {np.average(points_y_clu['diversity_bleu']):.2f}"),
+        (utils.PROPS, points_y_clu['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_clu['pyirt_diffdisc']):.2f}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
-    filename="13-main_outputbased_metrics_moment",
+    filename="13-main_outputbased",
 )
