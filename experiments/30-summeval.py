@@ -67,4 +67,4 @@ print("kmeans", f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f
 # %%
 # find best metric: supert
 
-subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="human_sum", display=True)
+_ = subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="human_sum", display=True)
