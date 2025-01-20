@@ -6,6 +6,7 @@ COLORS = [
     "#50ad9f",  # green
     "#0000a2",  # blue
     "#e9c716",  # yellow
+    "#8c6e96",  # purple
 ]
 
 
@@ -120,4 +121,98 @@ def plot_subset_selection(
             # save in files compatible with both LaTeX and Typst
             plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.pdf")
             plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'acc'}.svg")
+    plt.show()
+
+
+Color = str
+def plot_subset_selection_tall(
+        points: List[Tuple[List, List, Text]],
+        filename=None,
+        colors: List[str] = COLORS,
+):
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as mtick
+    import contextlib
+    import os
+
+    # if there is ever a value above 1 it can't be correlation
+    # so it has to be clusters
+    IS_CLUSTERS = any(
+        y > 1
+        for _, points_y, _ in points
+        for y in points_y
+    )
+
+    matplotlib_default()
+    plt.figure(figsize=(4, 3.2))
+
+    if len(points) == 1:
+        colors = ["black"]
+
+    tex_out = r"\small"
+    for i, ((points_x, points_y, label), color) in enumerate(zip(points, colors)):
+        plt.plot(
+            range(len(points_x)),
+            points_y,
+            marker="o",
+            markersize=5,
+            color=color,
+            label=label,
+            clip_on=True,
+            linewidth=2,
+        )
+        label_clean = label.replace("%", "\\%")
+        color_clean = color.replace("#", "")
+        tex_out += f"\n\\legend{{{color_clean}}}{{{label_clean}}}"
+        if i != 0 and i % 2 == 1:
+            tex_out += r"\\"
+    tex_out += "\n"
+
+    if IS_CLUSTERS:
+        plt.ylabel("Cluster count" + " " * 5, labelpad=13)
+    else:
+        plt.ylabel("Rank correlation" + " " * 5, labelpad=-1)
+    plt.xlabel("Proportion of original data", labelpad=-1)
+
+    plt.xticks(
+        list(range(len(points_x)))[::3],
+        [f"{x:.0%}" for x in points_x][::3],
+    )
+
+    ax = plt.gca()
+    ax.spines[['top', 'right']].set_visible(False)
+    # ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    if not IS_CLUSTERS:
+        ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+    plt.legend(
+        loc="lower right",
+        handletextpad=0.2,
+        handlelength=1,
+        labelspacing=0.2,
+        facecolor="#ddd",
+        framealpha=0.9,
+        scatteryoffsets=[0.5] * len(points),
+    )
+
+    if IS_CLUSTERS:
+        plt.ylim(1.2, 5.0)
+    else:
+        plt.ylim(0.87, 0.99)
+    plt.tight_layout(pad=0.1)
+
+    if filename:
+        # temporarily change to the root directory
+        with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/.."):
+            os.makedirs("figures_pdf", exist_ok=True)
+            os.makedirs("figures_svg", exist_ok=True)
+            os.makedirs("figures_tex", exist_ok=True)
+
+            # save in files compatible with both LaTeX and Typst
+            plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.pdf")
+            plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.svg")
+
+            with open(f"figures_tex/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.tex", "w") as f:
+                f.write(tex_out)
+
     plt.show()
