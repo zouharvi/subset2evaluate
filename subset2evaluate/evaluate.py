@@ -240,7 +240,7 @@ def main_cli():
     import argparse
 
     args = argparse.ArgumentParser(
-        description="Meta-evaluate subset selection methods with cluster count and pairwise accuracy."
+        description="Meta-evaluate subset selection methods with rank correlation and cluster count."
     )
     args.add_argument(
         'data_old', type=str, default='wmt23/en-cs',
@@ -258,5 +258,5 @@ def main_cli():
 
     clu_new, cor_new = eval_clucor(args.data_old, args.data_new, args.metric)
 
+    print(f"Correlation: {np.average(cor_new):.1%}")
     print(f"Clusters: {np.average(clu_new):.2f}")
-    print(f"Accuracy: {np.average(cor_new):.1%}")

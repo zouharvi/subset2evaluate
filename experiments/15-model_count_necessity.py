@@ -14,12 +14,12 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).items())[:9]
 
 # number of models in each language pair
 print([len(data_old[0]["scores"]) for data_old_name, data_old in data_old_all])
-SUBSET_SIZE = [2, 4]
+SUBSET_SIZE = [4]
 
 # %%
 accs_all = collections.defaultdict(lambda: collections.defaultdict(list))
 clus_all = collections.defaultdict(lambda: collections.defaultdict(list))
-cache_data = {}
+cache_model = collections.defaultdict(lambda: None)
 
 for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
     # run multiple times
@@ -66,21 +66,21 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
             # we dropped some models but we can recover them with the same ordering from data_old
             for cache, method_kwargs in [
                 (False, dict(method="random")),
-                (True,  dict(method="precomet_var")),
-                (True,  dict(method="precomet_avg")),
-                (True,  dict(method="precomet_diversity")),
-                (True,  dict(method="precomet_diffdisc")),
+                (True, dict(method="precomet_var")),
+                (True, dict(method="precomet_avg")),
+                (True, dict(method="precomet_diversity")),
+                (True, dict(method="local_precomet_diffdisc")),
                 (False, dict(method="metric_var", metric="MetricX-23-c")),
                 (False, dict(method="metric_avg", metric="MetricX-23-c")),
+                (False, dict(method="metric_alignment", metric="MetricX-23-c")),
                 (False, dict(method="diversity_bleu")),
                 (False, dict(method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c")),
             ]:
-                if cache and (method_kwargs["method"], data_old_name) in cache_data:
-                    data_new = cache_data[(method_kwargs["method"], data_old_name)]
-                else:
-                    data_new = subset2evaluate.select_subset.basic(data_old_artificial, **method_kwargs, retry_on_error=True)
-                    if cache:
-                        cache_data[(method_kwargs["method"], data_old_name)] = data_new
+                data_new, load_model = subset2evaluate.select_subset.basic(
+                    data_old_artificial, **method_kwargs,
+                    retry_on_error=True, return_model=True,
+                    load_model=cache_model[method_kwargs["method"]],
+                )
 
                 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
                     [
