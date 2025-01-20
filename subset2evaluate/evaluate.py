@@ -221,7 +221,7 @@ def get_model_absolute(data_new, metric="human") -> Dict[str, float]:
     return scores_new
 
 
-def get_model_ordering(data_new: List[Dict], metric="human"):
+def get_model_ordering(data_new: List[Dict], metric="human") -> Dict[str, int]:
     scores_new = get_model_absolute(data_new, metric)
 
     # sort to get ordering
