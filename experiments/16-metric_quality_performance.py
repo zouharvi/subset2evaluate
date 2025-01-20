@@ -67,10 +67,10 @@ for data_old in tqdm.tqdm(data_old_all):
             clus_all['pyirt_diffdisc'].append(np.average(clu_new))
             accs_all['pyirt_diffdisc'].append(np.average(cor_new))
 
-            data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_alignment", metric=metric)
+            data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_align", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_ali, data_old)
-            clus_all['metric_alignment'].append(np.average(clu_new))
-            accs_all['metric_alignment'].append(np.average(cor_new))
+            clus_all['metric_align'].append(np.average(clu_new))
+            accs_all['metric_align'].append(np.average(cor_new))
 
         except Exception as e:
             print(e)
@@ -135,7 +135,7 @@ axs[1].plot(
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["metric_alignment"]),
+    aggregate_data_y(clus_all["metric_align"]),
     label="MetricAlign",
     linewidth=2,
 )
@@ -183,7 +183,7 @@ axs[0].plot(
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["metric_alignment"]),
+    aggregate_data_y(accs_all["metric_align"]),
     label="MetricAlign",
     linewidth=2,
 )

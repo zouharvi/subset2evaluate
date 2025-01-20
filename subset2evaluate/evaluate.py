@@ -146,6 +146,7 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
 def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="human"):
     # evaluates spearman correlation of systems
     import scipy.stats
+    import warnings
 
     systems = list(data_old[0]["scores"].keys())
 
@@ -154,7 +155,13 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
 
     values_old = [scores_old[sys] for sys in systems]
     values_new = [scores_new[sys] for sys in systems]
-    return scipy.stats.spearmanr(values_old, values_new).correlation
+
+    # handle constant input warning
+    with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="error"):
+        try:
+            return scipy.stats.spearmanr(values_old, values_new).correlation
+        except:
+            return 0
 
 
 def eval_subset_clusters(data: List[Dict], metric="human"):
@@ -236,7 +243,7 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
     return np.average(result)
 
 
-def eval_metrics_correlations(data: List[Dict], metric_target="human"):
+def eval_metrics_correlations(data: List[Dict], metric_target="human", display=False):
     import scipy.stats
     metrics = set(list(data[0]["scores"].values())[0])
     data_y = {
@@ -252,11 +259,20 @@ def eval_metrics_correlations(data: List[Dict], metric_target="human"):
         for line in data
         for model in data[0]["scores"].keys()
     ]
-    return {
+    corrs = {
         metric: scipy.stats.pearsonr(data_y[metric], data_y_tgt).correlation
         for metric in metrics
         if metric != metric_target
     }
+
+    if display:
+        corrs_local = list(corrs.items())
+        corrs_local.sort(key=lambda x: x[1], reverse=True)
+
+        for metric, cor in corrs_local:
+            print(f"{metric:<40} {cor:.1%}")
+
+    return corrs
 
 def main_cli():
     import argparse

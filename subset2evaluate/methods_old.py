@@ -1,5 +1,5 @@
 # These are some subset selection methods that are not polished enough to be used in practice
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Tuple, Union, Dict
 from functools import partial
 import subset2evaluate.utils as utils
 import subset2evaluate
@@ -76,7 +76,7 @@ def nn_irt(data, metric, **kwargs):
         return data_out
 
     def create_agent_indexer_from_dataset(
-        dataset_or_path: str | Sequence[dict[str, Any]],
+        dataset_or_path: str | Sequence[Dict[str, Any]],
     ) -> neural_irt.train.AgentIndexer:
         dataset = dataset_or_path
         if isinstance(dataset, str):
