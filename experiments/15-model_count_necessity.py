@@ -100,13 +100,13 @@ def method_formatter(method):
         "random": "Random",
         "precomet_var": r"PreCOMET\textsuperscript{var}",
         "precomet_avg": r"PreCOMET\textsuperscript{avg}",
-        "precomet_diversity": r"PreCOMET\textsuperscript{div}",
-        "metric_var": "MetricX var.",
-        "metric_avg": "MetricX avg.",
+        "precomet_diversity": r"Diversity\textsuperscript{src}",
+        "metric_var": "MetricX-23 var.",
+        "metric_avg": "MetricX-23 avg.",
+        "metric_alignment": "MetricX-23 alignment",
         "diversity_bleu": "Diversity",
-        "pyirt_diffdisc": r"IRT diff.$\times$disc.",
-        "precomet_diffdisc": r"PreCOMET\textsuperscript{diff.$\times$disc}",
-        "precomet_diffdisc_direct": r"PreCOMET\textsuperscript{diff.$\times$disc} (direct)",
+        "pyirt_diffdisc": r"Diff.$\times$Disc.",
+        "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]
