@@ -12,7 +12,7 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())[:9]
 for method_kwargs in [
     dict(method="metric_avg", metric="MetricX-23"),
     dict(method="metric_var", metric="MetricX-23"),
-    dict(method="metric_alignment", metric="MetricX-23"),
+    dict(method="metric_align", metric="MetricX-23"),
     dict(method="diversity_bleu"),
     dict(method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True),
 ]:

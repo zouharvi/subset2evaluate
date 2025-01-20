@@ -26,7 +26,7 @@ def metric_var(data, metric, **kwargs) -> List[float]:
     ]
 
 
-def metric_alignment(data, metric, metric_target=None, **kwargs) -> List[float]:
+def metric_align(data, metric, metric_target=None, **kwargs) -> List[float]:
     import scipy.stats
     import warnings
     if metric_target is None:
@@ -364,7 +364,7 @@ def diversity_unigram(data, **kwargs) -> List[float]:
                 out.append(1)
             else:
                 out.append(2 * (text_a & text_b).total() / (text_a.total() + text_b.total()))
-        return np.average(out)
+        return 0 if len(out) == 0 else np.average(out)
 
     # we prefer smallest similarity so flip
     return [
@@ -379,6 +379,8 @@ def diversity_bleu(data, **kwargs) -> List[float]:
     metric = sacrebleu.metrics.BLEU(effective_order=True)
 
     def _f(line):
+        if len(line["tgt"]) < 2:
+            return 0
         return np.average([
             metric.sentence_score(
                 text_a,
@@ -425,7 +427,7 @@ METHODS = {
 
     "kmeans": kmeans,
 
-    "metric_alignment": metric_alignment,
+    "metric_align": metric_align,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),

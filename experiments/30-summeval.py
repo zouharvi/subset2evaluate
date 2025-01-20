@@ -27,7 +27,7 @@ for method_kwargs in [
 
 for repetitions, method_kwargs in [
     (100, dict(method="random")),
-    (1, dict(method="metric_alignment", metric="supert")),
+    (1, dict(method="metric_align", metric="supert")),
     (1, dict(method="metric_avg", metric="supert")),
     (1, dict(method="metric_var", metric="supert")),
     (1, dict(method="diversity_bleu")),
@@ -67,8 +67,4 @@ print("kmeans", f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f
 # %%
 # find best metric: supert
 
-corrs = list(subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="human_sum").items())
-corrs.sort(key=lambda x: x[1], reverse=True)
-
-for metric, cor in corrs[:10]:
-    print(metric, f"COR: {cor:.1%}")
+subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="human_sum", display=True)

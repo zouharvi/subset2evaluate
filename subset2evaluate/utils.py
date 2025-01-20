@@ -440,6 +440,53 @@ def pred_irt(model_theta, item):
     raise Exception("Uknown item", item)
 
 
+def sanitize_data(data: List[Dict], top_systems=5):
+    """
+    Makes sure that all items contain the same systems.
+    """
+    import collections
+
+    system_counter = collections.Counter()
+    for line in data:
+        for system in line["scores"].keys():
+            system_counter[system] += 1
+
+    systems = {x[0] for x in system_counter.most_common(top_systems)}
+
+    # filter items that don't have these systems
+    data = [
+        line for line in data
+        if (
+            all(system in line["scores"] for system in systems) and 
+            all(system in line["tgt"] for system in systems)
+        )
+    ]
+
+    # filter systems that are not everywhere
+    systems = set(data[0]["scores"].keys())
+    for line in data:
+        systems = systems.intersection(set(line["scores"].keys()))
+    
+    # filter other systems
+    data = [
+        {
+            **line,
+            "scores": {
+                system: metrics
+                for system, metrics in line["scores"].items()
+                if system in systems
+            },
+            "tgt": {
+                system: tgt
+                for system, tgt in line["tgt"].items()
+                if system in systems
+            }
+        }
+        for line in data
+    ]
+    return data
+    
+
 def load_data(data: Union[List, str], **kwargs):
     import os
     import json
