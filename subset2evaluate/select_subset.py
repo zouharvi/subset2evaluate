@@ -3,6 +3,7 @@ import subset2evaluate.utils as utils
 import subset2evaluate.methods as methods
 import copy
 import sys
+import numbers
 
 
 def basic(
@@ -51,7 +52,7 @@ def basic(
 
     # make sure that we always return a tuple if return_model is True
     if return_model:
-        if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, float) for x in out[0]]):
+        if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, numbers.Number) for x in out[0]]):
             out, model = out
         else:
             out, model = out, None
