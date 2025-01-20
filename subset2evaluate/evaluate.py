@@ -236,6 +236,28 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
     return np.average(result)
 
 
+def eval_metrics_correlations(data: List[Dict], metric_target="human"):
+    import scipy.stats
+    metrics = set(list(data[0]["scores"].values())[0])
+    data_y = {
+        metric: [
+            line["scores"][model][metric]
+            for line in data
+            for model in data[0]["scores"].keys()
+        ]
+        for metric in metrics
+    }
+    data_y_tgt = [
+        line["scores"][model][metric_target]
+        for line in data
+        for model in data[0]["scores"].keys()
+    ]
+    return {
+        metric: scipy.stats.pearsonr(data_y[metric], data_y_tgt).correlation
+        for metric in metrics
+        if metric != metric_target
+    }
+
 def main_cli():
     import argparse
 

@@ -26,7 +26,7 @@ for method_kwargs in [
 
             data_new = subset2evaluate.select_subset.costaware(data_new_raw, B)
             clu_new = subset2evaluate.evaluate.eval_subset_clusters(data_new)
-            cor_new = subset2evaluate.evaluate.eval_subset_accuracy(data_new, data_old)
+            cor_new = subset2evaluate.evaluate.eval_subset_correlation(data_new, data_old)
 
             clu_all.append(clu_new)
             cor_all.append(cor_new)

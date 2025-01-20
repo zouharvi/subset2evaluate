@@ -21,6 +21,8 @@ accs_all = collections.defaultdict(lambda: collections.defaultdict(list))
 clus_all = collections.defaultdict(lambda: collections.defaultdict(list))
 cache_model = collections.defaultdict(lambda: None)
 
+# %%
+
 for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
     # run multiple times
     for data_old_name, data_old in tqdm.tqdm(data_old_all, desc="Language pair"):
@@ -70,6 +72,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 (True, dict(method="precomet_avg")),
                 (True, dict(method="precomet_diversity")),
                 (True, dict(method="local_precomet_diffdisc")),
+                (True, dict(method="local_precomet_ali")),
                 (False, dict(method="metric_var", metric="MetricX-23-c")),
                 (False, dict(method="metric_avg", metric="MetricX-23-c")),
                 (False, dict(method="metric_alignment", metric="MetricX-23-c")),
@@ -98,15 +101,16 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
 def method_formatter(method):
     DICT = {
         "random": "Random",
-        "precomet_var": r"PreCOMET\textsuperscript{var}",
-        "precomet_avg": r"PreCOMET\textsuperscript{avg}",
+        "precomet_var": r"MetricVar\textsuperscript{src}",
+        "precomet_avg": r"MetricAvg\textsuperscript{src}",
         "precomet_diversity": r"Diversity\textsuperscript{src}",
-        "metric_var": "MetricX-23 var.",
-        "metric_avg": "MetricX-23 avg.",
-        "metric_alignment": "MetricX-23 alignment",
+        "metric_var": "MetricVar",
+        "metric_avg": "MetricAvg",
+        "metric_alignment": "MetricAlign",
         "diversity_bleu": "Diversity",
         "pyirt_diffdisc": r"Diff.$\times$Disc.",
         "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
+        "local_precomet_ali": r"MetricAlign\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]
@@ -114,41 +118,13 @@ def method_formatter(method):
         return method
 
 
-# ACCs
-for method, subset_kv in accs_all.items():
-    print(method_formatter(method), end=" & ")
-    if method == "random" or method.startswith("precomet"):
+# print results
+for subset_size in SUBSET_SIZE:
+    for method in accs_all.keys():
+        print(method_formatter(method), end=" & ")
         print(
-            r"\multicolumn{2}{c}{",
-            "------",
-            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.1%}".replace("%", r"\%"),
-            "------",
-            "}",
-            end=" \\\\\n"
-        )
-    else:
-        print(
-            *[f"{np.average(subset_kv[subset_size]):.1%}".replace("%", r"\%") for subset_size in SUBSET_SIZE],
-            sep=" & ",
-            end=" \\\\\n"
-        )
-
-# CLUs
-print()
-for method, subset_kv in clus_all.items():
-    print(method_formatter(method), end=" & ")
-    if method == "random" or method.startswith("precomet"):
-        print(
-            r"\multicolumn{2}{c}{",
-            "------",
-            f"{np.average([np.average(subset_kv[subset_size]) for subset_size in SUBSET_SIZE]):.2f}",
-            "------",
-            "}",
-            end=" \\\\\n"
-        )
-    else:
-        print(
-            *[f"{np.average(subset_kv[subset_size]):.2f}" for subset_size in SUBSET_SIZE],
+            f"{np.average(accs_all[method][subset_size]):.1%}".replace("%", r"\%"),
+            f"{np.average(clus_all[method][subset_size]):.2f}".replace("%", r"\%"),
             sep=" & ",
             end=" \\\\\n"
         )

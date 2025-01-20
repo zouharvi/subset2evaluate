@@ -21,12 +21,12 @@ clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_v
 # %%
 
 for method_kwargs in [
-    # dict(method="metric_var", metric="MetricX-23"),
-    # dict(method="metric_avg", metric="MetricX-23"),
-    # dict(method="metric_alignment", metric="MetricX-23"),
-    # dict(method="diversity_bleu"),
-    # dict(method="pyirt_diffdisc", metric="MetricX-23"),
-    # dict(method="precomet_diversity"),
+    dict(method="metric_var", metric="MetricX-23"),
+    dict(method="metric_avg", metric="MetricX-23"),
+    dict(method="metric_alignment", metric="MetricX-23"),
+    dict(method="diversity_bleu"),
+    dict(method="pyirt_diffdisc", metric="MetricX-23"),
+    dict(method="precomet_diversity"),
     dict(method="local_precomet_diffdisc"),
 ]:
     par_clu_all = []

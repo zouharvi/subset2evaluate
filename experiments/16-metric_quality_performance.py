@@ -117,26 +117,26 @@ axs[1].plot(
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_avg"]),
-    label="metric avg.",
+    label="MetricAvg",
     linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_var"]),
-    label="metric var.",
+    label="MetricVar",
     linewidth=2,
 )
 
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["pyirt_diffdisc"]),
-    label="IRT diff.$\\times$disc.",
+    label="Diff.$\\times$Disc.",
     linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_alignment"]),
-    label="metric align.",
+    label="MetricAlign",
     linewidth=2,
 )
 
@@ -166,25 +166,25 @@ axs[0].plot(
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(accs_all["metric_avg"]),
-    label="metric avg.",
+    label="MetricAvg",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(accs_all["metric_var"]),
-    label="metric var.",
+    label="MetricVar",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(accs_all["pyirt_diffdisc"]),
-    label="IRT diff.$\\times$disc.",
+    label="Diff.$\\times$Disc.",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(accs_all["metric_alignment"]),
-    label="metric align.",
+    label="MetricAlign",
     linewidth=2,
 )
 
@@ -202,11 +202,11 @@ axs[1].legend(
     handletextpad=0.4,
     handlelength=0.8,
     labelspacing=0.2,
-    facecolor="#ccc",
+    facecolor="#ddd",
     loc="upper right",
     bbox_to_anchor=(0.8, 1.2),
     ncol=3,
-    fontsize=8,
+    fontsize=9,
 )
 plt.subplots_adjust(right=5.5)
 

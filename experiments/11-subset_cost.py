@@ -145,10 +145,10 @@ def plot(ax, title, data_x_all, data_y_all):
     ax.spines[["top", "right"]].set_visible(False)
 
 
-plot(axs[0, 0], "MetricX-23 avg.", data_x_all, data_y_all_metricx_avg)
-plot(axs[0, 1], "MetricX-23 var.", data_x_all, data_y_all_metricx_var)
+plot(axs[0, 0], "MetricAvg", data_x_all, data_y_all_metricx_avg)
+plot(axs[0, 1], "MetricVar", data_x_all, data_y_all_metricx_var)
 plot(axs[1, 0], "Diversity", data_x_all, data_y_all_irt_diversity)
-plot(axs[1, 1], "IRT diff.$\\times$disc.", data_x_all, data_y_all_irt_diffdisc)
+plot(axs[1, 1], "Diff.$\\times$Disc.", data_x_all, data_y_all_irt_diffdisc)
 
 axs[0, 0].set_ylabel("Utility")
 axs[1, 0].set_ylabel("Utility")
