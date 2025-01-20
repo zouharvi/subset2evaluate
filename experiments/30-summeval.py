@@ -14,12 +14,12 @@ for method_kwargs in [
     dict(method="pyirt_diffdisc", metric="supert"),
     dict(method="diversity_bleu"),
 ]:
-    par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
+    par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
         subset2evaluate.select_subset.basic(data_old, **method_kwargs),
         data_old,
         metric="human_sum",
     )
-    print(method_kwargs["method"], f"ACC: {par_acc:.1%} | CLU: {par_clu:.1%}")
+    print(method_kwargs["method"], f"COR: {par_cor:.1%} | CLU: {par_clu:.1%}")
 
 # %%
 # ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum", "human_mul"]

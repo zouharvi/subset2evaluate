@@ -16,7 +16,7 @@ import pickle
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
-accs_all = collections.defaultdict(list)
+cors_all = collections.defaultdict(list)
 clus_all = collections.defaultdict(list)
 corrs_all = []
 
@@ -34,7 +34,7 @@ for data_old in tqdm.tqdm(data_old_all):
     metrics.remove("human")
     print(metrics)
     for metric in tqdm.tqdm(list(metrics)):
-        try:    
+        try:
             data_y_metric = [
                 line["scores"][model][metric]
                 for line in data_old
@@ -45,32 +45,32 @@ for data_old in tqdm.tqdm(data_old_all):
             data_new_avg = subset2evaluate.select_subset.basic(data_old, method="random", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_avg, data_old)
             clus_all['random'].append(np.average(clu_new))
-            accs_all['random'].append(np.average(cor_new))
+            cors_all['random'].append(np.average(cor_new))
 
             data_new_avg = subset2evaluate.select_subset.basic(data_old, method="metric_avg", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_avg, data_old)
             clus_all['metric_avg'].append(np.average(clu_new))
-            accs_all['metric_avg'].append(np.average(cor_new))
+            cors_all['metric_avg'].append(np.average(cor_new))
 
             data_new_var = subset2evaluate.select_subset.basic(data_old, method="metric_var", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_var, data_old)
             clus_all['metric_var'].append(np.average(clu_new))
-            accs_all['metric_var'].append(np.average(cor_new))
+            cors_all['metric_var'].append(np.average(cor_new))
 
             data_new_var = subset2evaluate.select_subset.basic(data_old, method="diversity_bleu", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_var, data_old)
             clus_all['diversity_bleu'].append(np.average(clu_new))
-            accs_all['diversity_bleu'].append(np.average(cor_new))
+            cors_all['diversity_bleu'].append(np.average(cor_new))
 
             data_new_irt = subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", model="4pl_score", metric=metric, retry_on_error=True)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_irt, data_old)
             clus_all['pyirt_diffdisc'].append(np.average(clu_new))
-            accs_all['pyirt_diffdisc'].append(np.average(cor_new))
+            cors_all['pyirt_diffdisc'].append(np.average(cor_new))
 
             data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_align", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_ali, data_old)
             clus_all['metric_align'].append(np.average(clu_new))
-            accs_all['metric_align'].append(np.average(cor_new))
+            cors_all['metric_align'].append(np.average(cor_new))
 
         except Exception as e:
             print(e)
@@ -80,11 +80,12 @@ for data_old in tqdm.tqdm(data_old_all):
 # %%
 # backup
 with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
-    pickle.dump((accs_all, clus_all, corrs_all), f)
+    pickle.dump((cors_all, clus_all, corrs_all), f)
 
 # %%
 
 data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
+
 
 def aggregate_data_y(data_y):
     assert len(corrs_all) == len(data_y)
@@ -151,39 +152,39 @@ axs[1].spines[['top', 'right']].set_visible(False)
 
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["random"]),
+    aggregate_data_y(cors_all["random"]),
     label="Random",
     linewidth=2,
     color="black",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["diversity_bleu"]),
+    aggregate_data_y(cors_all["diversity_bleu"]),
     label="Diversity",
     linewidth=2,
     color="gray",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["metric_avg"]),
+    aggregate_data_y(cors_all["metric_avg"]),
     label="MetricAvg",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["metric_var"]),
+    aggregate_data_y(cors_all["metric_var"]),
     label="MetricVar",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["pyirt_diffdisc"]),
+    aggregate_data_y(cors_all["pyirt_diffdisc"]),
     label="Diff.$\\times$Disc.",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(accs_all["metric_align"]),
+    aggregate_data_y(cors_all["metric_align"]),
     label="MetricAlign",
     linewidth=2,
 )

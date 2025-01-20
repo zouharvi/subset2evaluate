@@ -3,7 +3,12 @@ import numpy as np
 import subset2evaluate.utils as utils
 
 
-def eval_clucor(data_new: List[Dict], data_old: List[Dict], metric="human", props: List[float]=utils.PROPS) -> Tuple[float, float]:
+def eval_clucor(
+        data_new: List[Dict],
+        data_old: List[Dict],
+        metric="human",
+        props: List[float] = utils.PROPS
+) -> Tuple[float, float]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
@@ -22,9 +27,9 @@ def eval_clucor_par(
         data_new: List[Dict],
         data_old: List[Dict],
         clus_tgt: List[float],
-        accs_tgt: List[float],
+        cors_tgt: List[float],
         metric="human",
-        props: List[float]=utils.PROPS,
+        props: List[float] = utils.PROPS,
         workers=10,
 ) -> Tuple[float, float]:
     """
@@ -41,10 +46,10 @@ def eval_clucor_par(
             if eval_subset_clusters(data_new[:k], metric=metric) >= clu_tgt:
                 break
         return k
-    
-    def _par_acc(data_new, data_old, acc_tgt, metric):
+
+    def _par_cor(data_new, data_old, cor_tgt, metric):
         for k in range(5, len(data_new) + 1):
-            if eval_subset_correlation(data_new[:k], data_old, metric=metric) >= acc_tgt:
+            if eval_subset_correlation(data_new[:k], data_old, metric=metric) >= cor_tgt:
                 break
         return k
 
@@ -57,13 +62,13 @@ def eval_clucor_par(
         )
         ks_clu_par = [k / (len(data_old) * prop) for k, prop in zip(ks_clu_par, props)]
 
-        ks_acc_par = pool.starmap(
-            _par_acc,
-            [(data_new, data_old, clu_tgt, metric) for prop, clu_tgt in zip(props, accs_tgt)]
+        ks_cor_par = pool.starmap(
+            _par_cor,
+            [(data_new, data_old, clu_tgt, metric) for prop, clu_tgt in zip(props, cors_tgt)]
         )
-        ks_acc_par = [k / (len(data_old) * prop) for k, prop in zip(ks_acc_par, props)]
-    
-    return np.average(ks_clu_par), np.average(ks_acc_par)
+        ks_cor_par = [k / (len(data_old) * prop) for k, prop in zip(ks_cor_par, props)]
+
+    return np.average(ks_clu_par), np.average(ks_cor_par)
 
 
 def precompute_randnorm(
@@ -75,7 +80,7 @@ def precompute_randnorm(
     import subset2evaluate.select_subset
 
     clu_random = []
-    acc_random = []
+    cor_random = []
     for seed in range(random_seeds):
         clu_new, cor_new = eval_clucor(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
@@ -83,48 +88,51 @@ def precompute_randnorm(
             metric=metric,
         )
         clu_random.append(clu_new)
-        acc_random.append(cor_new)
+        cor_random.append(cor_new)
     clu_random = np.average(clu_random, axis=0)
-    acc_random = np.average(acc_random, axis=0)
+    cor_random = np.average(cor_random, axis=0)
 
     pars_clu_rand = []
-    pars_acc_rand = []
+    pars_cor_rand = []
 
     for seed in range(random_seeds, 2*random_seeds):
-        par_clu_rand, par_acc_rand = eval_clucor_par(
+        par_clu_rand, par_cor_rand = eval_clucor_par(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             clu_random,
-            acc_random,
+            cor_random,
             metric=metric,
             workers=workers,
         )
         pars_clu_rand.append(par_clu_rand)
-        pars_acc_rand.append(par_acc_rand)
+        pars_cor_rand.append(par_cor_rand)
 
-    return (clu_random, acc_random), (np.average(pars_clu_rand), np.average(pars_acc_rand))
+    return (clu_random, cor_random), (np.average(pars_clu_rand), np.average(pars_cor_rand))
+
 
 def eval_clucor_randnorm(
     data_new: List[Dict],
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
-    clucor_precomputed = None
+    clucor_precomputed=None
 ) -> Tuple[float, float]:
 
     if clucor_precomputed is not None:
-        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = clucor_precomputed
+        (clu_random, cor_random), (clu_random_norm, cor_random_norm) = clucor_precomputed
     else:
-        (clu_random, acc_random), (clu_random_norm, acc_random_norm) = precompute_randnorm(data_old, random_seeds=random_seeds, metric=metric)
+        (clu_random, cor_random), (clu_random_norm, cor_random_norm) = precompute_randnorm(
+            data_old, random_seeds=random_seeds, metric=metric
+        )
 
     # compute the parity of the new data
-    par_clu, par_acc = eval_clucor_par(
+    par_clu, par_cor = eval_clucor_par(
         data_new, data_old,
-        clu_random, acc_random,
+        clu_random, cor_random,
         metric=metric
     )
 
-    return par_clu/clu_random_norm, par_acc/acc_random_norm
+    return par_clu/clu_random_norm, par_cor/cor_random_norm
 
 
 def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):
@@ -160,7 +168,7 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
     with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="error"):
         try:
             return scipy.stats.spearmanr(values_old, values_new).correlation
-        except:
+        except scipy.stats.ConstantInputWarning:
             return 0
 
 
@@ -190,7 +198,7 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
                 clusters.append([model_scores])
             else:
                 clusters[-1].append(model_scores)
-                
+
     return len(clusters)
 
 
@@ -273,6 +281,7 @@ def eval_metrics_correlations(data: List[Dict], metric_target="human", display=F
             print(f"{metric:<40} {cor:.1%}")
 
     return corrs
+
 
 def main_cli():
     import argparse

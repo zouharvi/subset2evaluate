@@ -18,6 +18,7 @@ _ = subset2evaluate.evaluate.eval_metrics_correlations(data_old, metric_target="
 
 # %%
 
+
 def benchmark(data_old, repetitions=1, metric_target=None, method_kwargs={}):
     clu_all = []
     cor_all = []
@@ -30,6 +31,7 @@ def benchmark(data_old, repetitions=1, metric_target=None, method_kwargs={}):
         clu_all.append(clu_new)
         cor_all.append(cor_new)
     print(f'{method_kwargs["method"]:>20}', f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")
+
 
 # %%
 data_old = subset2evaluate.utils.load_data("../../subset2evaluate-tmp/data_other/sum_newsroom.jsonl")

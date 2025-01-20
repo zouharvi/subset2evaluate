@@ -32,11 +32,11 @@ for method_kwargs in [
     par_clu_all = []
     par_cor_all = []
     for data_name, data_old in tqdm.tqdm(data_old_all):
-        par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
             data_old,
             clucor_precomputed=clucor_precomputed[data_name],
         )
         par_clu_all.append(np.average(par_clu))
-        par_cor_all.append(np.average(par_acc))
+        par_cor_all.append(np.average(par_cor))
     print(f'{method_kwargs["method"]:<15}', f"COR: {np.average(par_cor_all):.1%} | CLU: {np.average(par_clu_all):.1%}")

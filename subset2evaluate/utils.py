@@ -68,7 +68,7 @@ def ensure_wmt_exists():
         os.remove("data/mt-metrics-eval-v2.tgz")
 
 
-def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
+def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):  # noqa: C901
     import glob
     import collections
     import numpy as np
@@ -213,7 +213,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):
             for line in data:
                 # z-normalize and make mean 1
                 line["cost"] = (line["cost"] - cost_avg) / cost_std + 1
-            
+
             data_flat = [line["cost"] for line in data]
             cost_min = np.min(data_flat)
             for line in data:
@@ -260,7 +260,7 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt24", "en-ru"),
             ("wmt24", "en-uk"),
             ("wmt24", "en-zh"),
-            ("wmt24", "ja-zh"),            
+            ("wmt24", "ja-zh"),
 
             ("wmt22", "cs-en"),
             ("wmt22", "cs-uk"),
@@ -457,7 +457,7 @@ def sanitize_data(data: List[Dict], top_systems=5):
     data = [
         line for line in data
         if (
-            all(system in line["scores"] for system in systems) and 
+            all(system in line["scores"] for system in systems) and
             all(system in line["tgt"] for system in systems)
         )
     ]
@@ -466,7 +466,7 @@ def sanitize_data(data: List[Dict], top_systems=5):
     systems = set(data[0]["scores"].keys())
     for line in data:
         systems = systems.intersection(set(line["scores"].keys()))
-    
+
     # filter other systems
     data = [
         {
@@ -485,7 +485,7 @@ def sanitize_data(data: List[Dict], top_systems=5):
         for line in data
     ]
     return data
-    
+
 
 def load_data(data: Union[List, str], **kwargs):
     import os

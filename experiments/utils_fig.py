@@ -39,7 +39,8 @@ def plot_subset_selection(
     import contextlib
     import os
 
-    # either it's accuracy or clusters
+    # if there is ever a value above 1 it can't be correlation
+    # so it has to be clusters
     IS_CLUSTERS = any(
         y > 1
         for _, points_y, _ in points

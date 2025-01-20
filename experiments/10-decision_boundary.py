@@ -1,13 +1,11 @@
 import copy
 from typing import Dict
 import subset2evaluate.utils as utils
-import subset2evaluate
 import subset2evaluate.evaluate
 import utils_fig
 import random
 import numpy as np
 import tqdm
-import subset2evaluate.evaluate
 
 data_old = utils.load_data_wmt()
 for line in data_old:

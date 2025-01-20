@@ -94,11 +94,6 @@ class IRTModelBase(L.LightningModule):
             metric="human"
         )
 
-        # print(
-        # f"Metric CLU: {np.average(clu_new_metric):.2f} | ACC: {np.average(cor_new_metric):.1%} | ",
-        # f"Human  CLU: {np.average(clu_new_human):.2f} | ACC: {np.average(cor_new_human):.1%}",
-        # )
-
         self.log("cluster_count_metric", np.average(clu_new_metric))
         self.log("subset_consistency_accuracy_metric", np.average(cor_new_metric))
         self.log("cluster_count_human", np.average(clu_new_human))

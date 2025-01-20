@@ -1,6 +1,7 @@
 import numpy as np
 import subset2evaluate
 
+
 def test_wmt_loader():
     data = subset2evaluate.utils.load_data("wmt/all", min_items=400)
     assert isinstance(data, dict)

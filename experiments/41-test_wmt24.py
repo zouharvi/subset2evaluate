@@ -8,6 +8,7 @@ import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 import multiprocessing
 import collections
+import itertools
 
 data_old_all = list({
     "en-cs": utils.load_data_wmt(year="wmt24", langs="en-cs", normalize=True),
@@ -36,7 +37,6 @@ with multiprocessing.Pool(len(data_old_all)) as pool:
 clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_values))
 
 # %%
-import itertools
 
 for method_kwargs in [
     dict(method="random"),
@@ -96,18 +96,16 @@ for method_kwargs in [
         data_new = [doc for docs in itertools.zip_longest(*data_aggregated) for doc in docs]
         data_new = [line for line in data_new if line is not None]
         data_new = [line for doc_v in data_new for line in doc_v]
-        
 
-        # par_clu, par_acc = subset2evaluate.evaluate.eval_clucor_randnorm(
+        # par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
         #     subset2evaluate.select_subset.basic(data_old, **method_kwargs),
         #     data_old,
         #     clucor_precomputed=clucor_precomputed[data_name],
         # )
-        par_clu, par_acc = subset2evaluate.evaluate.eval_clucor(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor(
             data_new,
             data_old,
         )
         par_clu_all.append(np.average(par_clu))
-        par_cor_all.append(np.average(par_acc))
-    # print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.1%} | ACC: {np.average(par_cor_all):.1%}")
-    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.2f} | ACC: {np.average(par_cor_all):.1%}")
+        par_cor_all.append(np.average(par_cor))
+    print(f'{method_kwargs["method"]:<15}', f"CLU: {np.average(par_clu_all):.2f} | COR: {np.average(par_cor_all):.1%}")
