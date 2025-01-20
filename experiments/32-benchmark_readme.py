@@ -11,7 +11,7 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
         data_old_all = list(subset2evaluate.utils.load_data_wmt_all(normalize=True).values())[:9]
     elif data == "summeval":
         data_old_all = [subset2evaluate.utils.load_data(data)]
-    points_y_acc = []
+    points_y_cor = []
     points_y_clu = []
 
     for data_old in tqdm.tqdm(data_old_all):
@@ -22,10 +22,10 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
                 data_old,
                 metric=target,
             )
-            points_y_acc.append(cor_new)
+            points_y_cor.append(cor_new)
             points_y_clu.append(clu_new)
 
-    print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_acc):.1%} | {np.average(points_y_clu):.2f}")
+    print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_cor):.1%} | {np.average(points_y_clu):.2f}")
 
 
 def benchmark_method_mt(**kwargs):

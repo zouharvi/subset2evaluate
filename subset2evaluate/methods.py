@@ -31,14 +31,12 @@ def metric_align(data, metric, metric_target=None, **kwargs) -> List[float]:
     import warnings
     if metric_target is None:
         metric_target = metric
-    
+
     data_ord = subset2evaluate.evaluate.get_model_absolute(data, metric=metric_target)
     systems = data_ord.keys()
     data_ord = [data_ord[sys] for sys in systems]
 
     def _fn(item):
-
-
         sys_absolute = subset2evaluate.evaluate.get_model_absolute([item], metric=metric)
         sys_absolute = [sys_absolute[sys] for sys in systems]
         with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="ignore"):
@@ -46,19 +44,24 @@ def metric_align(data, metric, metric_target=None, **kwargs) -> List[float]:
         if np.isnan(corr):
             return 0.0
         return corr
-    
+
     return [
         _fn(x)
         for x in data
     ]
 
 
-def kmeans(data, budget, load_model=None, return_model=False, features: Literal["src", "tgt_rand", "tgt_0"]="src", **kwargs) -> List[float]:
+def kmeans(
+        data, budget,
+        load_model=None,
+        return_model=False,
+        features: Literal["src", "tgt_rand", "tgt_0"] = "src",
+        **kwargs
+) -> List[float]:
     import sklearn.cluster
     import sentence_transformers
     import warnings
     import random
-
 
     if load_model is not None:
         model_embd = load_model
@@ -74,12 +77,12 @@ def kmeans(data, budget, load_model=None, return_model=False, features: Literal[
         data_x = [list(line["tgt"].values())[0] for line in data]
     else:
         raise Exception(f"Unknown feature type: {features}")
-    
+
     data_embd = model_embd.encode(data_x)
 
     # baseline don't pick any item
     data_y = [0 for _ in data]
-    
+
     kmeans = sklearn.cluster.KMeans(n_clusters=budget, random_state=0).fit(data_embd)
     data_new = []
     # get closest to cluster center
@@ -120,13 +123,20 @@ def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
         return item_irt["feas"]
 
 
-def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", dropout=0.25, epochs=1000, enforce_positive_disc=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
+def pyirt(  # noqa: C901
+        data, metric,
+        return_model=False,
+        load_model=None,
+        model="4pl_score",
+        dropout=0.25, epochs=1000,
+        enforce_positive_disc=False,
+        **kwargs
+) -> Union[List[float], Tuple[List[float], Any]]:
     try:
         import py_irt
-    except ImportError as e:
+    except ImportError:
         raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
-    
-    import py_irt
+
     import py_irt.config
     import py_irt.dataset
     import py_irt.io
@@ -134,7 +144,6 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
     import py_irt.models
     import py_irt.models.abstract_model
     import pandas as pd
-
 
     if model not in py_irt.models.abstract_model._IRT_REGISTRY:
         raise Exception("Please install py-irt with `pip install git+https://github.com/zouharvi/py-irt.git")
@@ -254,10 +263,9 @@ def pyirt(data, metric, return_model=False, load_model=None, model="4pl_score", 
 def _assert_comet_version():
     try:
         import comet
-    except ImportError as e:
+    except ImportError:
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
 
-    import comet
     if "HypothesislessRegression" not in dir(comet.models):
         raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
 
@@ -287,7 +295,7 @@ def precomet(data, model_path, return_model=False, load_model=None, reverse=Fals
         ], progress_bar=False).scores
         if reverse:
             scores = [-x for x in scores]
-    
+
     logging.disable(logging.NOTSET)
     if prev_tqdm_setting is not None:
         os.environ["TQDM_DISABLE"] = prev_tqdm_setting
@@ -338,7 +346,7 @@ def precomet_dual(data, model_path1, model_path2, return_model=False, load_model
         scores = [-s1 * s2 for s1, s2 in zip(scores1, scores2)]
     else:
         scores = [s1 * s2 for s1, s2 in zip(scores1, scores2)]
-    
+
     logging.disable(logging.NOTSET)
     if tqdm_disable_prev is not None:
         os.environ["TQDM_DISABLE"] = tqdm_disable_prev

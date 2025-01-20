@@ -10,7 +10,7 @@ import subset2evaluate.evaluate
 
 data_old_all = list(utils.load_data_wmt_all().values())[:9]
 
-points_y_acc = collections.defaultdict(list)
+points_y_cor = collections.defaultdict(list)
 points_y_clu = collections.defaultdict(list)
 
 
@@ -26,14 +26,14 @@ for data_old in tqdm.tqdm(data_old_all):
                 data_old,
                 metric="human",
             )
-            points_y_acc[method_kwargs["method"]].append(cor_new)
+            points_y_cor[method_kwargs["method"]].append(cor_new)
             points_y_clu[method_kwargs["method"]].append(clu_new)
 
 # %%
 
-points_y_acc = {
+points_y_cor = {
     k: np.average(np.array(v), axis=0)
-    for k, v in points_y_acc.items()
+    for k, v in points_y_cor.items()
 }
 points_y_clu = {
     k: np.average(np.array(v), axis=0)
@@ -43,9 +43,9 @@ points_y_clu = {
 # %%
 utils_fig.plot_subset_selection(
     points=[
-        (utils.PROPS, points_y_acc["random"], f"Random {np.average(points_y_acc['random']):.1%}"),
-        (utils.PROPS, points_y_acc["metric_avg"], f"MetricAvg {np.average(points_y_acc['metric_avg']):.1%}"),
-        (utils.PROPS, points_y_acc["metric_var"], f"MetricVar {np.average(points_y_acc['metric_var']):.1%}"),
+        (utils.PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
+        (utils.PROPS, points_y_cor["metric_avg"], f"MetricAvg {np.average(points_y_cor['metric_avg']):.1%}"),
+        (utils.PROPS, points_y_cor["metric_var"], f"MetricVar {np.average(points_y_cor['metric_var']):.1%}"),
     ],
     colors=["black"] + utils_fig.COLORS,
     filename="13-main_outputbased_metrics_moment",

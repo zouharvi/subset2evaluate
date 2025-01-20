@@ -13,7 +13,7 @@ points_y_cor_all = []
 points_y_clu_all = []
 
 for data_old in tqdm.tqdm(data_old_all):
-    points_y_acc = []
+    points_y_cor = []
     points_y_clu = []
 
     # repeat each sampling 100 times to smooth it out
@@ -23,22 +23,22 @@ for data_old in tqdm.tqdm(data_old_all):
             data_old,
             metric="human"
         )
-        points_y_acc.append(cor_new)
+        points_y_cor.append(cor_new)
         points_y_clu.append(clu_new)
 
-    points_y_cor_all.append(np.average(points_y_acc, axis=0))
+    points_y_cor_all.append(np.average(points_y_cor, axis=0))
     points_y_clu_all.append(np.average(points_y_clu, axis=0))
 
-print(f"Average ACC {np.average(points_y_acc):.1%}")
+print(f"Average COR {np.average(points_y_cor):.1%}")
 print(f"Average CLU {np.average(points_y_clu):.2f}")
 
 
 # %%
-def plot_extra_acc(ax):
-    for points_y_acc in points_y_cor_all:
+def plot_extra_cor(ax):
+    for points_y_cor in points_y_cor_all:
         ax.plot(
-            utils.PROPS,
-            points_y_acc,
+            range(len(utils.PROPS)),
+            points_y_cor,
             marker=None,
             color="black",
             linewidth=1,
@@ -49,7 +49,7 @@ def plot_extra_acc(ax):
 def plot_extra_clu(ax):
     for points_y_clu in points_y_clu_all:
         ax.plot(
-            utils.PROPS,
+            range(len(utils.PROPS)),
             points_y_clu,
             marker=None,
             color="black",
@@ -59,12 +59,12 @@ def plot_extra_clu(ax):
 
 
 utils_fig.plot_subset_selection(
-    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_acc).T], f"Random {np.average(points_y_acc):.1%}")],
+    points=[(utils.PROPS, np.average(points_y_cor, axis=0), f"Random {np.average(points_y_cor):.1%}")],
     filename="07-random_subset",
-    fn_extra=plot_extra_acc,
+    fn_extra=plot_extra_cor,
 )
 utils_fig.plot_subset_selection(
-    points=[(utils.PROPS, [np.average(l) for l in np.array(points_y_clu).T], f"Random {np.average(points_y_clu):.2f}")],
+    points=[(utils.PROPS, np.average(points_y_clu, axis=0), f"Random {np.average(points_y_clu):.2f}")],
     filename="07-random_subset",
     fn_extra=plot_extra_clu,
 )

@@ -1,7 +1,6 @@
 # used for fellowhsip application
 
 import subset2evaluate
-import subset2evaluate.utils as utils
 import utils_fig
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,14 +21,14 @@ points_x = np.linspace(theta_min - 0.4, theta_max + 0.4, 100)
 
 points_y_pred_d0 = [
     np.average([
-        utils.pred_irt(data_irt_d0["models"][model], item)
+        subset2evaluate.utils.pred_irt(data_irt_d0["models"][model], item)
         for item in data_irt_d0["items"]
     ])
     for model in models
 ]
 points_y_pred_d1 = [
     np.average([
-        utils.pred_irt(data_irt_d1["models"][model], item)
+        subset2evaluate.utils.pred_irt(data_irt_d1["models"][model], item)
         for item in data_irt_d1["items"]
     ])
     for model in models
@@ -39,14 +38,14 @@ points_y_pred_d1 = [
 plt.plot(
     [
         np.average([
-            utils.pred_irt(theta, item)
+            subset2evaluate.utils.pred_irt(theta, item)
             for item in data_irt_d0["items"]
         ])
         for theta in points_x
     ],
     [
         np.average([
-            utils.pred_irt(theta, item)
+            subset2evaluate.utils.pred_irt(theta, item)
             for item in data_irt_d1["items"]
         ])
         for theta in points_x

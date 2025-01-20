@@ -20,7 +20,7 @@ for data_old in tqdm.tqdm(data_old_all):
         data_aggregated = collections.defaultdict(list)
         for line in data_scored:
             data_aggregated[line["domain"]].append(line)
-        
+
         # sort within each domain by utility
         data_aggregated = [
             sorted(domain, key=lambda x: x["subset2evaluate_utility"], reverse=True)
@@ -34,7 +34,7 @@ for data_old in tqdm.tqdm(data_old_all):
         data_new_flat = [line for line in data_new_flat if line is not None]
         clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(cor_new)
-    
+
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
         (1, dict(method="metric_avg", metric="MetricX-23")),

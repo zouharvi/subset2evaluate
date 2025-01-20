@@ -36,7 +36,7 @@ for data_old in tqdm.tqdm(data_old_all):
         ]
         clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(cor_new)
-    
+
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
         (1, dict(method="metric_avg", metric="MetricX-23")),

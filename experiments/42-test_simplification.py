@@ -2,11 +2,12 @@
 
 import collections
 import csv
-import json
 import numpy as np
 import evaluate
 import subset2evaluate.evaluate
 import subset2evaluate.utils
+import tqdm
+import subset2evaluate
 
 with open("../data/other/simpeval_past.csv", "r") as f:
     data_raw = list(csv.DictReader(f))
@@ -83,7 +84,6 @@ data = [
     for v in data.values()
 ]
 
-import tqdm
 sari = evaluate.load("sari")
 for line in tqdm.tqdm(data):
     line["ref1"] = line["tgt"].pop("Human 1 Writing")
@@ -101,48 +101,46 @@ for line in data:
         scores["human_sum"] = scores["human_adequacy"] + scores["human_fluency"] + scores["human_simplicity"]
         scores["human_mul"] = scores["human_adequacy"] * scores["human_fluency"] * scores["human_simplicity"]
 # %%
-import subset2evaluate
-import tqdm
 
 props = [0.25, 0.5, 0.75]
 
 clus_new_sum = []
-accs_new_sum = []
+corss_new_sum = []
 clus_new_mul = []
-accs_new_mul = []
+cors_new_mul = []
 for _ in tqdm.tqdm(range(1000)):
     data_new = subset2evaluate.select_subset.basic(data, method="random")
     clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human", props=props)
     clus_new_sum.append(np.average(clu_new))
-    accs_new_sum.append(np.average(cor_new))
+    corss_new_sum.append(np.average(cor_new))
     clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_zscore", props=props)
     clus_new_mul.append(np.average(clu_new))
-    accs_new_mul.append(np.average(cor_new))
+    cors_new_mul.append(np.average(cor_new))
 
-print(f"sum | CLU: {np.average(clus_new_sum):.2f} | ACC: {np.average(accs_new_sum):.1%}")
-print(f"mul | CLU: {np.average(clus_new_mul):.2f} | ACC: {np.average(accs_new_mul):.1%}")
+print(f"sum | CLU: {np.average(clus_new_sum):.2f} | COR: {np.average(corss_new_sum):.1%}")
+print(f"mul | CLU: {np.average(clus_new_mul):.2f} | COR: {np.average(cors_new_mul):.1%}")
 
 # %%
 data_new = subset2evaluate.select_subset.basic(data, method="diversity_bleu")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human", props=props)
-print(f"sum | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"sum | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_zscore", props=props)
-print(f"mul | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"mul | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 
 data_new = subset2evaluate.select_subset.basic(data, method="diversity_chrf")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human", props=props)
-print(f"sum | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"sum | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_zscore", props=props)
-print(f"mul | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"mul | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 # %%
 data_new = subset2evaluate.select_subset.basic(data, method="metric_var", metric="sari")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_sum", props=props)
-print(f"sum | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"sum | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_zscore", props=props)
-print(f"mul | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"mul | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 
 data_new = subset2evaluate.select_subset.basic(data, method="metric_avg", metric="sari")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_sum", props=props)
-print(f"sum | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"sum | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")
 clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data, metric="human_zscore", props=props)
-print(f"mul | CLU: {np.average(clu_new):.2f} | ACC: {np.average(cor_new):.1%}")
+print(f"mul | CLU: {np.average(clu_new):.2f} | COR: {np.average(cor_new):.1%}")

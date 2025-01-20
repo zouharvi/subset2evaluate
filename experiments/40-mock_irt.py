@@ -83,7 +83,7 @@ axs[1, 0].annotate(
 item = {"diff": 0.0, "disc": 1.0, "feas": 0.8}
 plot_item(axs[1, 1], item)
 axs[1, 1].annotate(
-"Low feasibility ($c_s$)\nprevents any model from\never getting the full score.",
+    "Low feasibility ($c_s$)\nprevents any model from\never getting the full score.",
     xy=(models[1], pred_irt(models[1], item)),
     xytext=(4.8, 0.2),
     arrowprops=dict(arrowstyle="->", color=utils_fig.COLORS[0]),

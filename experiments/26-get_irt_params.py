@@ -31,7 +31,7 @@ for _ in tqdm.tqdm(range(5)):
 
 def average_irt_params(data_train):
     # the old data (e.g. line src) is the same everywhere
-    data_new = [l for l in data_train[0]]
+    data_new = data_train[0]
     irt_params = [collections.defaultdict(list) for _ in data_train]
     for i in range(len(data_train)):
         for data in data_train:

@@ -49,7 +49,6 @@ def basic(
     else:
         out = out_fn()
 
-
     # make sure that we always return a tuple if return_model is True
     if return_model:
         if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, numbers.Number) for x in out[0]]):
@@ -68,7 +67,7 @@ def basic(
         return data, model
     else:
         return data
-    
+
 
 def costaware(
     data: Union[List, str],

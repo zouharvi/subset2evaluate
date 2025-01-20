@@ -17,7 +17,7 @@ print([len(data_old[0]["scores"]) for data_old_name, data_old in data_old_all])
 SUBSET_SIZE = [4]
 
 # %%
-accs_all = collections.defaultdict(lambda: collections.defaultdict(list))
+cors_all = collections.defaultdict(lambda: collections.defaultdict(list))
 clus_all = collections.defaultdict(lambda: collections.defaultdict(list))
 cache_model = collections.defaultdict(lambda: None)
 
@@ -94,7 +94,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                     metric="human"
                 )
                 clus_all[method_kwargs["method"]][subset_size].append(clu_new)
-                accs_all[method_kwargs["method"]][subset_size].append(cor_new)
+                cors_all[method_kwargs["method"]][subset_size].append(cor_new)
 
 
 # %%
@@ -120,10 +120,10 @@ def method_formatter(method):
 
 # print results
 for subset_size in SUBSET_SIZE:
-    for method in accs_all.keys():
+    for method in cors_all.keys():
         print(method_formatter(method), end=" & ")
         print(
-            f"{np.average(accs_all[method][subset_size]):.1%}".replace("%", r"\%"),
+            f"{np.average(cors_all[method][subset_size]):.1%}".replace("%", r"\%"),
             f"{np.average(clus_all[method][subset_size]):.2f}".replace("%", r"\%"),
             sep=" & ",
             end=" \\\\\n"

@@ -20,7 +20,7 @@ for method_kwargs in [
     cor_all = []
     for data_old in tqdm.tqdm(data_old_all):
         data_new_raw = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
-        
+
         for prop in subset2evaluate.utils.PROPS:
             B = int(prop * len(data_old))
 
