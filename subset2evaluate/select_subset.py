@@ -48,9 +48,10 @@ def basic(
     else:
         out = out_fn()
 
+
     # make sure that we always return a tuple if return_model is True
     if return_model:
-        if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, dict) for x in out[0]]):
+        if len(out) == 2 and isinstance(out[0], list) and all([isinstance(x, float) for x in out[0]]):
             out, model = out
         else:
             out, model = out, None

@@ -133,6 +133,12 @@ axs[1].plot(
     label="IRT diff.$\\times$disc.",
     linewidth=2,
 )
+axs[1].plot(
+    data_x[:-1],
+    aggregate_data_y(clus_all["metric_alignment"]),
+    label="metric align.",
+    linewidth=2,
+)
 
 axs[1].set_ylabel("Number of clusters", labelpad=-1)
 axs[1].set_xticks(
@@ -169,15 +175,20 @@ axs[0].plot(
     label="metric var.",
     linewidth=2,
 )
-
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(accs_all["pyirt_diffdisc"]),
     label="IRT diff.$\\times$disc.",
     linewidth=2,
 )
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(accs_all["metric_alignment"]),
+    label="metric align.",
+    linewidth=2,
+)
 
-axs[0].set_ylabel("Pairwise accuracy", labelpad=-1)
+axs[0].set_ylabel("Rank correlation", labelpad=-1)
 axs[0].set_xticks(
     data_x[:-1],
     [f"{x+0.1:.2f}"[:3] for x in data_x[:-1]],
@@ -200,6 +211,6 @@ axs[1].legend(
 plt.subplots_adjust(right=5.5)
 
 
-plt.tight_layout()
+plt.tight_layout(pad=0)
 plt.savefig("../figures_pdf/16-metric_quality_performance.pdf")
 plt.show()
