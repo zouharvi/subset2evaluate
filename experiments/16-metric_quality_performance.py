@@ -110,13 +110,6 @@ axs[1].plot(
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["diversity_bleu"]),
-    label="Diversity",
-    linewidth=2,
-    color="gray",
-)
-axs[1].plot(
-    data_x[:-1],
     aggregate_data_y(clus_all["metric_avg"]),
     label="MetricAvg",
     linewidth=2,
@@ -127,17 +120,22 @@ axs[1].plot(
     label="MetricVar",
     linewidth=2,
 )
-
-axs[1].plot(
-    data_x[:-1],
-    aggregate_data_y(clus_all["pyirt_diffdisc"]),
-    label="Diff.$\\times$Disc.",
-    linewidth=2,
-)
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_align"]),
     label="MetricAlign",
+    linewidth=2,
+)
+axs[1].plot(
+    data_x[:-1],
+    aggregate_data_y(clus_all["diversity_bleu"]),
+    label="Diversity",
+    linewidth=2,
+)
+axs[1].plot(
+    data_x[:-1],
+    aggregate_data_y(clus_all["pyirt_diffdisc"]),
+    label="Diff.$\\times$Disc.",
     linewidth=2,
 )
 
@@ -159,13 +157,6 @@ axs[0].plot(
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["diversity_bleu"]),
-    label="Diversity",
-    linewidth=2,
-    color="gray",
-)
-axs[0].plot(
-    data_x[:-1],
     aggregate_data_y(cors_all["metric_avg"]),
     label="MetricAvg",
     linewidth=2,
@@ -178,14 +169,20 @@ axs[0].plot(
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["pyirt_diffdisc"]),
-    label="Diff.$\\times$Disc.",
+    aggregate_data_y(cors_all["metric_align"]),
+    label="MetricAlign",
     linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["metric_align"]),
-    label="MetricAlign",
+    aggregate_data_y(cors_all["diversity_bleu"]),
+    label="Diversity",
+    linewidth=2,
+)
+axs[0].plot(
+    data_x[:-1],
+    aggregate_data_y(cors_all["pyirt_diffdisc"]),
+    label="Diff.$\\times$Disc.",
     linewidth=2,
 )
 
@@ -212,6 +209,6 @@ axs[1].legend(
 plt.subplots_adjust(right=5.5)
 
 
-plt.tight_layout(pad=0)
+plt.tight_layout(pad=0.1)
 plt.savefig("../figures_pdf/16-metric_quality_performance.pdf")
 plt.show()

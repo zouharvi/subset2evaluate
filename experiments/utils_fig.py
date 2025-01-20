@@ -124,7 +124,6 @@ def plot_subset_selection(
     plt.show()
 
 
-Color = str
 def plot_subset_selection_tall(
         points: List[Tuple[List, List, Text]],
         filename=None,
@@ -159,11 +158,12 @@ def plot_subset_selection_tall(
             color=color,
             label=label,
             clip_on=True,
-            linewidth=2,
+            linewidth=1.5,
         )
-        label_clean = label.replace("%", "\\%")
+        label_clean = " ".join(label.split(" ")[:-1])
+        label_result_clean = label.split(" ")[-1].replace("%", "\\%")
         color_clean = color.replace("#", "")
-        tex_out += f"\n\\legend{{{color_clean}}}{{{label_clean}}}"
+        tex_out += f"\n\\legend{{{color_clean}}}{{{label_clean}}}{{{label_result_clean}}}"
         if i != 0 and i % 2 == 1:
             tex_out += r"\\"
     tex_out += "\n"
@@ -184,16 +184,6 @@ def plot_subset_selection_tall(
     # ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
     if not IS_CLUSTERS:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-
-    plt.legend(
-        loc="lower right",
-        handletextpad=0.2,
-        handlelength=1,
-        labelspacing=0.2,
-        facecolor="#ddd",
-        framealpha=0.9,
-        scatteryoffsets=[0.5] * len(points),
-    )
 
     if IS_CLUSTERS:
         plt.ylim(1.2, 5.0)
