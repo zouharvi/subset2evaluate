@@ -29,7 +29,7 @@ def test_wmt_method_metric_var():
 
 
 def test_wmt_method_diversity():
-    data_new = subset2evaluate.select_subset.basic("wmt23/en-de", method="diversity_bleu")
+    data_new = subset2evaluate.select_subset.basic("wmt23/en-de", method="diversity", metric="BLEU")
     clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "wmt23/en-de", metric="human")
     assert abs(np.average(clu_new) - 2.3000) < 0.01
     assert abs(np.average(cor_new) - 0.9328) < 0.01
@@ -60,7 +60,7 @@ def test_summeval_method_metric_var():
 
 
 def test_summeval_method_diversity():
-    data_new = subset2evaluate.select_subset.basic("summeval", method="diversity_bleu")
+    data_new = subset2evaluate.select_subset.basic("summeval", method="diversity", metric="BLEU")
     clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "summeval", metric="human_sum")
     # it is a bit different on GitHub actions, therefore higher error margin
     assert abs(np.average(clu_new) - 2.6000) < 0.2

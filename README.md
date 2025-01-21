@@ -7,8 +7,8 @@ It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém
 > Human evaluation for language generation is the gold-standard but expensive.
 > To fit the budgetary constraints, often only a random subset of the test set is chosen for evaluation.
 > The random selection is grossly inefficient and in this work we formalize the task of selecting most informative items for evaluation.
-> We show that methods based on variance in automated metric scores or diversity in modeloutputs, outperform the commonly used, yet inefficient, random selection.
-> However, these methods are not applicable for test set creation where the modeloutputs are not yet available.
+> We show that methods based on variance in automated metric scores or diversity in model outputs, outperform the commonly used, yet inefficient, random selection.
+> However, these methods are not applicable for test set creation where the model outputs are not yet available.
 > This is applicable to blind test set creation or for selecting from a very large set of items.
 > To this end, we introduce PreCOMET which predicts item usefulness for human evaluation just based on the input alone.
 > We demonstrate the efficacy of our methods on two common language generations tasks, machine translation and summarization.
@@ -25,39 +25,44 @@ General recommendations based on MT evaluation:
 | When to use? | What is it? | How to use? |
 |-|-|-|
 | Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="metric_var", metric="MetricX-23"` |
-| Metric not available but modeloutputs available. | Diversity of mmodelutputs. | `method="diversity_bleu"` |
-| Model outputs not available, only sources. | Estimated diversity in modeloutputs. | `method="precomet_diversity"` |
+| Metric not available but model outputs available. | Diversity of model outputs. | `method="diversity", method="BLEU"` |
+| Model outputs not available, only sources. | Estimated diversity in model outputs. | `method="precomet_diversity"` |
 
 The package supports multiple methods.
-We show benchmark of the methods on machine translation evaluation:
+We show benchmark of the methods on machine translation evaluation.
+For the metric-based methods, the results use MetricX-23 but others can be easily used if supplied in the input data.
 
-| Method | Requirements | Accuracy | Cluster count |
-|-|-|-|-|
-| Random | | 91.0% | 2.25 |
+| Method | Name in package | Requirements | Correlation | Clusters |
+|-|-|-|-|-|
+| Random | `random` | | 92.5% | 2.25
 | **Output-based selection** |
-| MetricX-23 var | MetricX-23 scores | 92.0% | 3.22 |
-| MetricX-23 avg | MetricX-23 scores | 91.8% | 3.16 |
-| Diversity BLEU | Outputs | 92.1% | 2.99 |
-| Diversity unigram | Outputs | 91.1% | 2.62 |
-| IRT diff.×disc. | MetricX-23 scores | 91.2% | 3.14 |
+| Metric variance | `method="metric_var", metric="MetricX-23"` | Metric scores | 93.8% | 3.22
+| Metric average | `method="metric_avg", metric="MetricX-23"` | Metric scores | 92.9% | 3.16 |
+| Metric consistency | `method="metric_cons", metric="MetricX-23"` | Metric scores | 94.2% | 3.24 |
+| Diversity BLEU | `method="diversity", metric="BLEU"` | Outputs | 94.0% | 2.99 |
+| Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 92.5% | 2.62 |
+| DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
 | **Source-based selection** |
-| PreCOMET var [model](https://huggingface.co/zouharvi/PreCOMET-var) | Sources | 91.2% | 2.58 |
-| PreCOMET avg [model](https://huggingface.co/zouharvi/PreCOMET-avg) | Sources | 91.1% | 2.68 |
-| PreCOMET diversity [[model](https://huggingface.co/zouharvi/PreCOMET-diversity)] | Sources | 92.1% | 2.86 |
-| PreCOMET diff.×disc. [[model1](https://huggingface.co/zouharvi/PreCOMET-diff), [model2](https://huggingface.co/zouharvi/PreCOMET-disc)] | Sources | 93.1% | 3.22 |
+| Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
+| Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-avg) | `method="precomet_avg"` | Sources | 92.2% | 2.68 |
+| Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-diversity) | `method="precomet_diversity"` | Sources | 94.0% | 2.86 |
+| DiffDisc<sup>SRC</sup> [model](TODO) | `method="precomet_diffdisc"` | Sources | 93.4% | 2.98 |
+| Consistency<sup>SRC</sup> [model](TODO) | `method="precomet_cons"` | Sources | 93.8% | 2.77 |
 
 
-And benchmark of the methods for summarization:
+And benchmark of the methods for summarization.
+For metric-based methods we use coverage but others can be easily used if supplied in the input data.
 
-| Method | Requirements | Accuracy | Cluster count |
-|-|-|-|-|
-| Random | | 90.5% | 2.00 |
+| Method | Call signature | Requirements | Correlation | Clusters |
+|-|-|-|-|-|
+| Random | `method="random"` | | 93.5% | 2.14 |
 | **Output-based selection** |
-| Coverage var | Coverage scores | 92.2% | 2.30 |
-| Coverage avg | Coverage scores | 91.8% | 2.20 |
-| IRT diff.×disc. | Coverage scores | 92.6% | 2.44 |
-| Diversity BLEU | Outputs | 89.3% | 2.90 |
-| Diversity unigram | Outputs | 87.2% | 2.80 |
+| Metric variance | `method="metric_var", metric="Coverage"` | Metric scores | 96.8% | 2.50 |
+| Metric average | `method="metric_avg", metric="Coverage"` | Metric scores | 95.7% | 2.30 |
+| Metric consistency | `method="metric_cons", metric="Coverage"` | Metric scores | 96.4% | 2.00 |
+| DiffDisc | `method="pyirt_diffdisc", metric="Coverage"` | Metric scores | 92.8% | 2.02 |
+| Diversity BLEU | `method="diversity", metric="BLEU"` | Outputs | 93.6% | 2.60 |
+| Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 91.4% | 2.70 |
 
 ## Example for Machine Translation
 
@@ -101,7 +106,7 @@ data_new = subset2evaluate.select_subset.basic(data_full, method="random")
 subset2evaluate.evaluate.eval_subset_clusters(data_new[:25], metric="human_relevance")
 > 2
 
-data_new = subset2evaluate.select_subset.basic(data_full, method="diversity_bleu")
+data_new = subset2evaluate.select_subset.basic(data_full, method="diversity", metric="BLEU")
 subset2evaluate.evaluate.eval_subset_clusters(data_new[:25], metric="human_relevance")
 > 3
 ```
@@ -175,10 +180,10 @@ json.dumps(data[0], indent=2)
 We recommend using the Python interface but the package can also be used from the command line:
 
 ```
-subset2evaluate wmt23/en-cs --method metric_var --args "{'metric': 'MetricX-23'}" > wmt23_encs_sorted.jsonl
-subset2evaluate-eval wmt23/en-cs wmt23_encs_sorted.jsonl 
-> Clusters: 2.30
-> Accuracy: 86.7%
+subset2evaluate wmt23/en-de --method metric_var --args "{'metric': 'MetricX-23'}" > wmt23_ende_sorted.jsonl
+subset2evaluate-eval wmt23/en-de wmt23_ende_sorted.jsonl 
+> Correlation: 87.1%
+> Clusters: 2.70
 ```
 
 ## Advanced Usage

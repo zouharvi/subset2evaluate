@@ -39,8 +39,8 @@ for data_old in tqdm.tqdm(data_old_all):
         (100, dict(method="random")),
         (1, dict(method="metric_avg", metric="MetricX-23")),
         (1, dict(method="metric_var", metric="MetricX-23")),
-        (1, dict(method="diversity_bleu")),
-        (1, dict(method="metric_align", metric="MetricX-23")),
+        (1, dict(method="diversity", metric="BLEU")),
+        (1, dict(method="metric_cons", metric="MetricX-23")),
         (5, dict(method="pyirt_diffdisc", metric="MetricX-23", model="4pl_score", epochs=1000, retry_on_error=True)),
     ]:
         data_y = subset2evaluate.select_subset.basic(data_old, **method_kwargs)

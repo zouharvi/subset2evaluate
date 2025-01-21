@@ -22,7 +22,7 @@ MODELS = {
         "precomet_var",
         "local_precomet_diffdisc",
         "precomet_diversity",
-        "local_precomet_ali",
+        "local_precomet_cons",
     ]
 }
 MODELS["random"] = None
@@ -33,7 +33,7 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
         (1, "precomet_var"),
         (1, "local_precomet_diffdisc"),
         (1, "precomet_diversity"),
-        (1, "local_precomet_ali"),
+        (1, "local_precomet_cons"),
         (100, "random"),
     ]:
         for _ in range(repetitions):
@@ -53,8 +53,8 @@ points_y_clu = {
 }
 
 # %%
-points_y_cor["precomet_ali"] = points_y_cor["local_precomet_ali"]
-points_y_clu["precomet_ali"] = points_y_clu["local_precomet_ali"]
+points_y_cor["precomet_cons"] = points_y_cor["local_precomet_cons"]
+points_y_clu["precomet_cons"] = points_y_clu["local_precomet_cons"]
 points_y_cor["precomet_diffdisc"] = points_y_cor["local_precomet_diffdisc"]
 points_y_clu["precomet_diffdisc"] = points_y_clu["local_precomet_diffdisc"]
 
@@ -63,7 +63,7 @@ utils_fig.plot_subset_selection(
         (utils.PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
         (utils.PROPS, points_y_cor["precomet_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_avg']):.1%}"),
         (utils.PROPS, points_y_cor["precomet_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_var']):.1%}"),
-        (utils.PROPS, points_y_cor['precomet_ali'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_ali']):.1%}"),
+        (utils.PROPS, points_y_cor['precomet_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_cons']):.1%}"),
         (utils.PROPS, points_y_cor['precomet_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_diversity']):.1%}"),
         (utils.PROPS, points_y_cor['precomet_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_diffdisc']):.1%}"),
     ],
@@ -75,7 +75,7 @@ utils_fig.plot_subset_selection(
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_avg']):.2f}"),
         (utils.PROPS, points_y_clu["precomet_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_var']):.2f}"),
-        (utils.PROPS, points_y_clu['precomet_ali'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_ali']):.2f}"),
+        (utils.PROPS, points_y_clu['precomet_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_cons']):.2f}"),
         (utils.PROPS, points_y_clu['precomet_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_diversity']):.2f}"),
         (utils.PROPS, points_y_clu['precomet_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_diffdisc']):.2f}"),
     ],

@@ -72,11 +72,11 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 (True, dict(method="precomet_avg")),
                 (True, dict(method="precomet_diversity")),
                 (True, dict(method="local_precomet_diffdisc")),
-                (True, dict(method="local_precomet_ali")),
+                (True, dict(method="local_precomet_cons")),
                 (False, dict(method="metric_var", metric="MetricX-23-c")),
                 (False, dict(method="metric_avg", metric="MetricX-23-c")),
-                (False, dict(method="metric_align", metric="MetricX-23-c")),
-                (False, dict(method="diversity_bleu")),
+                (False, dict(method="metric_cons", metric="MetricX-23-c")),
+                (False, dict(method="diversity", method="BLEU")),
                 (False, dict(method="pyirt_diffdisc", model="4pl_score", metric="MetricX-23-c")),
             ]:
                 data_new, load_model = subset2evaluate.select_subset.basic(
@@ -106,11 +106,11 @@ def method_formatter(method):
         "precomet_diversity": r"Diversity\textsuperscript{src}",
         "metric_var": "MetricVar",
         "metric_avg": "MetricAvg",
-        "metric_align": "MetricCons",
-        "diversity_bleu": "Diversity",
+        "metric_cons": "MetricCons",
+        "diversity": "Diversity",
         "pyirt_diffdisc": r"Diff.$\times$Disc.",
         "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
-        "local_precomet_ali": r"MetricCons\textsuperscript{src}",
+        "local_precomet_cons": r"MetricCons\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]

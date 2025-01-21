@@ -52,6 +52,6 @@ def benchmark_method_all(repetitions=10, kwargs_dict={}):
 benchmark_method_all(repetitions=10, kwargs_dict={"method": "random"})
 
 # %%
-benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_align", "metric": "MetricX-23"})
+benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_cons", "metric": "MetricX-23"})
 benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_var", "metric": "MetricX-23"})
 benchmark_method_all(repetitions=1, kwargs_dict={"method": "metric_avg", "metric": "MetricX-23"})

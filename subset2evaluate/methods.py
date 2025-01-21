@@ -26,7 +26,7 @@ def metric_var(data, metric, **kwargs) -> List[float]:
     ]
 
 
-def metric_align(data, metric, metric_target=None, **kwargs) -> List[float]:
+def metric_consistency(data, metric, metric_target=None, **kwargs) -> List[float]:
     import scipy.stats
     import warnings
     if metric_target is None:
@@ -425,17 +425,25 @@ def diversity_chrf(data, **kwargs) -> List[float]:
     ]
 
 
+def diversity(data, metric, **kwargs) -> List[float]:
+    if metric.lower() == "bleu":
+        return diversity_bleu(data, **kwargs)
+    elif metric.lower() == "chrf":
+        return diversity_chrf(data, **kwargs)
+    elif metric.lower() == "unigram":
+        return diversity_unigram(data, **kwargs)
+    else:
+        raise Exception(f"Unknown diversity metric: {metric}")
+
 METHODS = {
     "random": random_subset,
     "metric_avg": metric_avg,
     "metric_var": metric_var,
-    "diversity_bleu": diversity_bleu,
-    "diversity_chrf": diversity_chrf,
-    "diversity_unigram": diversity_unigram,
+    "metric_cons": metric_consistency,
+    
+    "diversity": diversity,
 
     "kmeans": kmeans,
-
-    "metric_align": metric_align,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),
@@ -445,7 +453,6 @@ METHODS = {
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
     "precomet": partial(precomet, reverse=False),
-
     "precomet_var": partial(precomet, model_path="zouharvi/PreCOMET-var", reverse=True),
     "precomet_avg": partial(precomet, model_path="zouharvi/PreCOMET-avg", reverse=True),
     "precomet_diversity": partial(precomet, model_path="zouharvi/PreCOMET-diversity", reverse=True),
@@ -460,6 +467,6 @@ METHODS = {
         reverse=False,
     ),
 
-    "local_precomet_ali": partial(precomet, model_path="../../PreCOMET/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
+    "local_precomet_cons": partial(precomet, model_path="../../PreCOMET/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
     "local_precomet_diffdisc": partial(precomet, model_path="../../PreCOMET/lightning_logs/diffdisc/checkpoints/e4.ckpt", reverse=False),
 }
