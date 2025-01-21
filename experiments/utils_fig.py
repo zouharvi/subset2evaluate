@@ -1,4 +1,5 @@
 from typing import Callable, List, Text, Tuple
+import warnings
 
 
 COLORS = [
@@ -14,6 +15,7 @@ def matplotlib_default():
     import matplotlib as mpl
     import matplotlib.pyplot as plt
 
+    mpl.rcParams["font.family"] = "serif"
     mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=COLORS)
     mpl.rcParams["legend.fancybox"] = False
     mpl.rcParams["legend.edgecolor"] = "None"
@@ -28,7 +30,7 @@ def turn_off_spines(which=['top', 'right']):
     ax.spines[which].set_visible(False)
 
 
-def plot_subset_selection(
+def plot_subset_selection_legend(
         points: List[Tuple[List, List, Text]],
         filename=None,
         areas: List[Tuple[List, List, List]] = [],
@@ -124,10 +126,11 @@ def plot_subset_selection(
     plt.show()
 
 
-def plot_subset_selection_tall(
+def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
         filename=None,
         colors: List[str] = COLORS,
+        height=3.2,
 ):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
@@ -143,7 +146,7 @@ def plot_subset_selection_tall(
     )
 
     matplotlib_default()
-    plt.figure(figsize=(4, 3.2))
+    plt.figure(figsize=(4, height))
 
     if len(points) == 1:
         colors = ["black"]
@@ -169,10 +172,11 @@ def plot_subset_selection_tall(
     tex_out += "\n"
 
     if IS_CLUSTERS:
-        plt.ylabel("Cluster count" + " " * 5, labelpad=13)
+        plt.ylabel("Cluster count" + " " * 5,fontweight='bold')
     else:
-        plt.ylabel("Rank correlation" + " " * 5, labelpad=-1)
-    plt.xlabel("Proportion of original data", labelpad=-1)
+        # set bold ylabel
+        plt.ylabel("Rank correlation" + " " * 5,fontweight='bold')
+    plt.xlabel("Proportion of original data", labelpad=-0.5)
 
     plt.xticks(
         list(range(len(points_x)))[::3],

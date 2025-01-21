@@ -12,7 +12,7 @@ import matplotlib as mpl
 import collections
 import pickle
 
-# use ALL the data
+# use all WMT data
 data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 
 # %%
@@ -82,10 +82,18 @@ for data_old in tqdm.tqdm(data_old_all):
 with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
     pickle.dump((cors_all, clus_all, corrs_all), f)
 
+
+# %%
+# load
+with open("../computed/16-metric_quality_performance.pkl", "rb") as f:
+    cors_all, clus_all, corrs_all = pickle.load(f)
+
+clus_all["metric_align"] = clus_all["metric_alignment"]
+cors_all["metric_align"] = cors_all["metric_alignment"]
+
 # %%
 
 data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
-
 
 def aggregate_data_y(data_y):
     assert len(corrs_all) == len(data_y)
@@ -97,6 +105,8 @@ def aggregate_data_y(data_y):
 
 fig_utils.matplotlib_default()
 
+# defaut line width
+mpl.rcParams["lines.linewidth"] = 1.5
 
 fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
 
@@ -105,45 +115,41 @@ axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["random"]),
     label="Random",
-    linewidth=2,
     color="black",
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_avg"]),
     label="MetricAvg",
-    linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_var"]),
     label="MetricVar",
-    linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["metric_align"]),
-    label="MetricAlign",
-    linewidth=2,
+    label="MetricCons",
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["diversity_bleu"]),
     label="Diversity",
-    linewidth=2,
 )
 axs[1].plot(
     data_x[:-1],
     aggregate_data_y(clus_all["pyirt_diffdisc"]),
-    label="Diff.$\\times$Disc.",
-    linewidth=2,
+    label="DiffDisc",
 )
 
-axs[1].set_ylabel("Number of clusters", labelpad=-1)
+axs[1].set_ylabel("Cluster count", labelpad=-1)
 axs[1].set_xticks(
     data_x[:-1],
     [f"{x+0.1:.2f}"[:3] for x in data_x[:-1]],
 )
+# set max number of yticks
+axs[1].yaxis.set_major_locator(plt.MaxNLocator(6))
 axs[1].set_xlabel("Metric correlation with human" + " " * 40)
 axs[1].spines[['top', 'right']].set_visible(False)
 
@@ -152,38 +158,32 @@ axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["random"]),
     label="Random",
-    linewidth=2,
     color="black",
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["metric_avg"]),
     label="MetricAvg",
-    linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["metric_var"]),
     label="MetricVar",
-    linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["metric_align"]),
-    label="MetricAlign",
-    linewidth=2,
+    label="MetricCons",
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["diversity_bleu"]),
     label="Diversity",
-    linewidth=2,
 )
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["pyirt_diffdisc"]),
-    label="Diff.$\\times$Disc.",
-    linewidth=2,
+    label="DiffDisc",
 )
 
 axs[0].set_ylabel("Rank correlation", labelpad=-1)
@@ -196,16 +196,17 @@ axs[0].set_xticks(
 axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 axs[0].spines[['top', 'right']].set_visible(False)
 
-axs[1].legend(
-    handletextpad=0.4,
-    handlelength=0.8,
-    labelspacing=0.2,
-    facecolor="#ddd",
-    loc="upper right",
-    bbox_to_anchor=(0.8, 1.2),
-    ncol=3,
-    fontsize=9,
-)
+# legend is done manually in LaTeX
+# axs[1].legend(
+#     handletextpad=0.4,
+#     handlelength=0.8,
+#     labelspacing=0.2,
+#     facecolor="#ddd",
+#     loc="upper right",
+#     bbox_to_anchor=(0.8, 1.2),
+#     ncol=3,
+#     fontsize=9,
+# )
 plt.subplots_adjust(right=5.5)
 
 

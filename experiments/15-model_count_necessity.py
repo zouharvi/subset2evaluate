@@ -106,11 +106,11 @@ def method_formatter(method):
         "precomet_diversity": r"Diversity\textsuperscript{src}",
         "metric_var": "MetricVar",
         "metric_avg": "MetricAvg",
-        "metric_align": "MetricAlign",
+        "metric_align": "MetricCons",
         "diversity_bleu": "Diversity",
         "pyirt_diffdisc": r"Diff.$\times$Disc.",
         "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
-        "local_precomet_ali": r"MetricAlign\textsuperscript{src}",
+        "local_precomet_ali": r"MetricCons\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]
