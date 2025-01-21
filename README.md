@@ -32,7 +32,7 @@ The package supports multiple methods.
 We show benchmark of the methods on machine translation evaluation.
 For the metric-based methods, the results use MetricX-23 but others can be easily used if supplied in the input data.
 
-| Method | Name in package | Requirements | Correlation | Clusters |
+| Method | Function signature | Requirements | Correlation | Clusters |
 |-|-|-|-|-|
 | Random | `random` | | 92.5% | 2.25
 | **Output-based selection** |
@@ -54,7 +54,7 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 And benchmark of the methods for summarization.
 For metric-based methods we use coverage but others can be easily used if supplied in the input data.
 
-| Method | Call signature | Requirements | Correlation | Clusters |
+| Method | Function signature | Requirements | Correlation | Clusters |
 |-|-|-|-|-|
 | Random | `method="random"` | | 93.5% | 2.14 |
 | **Output-based selection** |
