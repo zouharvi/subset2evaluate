@@ -425,6 +425,34 @@ def diversity_chrf(data, **kwargs) -> List[float]:
     ]
 
 
+
+def diversity_lm(data, **kwargs) -> List[float]:
+    import itertools
+    import sentence_transformers
+    import warnings
+
+    with warnings.catch_warnings(action="ignore", category=FutureWarning):
+        model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    
+    embds = list(model_embd.encode([
+        tgt
+        for line in data
+        for tgt in line["tgt"].values()
+    ]))
+
+    def _f(embds):
+        return np.average([
+            np.dot(embd_a, embd_b)
+            for embd_a, embd_b in itertools.combinations(embds, 2)
+        ])
+
+    # we prefer smallest similarity so flip
+    return [
+        -_f([embds.pop(0) for _ in line["tgt"].values()])
+        for line in data
+    ]
+
+
 def diversity(data, metric, **kwargs) -> List[float]:
     if metric.lower() == "bleu":
         return diversity_bleu(data, **kwargs)
@@ -432,6 +460,8 @@ def diversity(data, metric, **kwargs) -> List[float]:
         return diversity_chrf(data, **kwargs)
     elif metric.lower() == "unigram":
         return diversity_unigram(data, **kwargs)
+    elif metric.lower() == "lm":
+        return diversity_lm(data, **kwargs)
     else:
         raise Exception(f"Unknown diversity metric: {metric}")
 

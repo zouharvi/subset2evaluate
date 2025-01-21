@@ -41,6 +41,7 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 | Metric consistency | `method="metric_cons", metric="MetricX-23"` | Metric scores | 94.2% | 3.24 |
 | Diversity BLEU | `method="diversity", metric="BLEU"` | Outputs | 94.0% | 2.99 |
 | Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 92.5% | 2.62 |
+| Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 93.9% | 2.81 |
 | DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
 | **Source-based selection** |
 | Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
@@ -63,6 +64,7 @@ For metric-based methods we use coverage but others can be easily used if suppli
 | DiffDisc | `method="pyirt_diffdisc", metric="Coverage"` | Metric scores | 92.8% | 2.02 |
 | Diversity BLEU | `method="diversity", metric="BLEU"` | Outputs | 93.6% | 2.60 |
 | Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 91.4% | 2.70 |
+| Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 97.0% | 2.90 |
 
 ## Example for Machine Translation
 

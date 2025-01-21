@@ -45,6 +45,7 @@ benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_avg", metric=
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_cons", metric="MetricX-23"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="BLEU"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="unigram"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="lm"))
 benchmark_method_mt(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diversity"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg"))
@@ -61,3 +62,4 @@ benchmark_method_summeval(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc
 benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="BLEU"))
 benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="unigram"))
 benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="ChrF"))
+benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="lm"))
