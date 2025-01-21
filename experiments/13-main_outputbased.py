@@ -42,29 +42,27 @@ points_y_clu = {
 }
 
 # %%
-import importlib
-importlib.reload(utils_fig)
-utils_fig.plot_subset_selection_tall(
+utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
         (utils.PROPS, points_y_cor["metric_avg"], f"MetricAvg {np.average(points_y_cor['metric_avg']):.1%}"),
         (utils.PROPS, points_y_cor["metric_var"], f"MetricVar {np.average(points_y_cor['metric_var']):.1%}"),
-        (utils.PROPS, points_y_cor["metric_align"], f"MetricAlign {np.average(points_y_cor['metric_align']):.1%}"),
+        (utils.PROPS, points_y_cor["metric_align"], f"MetricCons {np.average(points_y_cor['metric_align']):.1%}"),
         (utils.PROPS, points_y_cor['diversity_bleu'], f"Diversity {np.average(points_y_cor['diversity_bleu']):.1%}"),
-        (utils.PROPS, points_y_cor['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_cor['pyirt_diffdisc']):.1%}"),
+        (utils.PROPS, points_y_cor['pyirt_diffdisc'], f"DiffDisc {np.average(points_y_cor['pyirt_diffdisc']):.1%}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="13-main_outputbased",
 )
 
-utils_fig.plot_subset_selection_tall(
+utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
         (utils.PROPS, points_y_clu["metric_avg"], f"MetricAvg {np.average(points_y_clu['metric_avg']):.2f}"),
         (utils.PROPS, points_y_clu["metric_var"], f"MetricVar {np.average(points_y_clu['metric_var']):.2f}"),
-        (utils.PROPS, points_y_clu["metric_align"], f"MetricAlign {np.average(points_y_clu['metric_align']):.2f}"),
+        (utils.PROPS, points_y_clu["metric_align"], f"MetricCons {np.average(points_y_clu['metric_align']):.2f}"),
         (utils.PROPS, points_y_clu['diversity_bleu'], f"Diversity {np.average(points_y_clu['diversity_bleu']):.2f}"),
-        (utils.PROPS, points_y_clu['pyirt_diffdisc'], f"Diff.×Disc. {np.average(points_y_clu['pyirt_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu['pyirt_diffdisc'], f"DiffDisc {np.average(points_y_clu['pyirt_diffdisc']):.2f}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="13-main_outputbased",

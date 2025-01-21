@@ -45,13 +45,16 @@ for data_old in tqdm.tqdm(data_old_all):
 
 
 # %%
+import importlib
+importlib.reload(utils_fig)
 utils_fig.plot_subset_selection(
     points=[
         (subset2evaluate.utils.PROPS, np.average(clu_random, axis=0), f"Random {np.average(clu_random):.2f}"),
         (subset2evaluate.utils.PROPS, np.average(clu_kmeans, axis=0), f"k-means {np.average(clu_kmeans):.2f}"),
     ],
     filename="43-kmeans",
-    colors=["black"] + utils_fig.COLORS,
+    colors=["#000000"] + utils_fig.COLORS,
+    height=2,
 )
 
 utils_fig.plot_subset_selection(
@@ -60,5 +63,6 @@ utils_fig.plot_subset_selection(
         (subset2evaluate.utils.PROPS, np.average(cor_kmeans, axis=0), f"k-means {np.average(cor_kmeans):.1%}"),
     ],
     filename="43-kmeans",
-    colors=["black"] + utils_fig.COLORS,
+    colors=["#000000"] + utils_fig.COLORS,
+    height=2,
 )
