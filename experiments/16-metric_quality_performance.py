@@ -57,20 +57,20 @@ for data_old in tqdm.tqdm(data_old_all):
             clus_all['metric_var'].append(np.average(clu_new))
             cors_all['metric_var'].append(np.average(cor_new))
 
-            data_new_var = subset2evaluate.select_subset.basic(data_old, method="diversity_bleu", metric=metric)
+            data_new_var = subset2evaluate.select_subset.basic(data_old, method="diversity", metric="BLEU")
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_var, data_old)
-            clus_all['diversity_bleu'].append(np.average(clu_new))
-            cors_all['diversity_bleu'].append(np.average(cor_new))
+            clus_all['diversity'].append(np.average(clu_new))
+            cors_all['diversity'].append(np.average(cor_new))
 
             data_new_irt = subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", model="4pl_score", metric=metric, retry_on_error=True)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_irt, data_old)
             clus_all['pyirt_diffdisc'].append(np.average(clu_new))
             cors_all['pyirt_diffdisc'].append(np.average(cor_new))
 
-            data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_align", metric=metric)
+            data_new_ali = subset2evaluate.select_subset.basic(data_old, method="metric_cons", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_ali, data_old)
-            clus_all['metric_align'].append(np.average(clu_new))
-            cors_all['metric_align'].append(np.average(cor_new))
+            clus_all['metric_cons'].append(np.average(clu_new))
+            cors_all['metric_cons'].append(np.average(cor_new))
 
         except Exception as e:
             print(e)
@@ -88,8 +88,8 @@ with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
 with open("../computed/16-metric_quality_performance.pkl", "rb") as f:
     cors_all, clus_all, corrs_all = pickle.load(f)
 
-clus_all["metric_align"] = clus_all["metric_alignment"]
-cors_all["metric_align"] = cors_all["metric_alignment"]
+clus_all["metric_const"] = clus_all["metric_alignment"]
+cors_all["metric_const"] = cors_all["metric_alignment"]
 
 # %%
 
@@ -129,12 +129,12 @@ axs[1].plot(
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["metric_align"]),
+    aggregate_data_y(clus_all["metric_cons"]),
     label="MetricCons",
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["diversity_bleu"]),
+    aggregate_data_y(clus_all["diversity"]),
     label="Diversity",
 )
 axs[1].plot(
@@ -172,12 +172,12 @@ axs[0].plot(
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["metric_align"]),
+    aggregate_data_y(cors_all["metric_cons"]),
     label="MetricCons",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["diversity_bleu"]),
+    aggregate_data_y(cors_all["diversity"]),
     label="Diversity",
 )
 axs[0].plot(

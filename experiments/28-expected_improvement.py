@@ -20,10 +20,10 @@ clu_new_all_met = collections.defaultdict(list)
 for data_old in tqdm.tqdm(data_old_all):
     for method_kwargs in [
         dict(method="random"),
-        dict(method="metric_avg"),
-        dict(method="metric_var"),
-        dict(method="diversity_bleu"),
-        # dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000),
+        dict(method="metric_avg", metric="MetricX-23"),
+        dict(method="metric_var", metric="MetricX-23"),
+        dict(method="diversity", metric="BLEU"),
+        dict(method="pyirt_diffdisc", model="4pl_score", epochs=1000, metric="MetricX-23", retry_on_error=True),
     ]:
         # run multiple times to average out the effect
         cor_new_all_hum_local = []
@@ -34,8 +34,6 @@ for data_old in tqdm.tqdm(data_old_all):
             data_new = subset2evaluate.select_subset.basic(
                 data_old,
                 **method_kwargs,
-                metric="MetricX-23-c",
-                retry_on_error=True,
             )
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="human")
             cor_new_all_hum_local.append(np.average(cor_new))

@@ -18,14 +18,14 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
         # run multiple times to smooth variance
         for _ in range(repetitions):
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
-                subset2evaluate.select_subset.basic(data_old, **kwargs_dict, retry_on_error=False),
+                subset2evaluate.select_subset.basic(data_old, **kwargs_dict),
                 data_old,
                 metric=target,
             )
             points_y_cor.append(cor_new)
             points_y_clu.append(clu_new)
 
-    print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_cor):.1%} | {np.average(points_y_clu):.2f}")
+    print(f"{data:>10} {json.dumps(kwargs_dict, ensure_ascii=False)} | {np.average(points_y_cor):.1%} | {np.average(points_y_clu):.2f} |")
 
 
 def benchmark_method_mt(**kwargs):
@@ -42,23 +42,22 @@ benchmark_method_mt(repetitions=100, kwargs_dict=dict(method="random"))
 # %%
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_var", metric="MetricX-23"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_avg", metric="MetricX-23"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_var", metric="bleu"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_avg", metric="bleu"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity_bleu"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity_unigram"))
-benchmark_method_mt(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", metric="MetricX-23"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="metric_cons", metric="MetricX-23"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="BLEU"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="unigram"))
+benchmark_method_mt(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diversity"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diffdisc"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diffdisc_direct"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg", reverse=True))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg", reverse=False))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_var", reverse=True))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_var", reverse=False))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_var"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_diffdisc"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_cons"))
 
 # %%
 benchmark_method_summeval(repetitions=100, kwargs_dict=dict(method="random"))
 benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="metric_var", metric="coverage"))
 benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="metric_avg", metric="coverage"))
+benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="metric_cons", metric="coverage"))
 benchmark_method_summeval(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", metric="coverage"))
-benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity_bleu"))
-benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity_unigram"))
+benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="BLEU"))
+benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="unigram"))
+benchmark_method_summeval(repetitions=1, kwargs_dict=dict(method="diversity", metric="ChrF"))

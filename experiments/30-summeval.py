@@ -12,7 +12,7 @@ for method_kwargs in [
     dict(method="metric_var", metric="supert"),
     dict(method="metric_avg", metric="supert"),
     dict(method="pyirt_diffdisc", metric="supert"),
-    dict(method="diversity_bleu"),
+    dict(method="diversity", metric="BLEU"),
 ]:
     par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
         subset2evaluate.select_subset.basic(data_old, **method_kwargs),
@@ -27,10 +27,10 @@ for method_kwargs in [
 
 for repetitions, method_kwargs in [
     (100, dict(method="random")),
-    (1, dict(method="metric_align", metric="supert")),
+    (1, dict(method="metric_cons", metric="supert")),
     (1, dict(method="metric_avg", metric="supert")),
     (1, dict(method="metric_var", metric="supert")),
-    (1, dict(method="diversity_bleu")),
+    (1, dict(method="diversity", metric="BLEU")),
     (5, dict(method="pyirt_diffdisc", metric="supert", retry_on_error=True)),
 ]:
     cor_all = []
