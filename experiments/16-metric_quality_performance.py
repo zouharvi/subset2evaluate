@@ -84,19 +84,37 @@ with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
 
 
 # %%
+data_old_all = list(utils.load_data_wmt_all(normalize=True).items())
+data_old_count = 0
+prev_name = None
+for (data_old_name, langs), data_old in data_old_all:
+    if prev_name != data_old_name:
+        print(prev_name, data_old_count)
+        prev_name = data_old_name
+
+    metrics = list(list(data_old[0]["scores"].values())[0].keys())
+    metrics = [m for m in metrics if m != "human"]
+    data_old_count += len(metrics)
+
+# %%
 # load
 with open("../computed/16-metric_quality_performance.pkl", "rb") as f:
     cors_all, clus_all, corrs_all = pickle.load(f)
 
-clus_all["metric_const"] = clus_all["metric_alignment"]
-cors_all["metric_const"] = cors_all["metric_alignment"]
+# temp hack
+clus_all["metric_cons"] = clus_all["metric_alignment"]
+cors_all["metric_cons"] = cors_all["metric_alignment"]
+clus_all["diversity"] = clus_all["diversity_bleu"]
+cors_all["diversity"] = cors_all["diversity_bleu"]
 
 # %%
 
 data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
+# constrain to WMT22, WMT23, WMT24
+corrs_all = corrs_all[:561]
 
 def aggregate_data_y(data_y):
-    assert len(corrs_all) == len(data_y)
+    # assert len(corrs_all) == len(data_y)
     data_y_new = []
     for x1, x2 in zip(data_x, data_x[1:]):
         # add all data that are in [x1, x2) interval
@@ -196,6 +214,8 @@ axs[0].set_xticks(
 axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 axs[0].spines[['top', 'right']].set_visible(False)
 
+axs[0].set_ylim(0.88, None)
+
 # legend is done manually in LaTeX
 # axs[1].legend(
 #     handletextpad=0.4,
@@ -207,7 +227,7 @@ axs[0].spines[['top', 'right']].set_visible(False)
 #     ncol=3,
 #     fontsize=9,
 # )
-plt.subplots_adjust(right=5.5)
+# plt.subplots_adjust(right=5.5)
 
 
 plt.tight_layout(pad=0.1)

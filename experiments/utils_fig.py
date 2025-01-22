@@ -131,6 +131,7 @@ def plot_subset_selection(
         filename=None,
         colors: List[str] = COLORS,
         height=3.2,
+        ylim=None,
 ):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
@@ -189,10 +190,14 @@ def plot_subset_selection(
     if not IS_CLUSTERS:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
-    if IS_CLUSTERS:
-        plt.ylim(1.2, 5.0)
+    # default for MT
+    if ylim is None:
+        if IS_CLUSTERS:
+            plt.ylim(1.2, 5.0)
+        else:
+            plt.ylim(0.87, 0.99)
     else:
-        plt.ylim(0.87, 0.99)
+        plt.ylim(ylim)
     plt.tight_layout(pad=0.1)
 
     if filename:
