@@ -272,12 +272,12 @@ def eval_metrics_correlations(data: List[Dict], metric_target="human", display=F
         for metric in metrics
         if metric != metric_target
     }
+    corrs = list(corrs.items())
+    corrs.sort(key=lambda x: x[1], reverse=True)
+    corrs = dict(corrs)
 
     if display:
-        corrs_local = list(corrs.items())
-        corrs_local.sort(key=lambda x: x[1], reverse=True)
-
-        for metric, cor in corrs_local:
+        for metric, cor in corrs:
             print(f"{metric:<40} {cor:.1%}")
 
     return corrs

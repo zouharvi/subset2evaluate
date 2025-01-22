@@ -1,4 +1,4 @@
-from typing import Any, List, Literal, Tuple, Union
+from typing import Any, Dict, List, Literal, Tuple, Union
 from functools import partial
 import numpy as np
 import subset2evaluate.evaluate
@@ -464,6 +464,42 @@ def diversity(data, metric, **kwargs) -> List[float]:
         return diversity_lm(data, **kwargs)
     else:
         raise Exception(f"Unknown diversity metric: {metric}")
+    
+
+def combinator(
+        data,
+        methods: List[Dict],
+        operation: Literal["mul", "sum"] = "mul",
+        normalize_zscore: bool = True,
+        normalize_01: bool = True,
+        **kwargs
+) -> List[float]:
+    scores = []
+    for method_kwargs in methods:
+        assert \
+            "return_model" not in method_kwargs or not method_kwargs["return_model"], \
+            "Cannot return model in combinator"
+        scores.append(METHODS[method_kwargs["method"]](data, **method_kwargs))
+
+    scores = np.array(scores)
+
+    if normalize_zscore:
+        # z-score
+        scores = (scores - np.mean(scores, axis=1, keepdims=True)) / np.std(scores, axis=1, keepdims=True)
+
+    if normalize_01:
+        # make positive and in [0, 1]
+        scores = (scores - np.min(scores, axis=1, keepdims=True)) / (np.max(scores, axis=1, keepdims=True) - np.min(scores, axis=1, keepdims=True))
+
+    if operation == "mul":
+        scores = np.prod(scores, axis=0)
+    elif operation == "sum":
+        scores = np.sum(scores, axis=0)
+    else:
+        raise Exception(f"Unknown operation: {operation}")
+
+    return scores
+
 
 METHODS = {
     "random": random_subset,
@@ -472,6 +508,8 @@ METHODS = {
     "metric_cons": metric_consistency,
     
     "diversity": diversity,
+
+    "combinator": combinator,
 
     "kmeans": kmeans,
 

@@ -94,6 +94,12 @@ def costaware(
     data_new_utility = (data_new_utility - min_data) / (max_data - min_data) / 2
     data_new_utility += 0.1
 
+
+    # simulate random cost
+    # import random
+    # costs = np.array([x["cost"] for x in data])
+    # random.shuffle(costs)
+
     opt = scipy.optimize.milp(
         # minimize negative utility
         c=-data_new_utility,
