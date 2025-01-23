@@ -36,13 +36,13 @@ _, cor_diffdisc = subset2evaluate.evaluate.eval_clucor(
     data_old,
     metric="human",
 )
-_, cor_precomet_diffdisc = subset2evaluate.evaluate.eval_clucor(
-    subset2evaluate.select_subset.basic(data_old, method="precomet_diffdisc"),
+_, cor_cometsrc_diffdisc = subset2evaluate.evaluate.eval_clucor(
+    subset2evaluate.select_subset.basic(data_old, method="cometsrc_diffdisc"),
     data_old,
     metric="human",
 )
-_, cor_precomet_var = subset2evaluate.evaluate.eval_clucor(
-    subset2evaluate.select_subset.basic(data_old, method="precomet_var"),
+_, cor_cometsrc_var = subset2evaluate.evaluate.eval_clucor(
+    subset2evaluate.select_subset.basic(data_old, method="cometsrc_var"),
     data_old,
     metric="human",
 )
@@ -98,8 +98,8 @@ utils_fig.plot_subset_selection(
 utils_fig.plot_subset_selection(
     points=[
         (utils.PROPS, np.average(cor_random, axis=0), f"Random {np.average(cor_random):.1%}"),
-        (utils.PROPS, cor_precomet_diffdisc, f"PreCOMET$^\\mathrm{{IRT}}$ {np.average(cor_precomet_diffdisc):.1%}"),
-        (utils.PROPS, cor_precomet_var, f"PreCOMET$^\\mathrm{{var}}$ {np.average(cor_precomet_var[:-1]):.1%}"),
+        (utils.PROPS, cor_cometsrc_diffdisc, f"COMETsrc$^\\mathrm{{IRT}}$ {np.average(cor_cometsrc_diffdisc):.1%}"),
+        (utils.PROPS, cor_cometsrc_var, f"COMETsrc$^\\mathrm{{var}}$ {np.average(cor_cometsrc_var[:-1]):.1%}"),
     ],
     colors=[
         "black",

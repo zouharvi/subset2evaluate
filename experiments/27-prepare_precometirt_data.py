@@ -39,32 +39,32 @@ data_diffdisc = [
 ]
 
 # prepare comet-compatible data
-with open("../PreCOMET/data/csv/train_disc.csv", "w") as f:
+with open("../COMETsrc/data/csv/train_disc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_disc)
 
-with open("../PreCOMET/data/csv/dev_disc.csv", "w") as f:
+with open("../COMETsrc/data/csv/dev_disc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(random.Random(0).sample(data_disc, k=1000))
 
-with open("../PreCOMET/data/csv/train_diff.csv", "w") as f:
+with open("../COMETsrc/data/csv/train_diff.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_diff)
 
-with open("../PreCOMET/data/csv/dev_diff.csv", "w") as f:
+with open("../COMETsrc/data/csv/dev_diff.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(random.Random(0).sample(data_diff, k=1000))
 
-with open("../PreCOMET/data/csv/train_diffdisc.csv", "w") as f:
+with open("../COMETsrc/data/csv/train_diffdisc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_diffdisc)
 
-with open("../PreCOMET/data/csv/dev_diffdisc.csv", "w") as f:
+with open("../COMETsrc/data/csv/dev_diffdisc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(random.Random(0).sample(data_diffdisc, k=1000))
