@@ -86,9 +86,6 @@ points_y_clu = {
     for k,v in clu_all.items()
 }
 
-import utils_fig
-import importlib
-importlib.reload(utils_fig)
 utils_fig.plot_subset_selection(
     points=[
         (PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
