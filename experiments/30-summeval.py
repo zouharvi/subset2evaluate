@@ -4,6 +4,7 @@ import subset2evaluate
 import subset2evaluate.evaluate
 import numpy as np
 import collections
+import utils_fig
 
 data_old = subset2evaluate.utils.load_data_summeval(normalize=True)
 PROPS = np.geomspace(0.25, 0.75, 10)
