@@ -53,6 +53,7 @@ utils_fig.plot_subset_selection(
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="13-main_outputbased",
+    height=2.5,
 )
 
 utils_fig.plot_subset_selection(
@@ -66,4 +67,5 @@ utils_fig.plot_subset_selection(
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="13-main_outputbased",
+    height=2.5,
 )
