@@ -130,7 +130,7 @@ def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
         filename=None,
         colors: List[str] = COLORS,
-        height=3.2,
+        height=2.5,
         ylim=None,
 ):
     import matplotlib.pyplot as plt
