@@ -10,7 +10,7 @@ It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém
 > We show that methods based on variance in automated metric scores or diversity in model outputs, outperform the commonly used, yet inefficient, random selection.
 > However, these methods are not applicable for test set creation where the model outputs are not yet available.
 > This is applicable to blind test set creation or for selecting from a very large set of items.
-> To this end, we introduce PreCOMET which predicts item usefulness for human evaluation just based on the input alone.
+> To this end, we introduce COMETsrc which predicts item usefulness for human evaluation just based on the input alone.
 > We demonstrate the efficacy of our methods on two common language generations tasks, machine translation and summarization.
 > We show that only 30%-60% of human annotations are needed to produce the same evaluation result.
 
@@ -26,7 +26,7 @@ General recommendations based on MT evaluation:
 |-|-|-|
 | Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="metric_var", metric="MetricX-23"` |
 | Metric not available but model outputs available. | Diversity of model outputs. | `method="diversity", method="BLEU"` |
-| Model outputs not available, only sources. | Estimated diversity in model outputs. | `method="precomet_diversity"` |
+| Model outputs not available, only sources. | Estimated diversity in model outputs. | `method="cometsrc_diversity"` |
 
 The package supports multiple methods.
 We show benchmark of the methods on machine translation evaluation.
@@ -44,11 +44,11 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 | Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 93.9% | 2.81 |
 | DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
 | **Source-based selection** |
-| Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
-| Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-avg) | `method="precomet_avg"` | Sources | 92.2% | 2.68 |
-| Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-diversity) | `method="precomet_diversity"` | Sources | 94.0% | 2.86 |
-| DiffDisc<sup>SRC</sup> [model](TODO) | `method="precomet_diffdisc"` | Sources | 93.4% | 2.98 |
-| Consistency<sup>SRC</sup> [model](TODO) | `method="precomet_cons"` | Sources | 93.8% | 2.77 |
+| Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-var) | `method="cometsrc_var"` | Sources | 92.7% | 2.62 |
+| Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-avg) | `method="cometsrc_avg"` | Sources | 92.2% | 2.68 |
+| Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-diversity) | `method="cometsrc_diversity"` | Sources | 94.0% | 2.86 |
+| DiffDisc<sup>SRC</sup> [model](TODO) | `method="cometsrc_diffdisc"` | Sources | 93.4% | 2.98 |
+| Consistency<sup>SRC</sup> [model](TODO) | `method="cometsrc_cons"` | Sources | 93.8% | 2.77 |
 
 
 And benchmark of the methods for summarization.
@@ -71,8 +71,8 @@ For metric-based methods we use coverage but others can be easily used if suppli
 Install the package and download WMT data:
 ```bash
 pip3 install subset2evaluate
-# optionally these two packages for IRT and PreCOMET based selections
-pip3 install git+https://github.com/zouharvi/PreCOMET.git git+https://github.com/zouharvi/py-irt.git
+# optionally these two packages for IRT and COMETsrc based selections
+pip3 install git+https://github.com/zouharvi/COMETsrc.git git+https://github.com/zouharvi/py-irt.git
 ```
 
 Then in Python we compute the baseline:

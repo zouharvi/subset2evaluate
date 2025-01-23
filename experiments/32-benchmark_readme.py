@@ -47,11 +47,11 @@ benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="unigram"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="diversity", metric="lm"))
 benchmark_method_mt(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diversity"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_var"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_diffdisc"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_cons"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="cometsrc_diversity"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="cometsrc_avg"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="cometsrc_var"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_cometsrc_diffdisc"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_cometsrc_cons"))
 
 # %%
 benchmark_method_summeval(repetitions=100, kwargs_dict=dict(method="random"))

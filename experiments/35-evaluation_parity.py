@@ -26,8 +26,8 @@ for method_kwargs in [
     dict(method="metric_cons", metric="MetricX-23"),
     dict(method="diversity", metric="BLEU"),
     dict(method="pyirt_diffdisc", metric="MetricX-23"),
-    dict(method="precomet_diversity"),
-    dict(method="local_precomet_diffdisc"),
+    dict(method="cometsrc_diversity"),
+    dict(method="local_cometsrc_diffdisc"),
 ]:
     par_clu_all = []
     par_cor_all = []

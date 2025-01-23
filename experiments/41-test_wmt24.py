@@ -49,8 +49,8 @@ for method_kwargs in [
     dict(method="diversity", metric="BLEU"),
     dict(method="diversity", metric="ChrF"),
     dict(method="pyirt_diffdisc", metric="MetricX-24"),
-    dict(method="precomet_diversity"),
-    dict(method="precomet_diffdisc"),
+    dict(method="cometsrc_diversity"),
+    dict(method="cometsrc_diffdisc"),
 ]:
     par_clu_all = []
     par_cor_all = []

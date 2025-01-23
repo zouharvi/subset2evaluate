@@ -264,13 +264,13 @@ def _assert_comet_version():
     try:
         import comet
     except ImportError:
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/COMETsrc.git`")
 
     if "HypothesislessRegression" not in dir(comet.models):
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
+        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/COMETsrc.git`")
 
 
-def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+def cometsrc(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
     prev_tqdm_setting = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
@@ -308,7 +308,7 @@ def precomet(data, model_path, return_model=False, load_model=None, reverse=Fals
         return scores
 
 
-def precomet_dual(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+def cometsrc_dual(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
     tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
@@ -520,21 +520,21 @@ METHODS = {
     "pyirt_fic": partial(pyirt, fn_utility="fisher_information_content"),
     "pyirt_experiment": partial(pyirt, fn_utility="experiment"),
 
-    "precomet": partial(precomet, reverse=False),
-    "precomet_var": partial(precomet, model_path="zouharvi/PreCOMET-var", reverse=True),
-    "precomet_avg": partial(precomet, model_path="zouharvi/PreCOMET-avg", reverse=True),
-    "precomet_diversity": partial(precomet, model_path="zouharvi/PreCOMET-diversity", reverse=True),
+    "cometsrc": partial(cometsrc, reverse=False),
+    "cometsrc_var": partial(cometsrc, model_path="zouharvi/COMETsrc-var", reverse=True),
+    "cometsrc_avg": partial(cometsrc, model_path="zouharvi/COMETsrc-avg", reverse=True),
+    "cometsrc_diversity": partial(cometsrc, model_path="zouharvi/COMETsrc-diversity", reverse=True),
 
-    "precomet_diff": partial(precomet, model_path="zouharvi/PreCOMET-diff", reverse=False),
-    "precomet_disc": partial(precomet, model_path="zouharvi/PreCOMET-disc", reverse=True),
-    "precomet_diffdisc_direct": partial(precomet, model_path="zouharvi/PreCOMET-diffdisc_direct", reverse=False),
-    "precomet_diffdisc": partial(
-        precomet_dual,
-        model_path1="zouharvi/PreCOMET-diff",
-        model_path2="zouharvi/PreCOMET-disc",
+    "cometsrc_diff": partial(cometsrc, model_path="zouharvi/COMETsrc-diff", reverse=False),
+    "cometsrc_disc": partial(cometsrc, model_path="zouharvi/COMETsrc-disc", reverse=True),
+    "cometsrc_diffdisc_direct": partial(cometsrc, model_path="zouharvi/COMETsrc-diffdisc_direct", reverse=False),
+    "cometsrc_diffdisc": partial(
+        cometsrc_dual,
+        model_path1="zouharvi/COMETsrc-diff",
+        model_path2="zouharvi/COMETsrc-disc",
         reverse=False,
     ),
 
-    "local_precomet_cons": partial(precomet, model_path="../../PreCOMET/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
-    "local_precomet_diffdisc": partial(precomet, model_path="../../PreCOMET/lightning_logs/diffdisc/checkpoints/e4.ckpt", reverse=False),
+    "local_cometsrc_cons": partial(cometsrc, model_path="../../COMETsrc/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
+    "local_cometsrc_diffdisc": partial(cometsrc, model_path="../../COMETsrc/lightning_logs/diffdisc/checkpoints/e4.ckpt", reverse=False),
 }

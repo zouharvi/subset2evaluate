@@ -29,7 +29,7 @@ dependencies = [
   "tqdm",
   "matplotlib",
   "requests",
-  # "unbabel_comet @ git+https://github.com/zouharvi/PreCOMET.git",
+  # "unbabel_comet @ git+https://github.com/zouharvi/COMETsrc.git",
   # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]
 classifiers = [
