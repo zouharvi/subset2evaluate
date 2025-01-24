@@ -277,7 +277,7 @@ def eval_metrics_correlations(data: List[Dict], metric_target="human", display=F
     corrs = dict(corrs)
 
     if display:
-        for metric, cor in corrs:
+        for metric, cor in corrs.items():
             print(f"{metric:<40} {cor:.1%}")
 
     return corrs
