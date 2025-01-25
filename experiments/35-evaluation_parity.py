@@ -21,11 +21,14 @@ clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_v
 # %%
 
 for method_kwargs in [
-    dict(method="metric_var", metric="MetricX-23"),
     dict(method="metric_avg", metric="MetricX-23"),
+    dict(method="metric_var", metric="MetricX-23"),
     dict(method="metric_cons", metric="MetricX-23"),
     dict(method="diversity", metric="BLEU"),
     dict(method="pyirt_diffdisc", metric="MetricX-23"),
+    dict(method="cometsrc_avg"),
+    dict(method="cometsrc_var"),
+    dict(method="local_cometsrc_cons"),
     dict(method="cometsrc_diversity"),
     dict(method="local_cometsrc_diffdisc"),
 ]:

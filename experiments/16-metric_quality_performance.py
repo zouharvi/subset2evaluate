@@ -108,9 +108,51 @@ clus_all["diversity"] = clus_all["diversity_bleu"]
 cors_all["diversity"] = cors_all["diversity_bleu"]
 
 # %%
+# post-hoc compute metric correlations
+
+corrs_all_named = collections.defaultdict(list)
+for data_old in data_old_all:
+    # align to WMT23, WMT24, WMT22
+    if sum(len(y) for y in corrs_all_named.values()) >= 561:
+        break
+
+    models = list(data_old[0]["scores"].keys())
+    data_y_human = [
+        line["scores"][model]["human"]
+        for line in data_old
+        for model in models
+    ]
+    metrics = set(list(data_old[0]["scores"].values())[0])
+    if "human" not in metrics:
+        continue
+    metrics.remove("human")
+    for metric in list(metrics):
+        data_y_metric = [
+            line["scores"][model][metric]
+            for line in data_old
+            for model in models
+        ]
+        corrs_all_named[metric].append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
+
+corrs_all_named = {
+    k: np.average(v)
+    for k, v in corrs_all_named.items()
+}
+
+
+METRIC_NAMES = {
+    "BLEU": "BLEU",
+    "chrF": "ChrF",
+    "BLEURT-20": "BLEURT",
+    "BERTscore": "BERTscore",
+    "prismRef": "Prism",
+    "MetricX-23": "MetricX",
+}
+
+# %%
 
 data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
-# constrain to WMT22, WMT23, WMT24
+# constrain to WMT23, WMT24, WMT22
 corrs_all = corrs_all[:561]
 
 def aggregate_data_y(data_y):
@@ -172,6 +214,27 @@ axs[1].set_xlabel("Metric correlation with human" + " " * 40)
 axs[1].spines[['top', 'right']].set_visible(False)
 
 
+# plot vertical lines for some special metrics
+for offset, metric in [
+    ((-0.032, 3.35), "BLEU"),
+    ((-0.032, 3.46), "chrF"),
+    ((-0.032, 2.61), "BERTscore"),
+    ((-0.032, 2.80), "MetricX-23"),
+]:
+    axs[1].axvline(
+        corrs_all_named[metric],
+        color="gray",
+        linestyle="--",
+        linewidth=0.5,
+    )
+    axs[1].text(
+        corrs_all_named[metric] + offset[0],
+        0.0 + offset[1],
+        METRIC_NAMES[metric],
+        rotation=90,
+        fontsize=8,
+    )
+
 axs[0].plot(
     data_x[:-1],
     aggregate_data_y(cors_all["random"]),
@@ -215,6 +278,28 @@ axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0)
 axs[0].spines[['top', 'right']].set_visible(False)
 
 axs[0].set_ylim(0.88, None)
+
+
+# plot vertical lines for some special metrics
+for offset, metric in [
+    ((-0.032, 0.93), "BLEU"),
+    ((-0.032, 0.94), "chrF"),
+    ((-0.032, 0.883), "BERTscore"),
+    ((-0.032, 0.893), "MetricX-23"),
+]:
+    axs[0].axvline(
+        corrs_all_named[metric],
+        color="gray",
+        linestyle="--",
+        linewidth=0.5,
+    )
+    axs[0].text(
+        corrs_all_named[metric] + offset[0],
+        0.0 + offset[1],
+        METRIC_NAMES[metric],
+        rotation=90,
+        fontsize=8,
+    )
 
 # legend is done manually in LaTeX
 # axs[1].legend(
