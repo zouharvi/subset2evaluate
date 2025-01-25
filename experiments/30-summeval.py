@@ -12,6 +12,7 @@ PROPS = np.geomspace(0.25, 0.75, 10)
 # %%
 # parity
 for method_kwargs in [
+    dict(method="random"),
     dict(method="metric_avg", metric="supert"),
     dict(method="metric_var", metric="supert"),
     dict(method="metric_cons", metric="supert"),
