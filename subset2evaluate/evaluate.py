@@ -253,6 +253,7 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
 
 def eval_metrics_correlations(data: List[Dict], metric_target="human", display=False):
     import scipy.stats
+    import collections
     metrics = set(list(data[0]["scores"].values())[0])
     data_y = {
         metric: [
@@ -274,7 +275,7 @@ def eval_metrics_correlations(data: List[Dict], metric_target="human", display=F
     }
     corrs = list(corrs.items())
     corrs.sort(key=lambda x: x[1], reverse=True)
-    corrs = dict(corrs)
+    corrs = collections.OrderedDict(corrs)
 
     if display:
         for metric, cor in corrs.items():
