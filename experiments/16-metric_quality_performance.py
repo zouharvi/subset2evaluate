@@ -19,7 +19,7 @@ data_old_all = list(utils.load_data_wmt_all(normalize=True).values())
 cors_all = collections.defaultdict(list)
 clus_all = collections.defaultdict(list)
 corrs_all = []
-
+corrs_all_named = collections.defaultdict(list)
 
 for data_old in tqdm.tqdm(data_old_all):
     models = list(data_old[0]["scores"].keys())
@@ -41,6 +41,7 @@ for data_old in tqdm.tqdm(data_old_all):
                 for model in models
             ]
             corrs_all.append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
+            corrs_all_named[metric].append(scipy.stats.pearsonr(data_y_human, data_y_metric)[0])
 
             data_new_avg = subset2evaluate.select_subset.basic(data_old, method="random", metric=metric)
             clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_avg, data_old)
@@ -77,6 +78,12 @@ for data_old in tqdm.tqdm(data_old_all):
             print("Errored on", metric)
             continue
 
+
+corrs_all_named = {
+    k: np.average(v)
+    for k, v in corrs_all_named.items()
+}
+
 # %%
 # backup
 with open("../computed/16-metric_quality_performance.pkl", "wb") as f:
@@ -97,18 +104,15 @@ for (data_old_name, langs), data_old in data_old_all:
     data_old_count += len(metrics)
 
 # %%
+# temp hack
 # load
 with open("../computed/16-metric_quality_performance.pkl", "rb") as f:
     cors_all, clus_all, corrs_all = pickle.load(f)
 
-# temp hack
 clus_all["metric_cons"] = clus_all["metric_alignment"]
 cors_all["metric_cons"] = cors_all["metric_alignment"]
 clus_all["diversity"] = clus_all["diversity_bleu"]
 cors_all["diversity"] = cors_all["diversity_bleu"]
-
-# %%
-# post-hoc compute metric correlations
 
 corrs_all_named = collections.defaultdict(list)
 for data_old in data_old_all:
@@ -140,6 +144,8 @@ corrs_all_named = {
 }
 
 
+# %%
+
 METRIC_NAMES = {
     "BLEU": "BLEU",
     "chrF": "ChrF",
@@ -149,9 +155,7 @@ METRIC_NAMES = {
     "MetricX-23": "MetricX",
 }
 
-# %%
-
-data_x = [0, 0.12, 0.24, 0.36, 0.48, 1]
+data_x = [0, 0.12, 0.24, 0.39, 0.49, 1]
 # constrain to WMT23, WMT24, WMT22
 corrs_all = corrs_all[:561]
 
@@ -163,6 +167,15 @@ def aggregate_data_y(data_y):
         data_y_new.append([y for x, y in zip(corrs_all, data_y) if x1 <= x < x2 and isinstance(y, np.float64)])
     return [np.average(l) for l in data_y_new]
 
+aggregate_data_y_cors = {
+    k: aggregate_data_y(v)
+    for k, v in cors_all.items()
+}
+aggregate_data_y_clus = {
+    k: aggregate_data_y(v)
+    for k, v in clus_all.items()
+}
+
 fig_utils.matplotlib_default()
 
 # defaut line width
@@ -173,33 +186,34 @@ fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
 # figure for clusters
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["random"]),
+    aggregate_data_y_clus["random"],
     label="Random",
     color="black",
+    zorder=100,
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["metric_avg"]),
+    aggregate_data_y_clus["metric_avg"],
     label="MetricAvg",
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["metric_var"]),
+    aggregate_data_y_clus["metric_var"],
     label="MetricVar",
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["metric_cons"]),
+    aggregate_data_y_clus["metric_cons"],
     label="MetricCons",
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["diversity"]),
+    aggregate_data_y_clus["diversity"],
     label="Diversity",
 )
 axs[1].plot(
     data_x[:-1],
-    aggregate_data_y(clus_all["pyirt_diffdisc"]),
+    aggregate_data_y_clus["pyirt_diffdisc"],
     label="DiffDisc",
 )
 
@@ -215,55 +229,67 @@ axs[1].spines[['top', 'right']].set_visible(False)
 
 
 # plot vertical lines for some special metrics
-for offset, metric in [
-    ((-0.032, 3.35), "BLEU"),
-    ((-0.032, 3.46), "chrF"),
-    ((-0.032, 2.61), "BERTscore"),
-    ((-0.032, 2.80), "MetricX-23"),
+for text_xy, text_top, relpos, line_yy, metric in [
+    ((0.005, 3.55), True, (1, 0.5), (2.85, 3.55), "BLEU"),
+    ((0.13, 3.65), True, (0.5, 0.5), (2.85, 3.65), "chrF"),
+    ((0.22, 2.70), False, (0, 0.5), (3.00, 3.75), "BERTscore"),
+    ((0.303, 2.80), False, (0.5, 0.5), (3.00, 3.75), "MetricX-23"),
 ]:
-    axs[1].axvline(
-        corrs_all_named[metric],
+    
+    axs[1].vlines(
+        ymin=line_yy[0], ymax=line_yy[1],
+        x=corrs_all_named[metric],
         color="gray",
         linestyle="--",
         linewidth=0.5,
     )
-    axs[1].text(
-        corrs_all_named[metric] + offset[0],
-        0.0 + offset[1],
+    axs[1].annotate(
         METRIC_NAMES[metric],
-        rotation=90,
+        xy=(corrs_all_named[metric], line_yy[1] if text_top else line_yy[0]),
+        xytext=(text_xy[0], text_xy[1]),
+        arrowprops=dict(
+            arrowstyle="-",
+            linestyle="--",
+            color="gray",
+            lw=0.5,
+            shrinkA=0.0, shrinkB=0.0,
+            relpos=relpos,
+        ),
         fontsize=8,
+        va="center",
     )
+
 
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["random"]),
+    aggregate_data_y_cors["random"],
     label="Random",
     color="black",
+    zorder=100
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["metric_avg"]),
+    aggregate_data_y_cors["metric_avg"],
     label="MetricAvg",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["metric_var"]),
+    aggregate_data_y_cors["metric_var"],
     label="MetricVar",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["metric_cons"]),
+    aggregate_data_y_cors["metric_cons"],
     label="MetricCons",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["diversity"]),
+    aggregate_data_y_cors["diversity"],
     label="Diversity",
 )
 axs[0].plot(
     data_x[:-1],
-    aggregate_data_y(cors_all["pyirt_diffdisc"]),
+    aggregate_data_y_cors["pyirt_diffdisc"],
     label="DiffDisc",
 )
 
@@ -280,25 +306,36 @@ axs[0].spines[['top', 'right']].set_visible(False)
 axs[0].set_ylim(0.88, None)
 
 
+
 # plot vertical lines for some special metrics
-for offset, metric in [
-    ((-0.032, 0.93), "BLEU"),
-    ((-0.032, 0.94), "chrF"),
-    ((-0.032, 0.883), "BERTscore"),
-    ((-0.032, 0.893), "MetricX-23"),
+for text_xy, text_top, relpos, line_yy, metric in [
+    ((0.01, 0.935), True, (1.0, 0.5), (0.89, 0.935), "BLEU"),
+    ((0.13, 0.945), True, (0.5, 0.5), (0.89, 0.945), "chrF"),
+    ((0.22, 0.894), False, (0.1, 1), (0.915, 0.95), "BERTscore"),
+    ((0.305, 0.90), False, (0.5, 1), (0.902, 0.95), "MetricX-23"),
 ]:
-    axs[0].axvline(
-        corrs_all_named[metric],
+    
+    axs[0].vlines(
+        ymin=line_yy[0], ymax=line_yy[1],
+        x=corrs_all_named[metric],
         color="gray",
         linestyle="--",
         linewidth=0.5,
     )
-    axs[0].text(
-        corrs_all_named[metric] + offset[0],
-        0.0 + offset[1],
+    axs[0].annotate(
         METRIC_NAMES[metric],
-        rotation=90,
+        xy=(corrs_all_named[metric], line_yy[1] if text_top else line_yy[0]),
+        xytext=(text_xy[0], text_xy[1]),
+        arrowprops=dict(
+            arrowstyle="-",
+            linestyle="--",
+            color="gray",
+            lw=0.5,
+            shrinkA=0.0, shrinkB=0.0,
+            relpos=relpos,
+        ),
         fontsize=8,
+        va="center",
     )
 
 # legend is done manually in LaTeX

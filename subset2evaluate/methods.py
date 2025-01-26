@@ -538,3 +538,12 @@ METHODS = {
     "local_cometsrc_cons": partial(cometsrc, model_path="../../COMETsrc/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
     "local_cometsrc_diffdisc": partial(cometsrc, model_path="../../COMETsrc/lightning_logs/diffdisc/checkpoints/e4.ckpt", reverse=False),
 }
+
+METHOD_NAMES = {
+    "random": "Random",
+    "metric_avg": "MetricAvg",
+    "metric_var": "MetricVar",
+    "metric_cons": "MetricCons",
+    "diversity": "Diversity",
+    "pyirt_diffdisc": "DiffDisc",
+}
