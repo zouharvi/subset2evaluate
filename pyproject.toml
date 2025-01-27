@@ -29,6 +29,7 @@ dependencies = [
   "tqdm",
   "matplotlib",
   "requests",
+  "sentence-transformers",
   # "unbabel_comet @ git+https://github.com/zouharvi/COMETsrc.git",
   # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]

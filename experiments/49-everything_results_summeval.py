@@ -14,7 +14,7 @@ PROPS = np.geomspace(0.25, 0.75, 10)
 results = collections.defaultdict(dict)
 
 for metric_target in tqdm.tqdm(["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]):
-    metric_train = "unieval_" + metric_target.split("_")[1]
+    metric_train = "gpt_" + metric_target.split("_")[1]
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
         (1, dict(method="metric_avg", metric=metric_train)),
