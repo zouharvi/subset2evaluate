@@ -8,25 +8,26 @@ import collections
 import utils_fig
 
 data_old = subset2evaluate.utils.load_data_summeval(normalize=True, load_extra=True)
-
 PROPS = np.geomspace(0.25, 0.75, 5)
 
 # %%
 # parity
 for method_kwargs in [
-    dict(method="metric_avg", metric="supert"),
-    dict(method="metric_var", metric="supert"),
-    dict(method="metric_cons", metric="supert"),
+    dict(method="metric_avg"),
+    dict(method="metric_var"),
+    dict(method="metric_cons"),
     dict(method="diversity", metric="LM"),
-    dict(method="pyirt_diffdisc", metric="supert"),
+    dict(method="pyirt_diffdisc"),
 ]:
     cor_local = []
     clu_local = []
     for metric_target in ["gpt_relevance", "gpt_coherence", "gpt_consistency", "gpt_fluency", "gpt_sum"]:
+        metric_train = "supert"
         par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_par_randnorm(
-            subset2evaluate.select_subset.basic(data_old, **method_kwargs),
+            subset2evaluate.select_subset.basic(data_old, **({"metric": metric_train} | method_kwargs)),
             data_old,
             metric=metric_target,
+            props=PROPS,
         )
         cor_local.append(par_cor)
         clu_local.append(par_clu)

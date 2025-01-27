@@ -24,13 +24,13 @@ def eval_clucor(
 
 
 def eval_clucor_par(
-        data_new: List[Dict],
-        data_old: List[Dict],
-        clus_tgt: List[float],
-        cors_tgt: List[float],
-        metric="human",
-        props: List[float] = utils.PROPS,
-        workers=10,
+    data_new: List[Dict],
+    data_old: List[Dict],
+    clus_tgt: List[float],
+    cors_tgt: List[float],
+    metric="human",
+    props: List[float] = utils.PROPS,
+    workers=10,
 ) -> Tuple[float, float]:
     """
     Evaluates the proportion of data that is needed to achieve parity with target.
@@ -76,6 +76,7 @@ def precompute_randnorm(
     random_seeds=10,
     metric="human",
     workers=10,
+    props: List[float] = utils.PROPS,
 ) -> Tuple[List[float], List[float], float, float]:
     import subset2evaluate.select_subset
 
@@ -86,6 +87,7 @@ def precompute_randnorm(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             metric=metric,
+            props=props
         )
         clu_random.append(clu_new)
         cor_random.append(cor_new)
@@ -103,6 +105,7 @@ def precompute_randnorm(
             cor_random,
             metric=metric,
             workers=workers,
+            props=props,
         )
         pars_clu_rand.append(par_clu_rand)
         pars_cor_rand.append(par_cor_rand)
@@ -115,21 +118,23 @@ def eval_clucor_par_randnorm(
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
-    clucor_precomputed=None
+    clucor_precomputed=None,
+    props: List[float] = utils.PROPS,
 ) -> Tuple[float, float]:
 
     if clucor_precomputed is not None:
         (clu_random, cor_random), (clu_random_norm, cor_random_norm) = clucor_precomputed
     else:
         (clu_random, cor_random), (clu_random_norm, cor_random_norm) = precompute_randnorm(
-            data_old, random_seeds=random_seeds, metric=metric
+            data_old, random_seeds=random_seeds, metric=metric, props=props,
         )
 
     # compute the parity of the new data
     par_clu, par_cor = eval_clucor_par(
         data_new, data_old,
         clu_random, cor_random,
-        metric=metric
+        metric=metric,
+        props=props,
     )
 
     return par_clu/clu_random_norm, par_cor/cor_random_norm

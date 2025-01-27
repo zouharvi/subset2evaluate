@@ -38,7 +38,7 @@ function sbatch_gpu_short_small() {
         --gpus=1 \
         --ntasks-per-node=1 \
         --cpus-per-task=20 \
-        --mem-per-cpu=2G \
+        --mem-per-cpu=1G \
         --time=0-4 \
         --wrap="$JOB_WRAP";
 }

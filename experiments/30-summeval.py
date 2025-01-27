@@ -12,7 +12,6 @@ PROPS = np.geomspace(0.25, 0.75, 10)
 # %%
 # parity
 for method_kwargs in [
-    dict(method="random"),
     dict(method="metric_avg"),
     dict(method="metric_var"),
     dict(method="metric_cons"),
@@ -22,11 +21,12 @@ for method_kwargs in [
     cor_local = []
     clu_local = []
     for metric_target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]:
-        metric_train = "unieval_" + metric_target.split("_")[1]
+        metric_train = "gpt_" + metric_target.split("_")[1]
         par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_par_randnorm(
             subset2evaluate.select_subset.basic(data_old, **({"metric": metric_train} | method_kwargs)),
             data_old,
             metric=metric_target,
+            props=PROPS,
         )
         cor_local.append(par_cor)
         clu_local.append(par_clu)
