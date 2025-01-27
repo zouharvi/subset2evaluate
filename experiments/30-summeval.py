@@ -33,11 +33,11 @@ for method_kwargs in [
     print(method_kwargs["method"], f"COR: {np.average(cor_local):.1%} | CLU: {np.average(clu_local):.1%}")
 
 # %%
-
 cor_all = collections.defaultdict(list)
 clu_all = collections.defaultdict(list)
+
 for metric_target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]:
-    metric_train = "unieval_" + metric_target.split("_")[1]
+    metric_train = "gpt_" + metric_target.split("_")[1]
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
         (1, dict(method="metric_cons", metric=metric_train)),
