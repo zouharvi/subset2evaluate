@@ -13,38 +13,37 @@ import os
 
 args = argparse.ArgumentParser()
 args.add_argument("dataset_i", type=int, default=0)
+# SummEval has 119 metrics
 args.add_argument("metric_i", type=int, default=0)
 args = args.parse_args()
 
-print("Start loading data", flush=True)
-data_old_all = list(utils.load_data_wmt_all(normalize=True).items())
-data_old_name, data_old = data_old_all[args.dataset_i]
-print("Finish loading data", flush=True)
+metric_target = ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"][args.dataset_i]
+PROPS = np.geomspace(0.25, 0.75, 10)
 
-# WMT23 has 19-26 metrics
-# print({
-#     k: len(list(v[0]["scores"].values())[0].keys())
-#     for k, v in data_old_all[:9]
-# })
-# exit()
+# %%
+print("Start loading data", flush=True)
+data_old = utils.load_data_summeval(normalize=True, load_extra=True)
+print("Finish loading data", flush=True)
 
 # %%
 # precompute parity randnorm
-with open(f"computed/16-metric_quality/precomputed_d{args.dataset_i}.pkl", "rb") as f:
+with open(f"computed/17-metric_quality/precomputed_d{args.dataset_i}.pkl", "rb") as f:
     clucor_precomputed = pickle.load(f)
 print("Loaded precomputed clucor", flush=True)
 
 # %%
 models = list(data_old[0]["scores"].keys())
 data_y_human = [
-    line["scores"][model]["human"]
+    line["scores"][model][metric_target]
     for line in data_old
     for model in models
 ]
 metrics = list(list(data_old[0]["scores"].values())[0].keys())
-metrics = [metric for metric in metrics if metric != "human"]
+metrics = [metric for metric in metrics if not metric.startswith("human_")]
+print(len(metrics))
+
 if args.metric_i >= len(metrics):
-    print(f"No metric_i {args.metric_i} in {data_old_name}")
+    print(f"No metric_i {args.metric_i}")
     exit()
 metric = metrics[args.metric_i]
 
@@ -55,7 +54,7 @@ data_y_metric = [
 ]
 metric_corr = scipy.stats.pearsonr(data_y_human, data_y_metric)[0]
 result_item = {
-    "wmt": data_old_name,
+    "metric_target": metric_target,
     "metric": metric,
     "correlation": metric_corr,
     "cor": collections.defaultdict(list),
@@ -78,6 +77,8 @@ for repetitions, method_kwargs in tqdm.tqdm([
         clu_new, cor_new = subset2evaluate.evaluate.eval_clucor_par_randnorm(
             data_new_avg, data_old,
             clucor_precomputed=clucor_precomputed,
+            metric=metric_target,
+            props=PROPS,
         )
         clus_local.append(clu_new)
         cors_local.append(cor_new)
@@ -85,16 +86,17 @@ for repetitions, method_kwargs in tqdm.tqdm([
     result_item["cor"][method_kwargs["method"]] = np.average(cors_local)
 
 # %%
-os.makedirs("computed/16-metric_quality/", exist_ok=True)
-with open(f"computed/16-metric_quality/d{args.dataset_i}_m{args.metric_i}.pkl", "wb") as f:
+os.makedirs("computed/17-metric_quality/", exist_ok=True)
+with open(f"computed/17-metric_quality/d{args.dataset_i}_m{args.metric_i}.pkl", "wb") as f:
     pickle.dump(result_item, f)
 
 """
-sbatch_gpu_short_small "metric_quality_d0_m0" "python3 experiments/16c-metric_quality_compute.py 0 0"
+sbatch_gpu_short_small "summeval_metric_quality_d0_m0" "python3 experiments/17c-metric_quality_compute_summeval.py 0 0"
 
-for di in $(seq 0 8); do
-    for mi in $(seq 0 25); do
-        sbatch_gpu_short_small "metric_quality_d${di}_m${mi}" "python3 experiments/16c-metric_quality_compute.py ${di} ${mi}"
+for di in $(seq 0 4); do
+    for mi in $(seq 0 118); do
+        echo "summeval_metric_quality_d${di}_m${mi}"
+        sbatch_gpu_short_small "summeval_metric_quality_d${di}_m${mi}" "python3 experiments/17c-metric_quality_compute_summeval.py ${di} ${mi}"
     done;
 done;
 """
