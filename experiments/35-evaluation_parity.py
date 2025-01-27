@@ -35,7 +35,7 @@ for method_kwargs in [
     par_clu_all = []
     par_cor_all = []
     for data_name, data_old in tqdm.tqdm(data_old_all):
-        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_par_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
             data_old,
             clucor_precomputed=clucor_precomputed[data_name],
