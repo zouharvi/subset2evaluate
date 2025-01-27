@@ -349,12 +349,24 @@ def load_data_wmt_all(min_items=500, **kwargs):
     return {k: v for k, v in data.items() if len(v) > min_items}
 
 
-def load_data_summeval(normalize=True, load_extra=True):
+def load_data_summeval(normalize=True, load_extra=False):
     from datasets import load_dataset
     from functools import reduce
     import collections
     import contextlib
     import os
+    import pickle
+
+    # temporarily change to the root directory
+    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+        os.makedirs("data/cache/", exist_ok=True)
+        cache_f = f"data/cache/summeval_n{int(normalize)}_l{int(load_extra)}.pkl"
+
+        # load cache if exists
+        if os.path.exists(cache_f):
+            with open(cache_f, "rb") as f:
+                return pickle.load(f)
+
     data_raw = load_dataset("KnutJaegersberg/summeval_pairs")["train"]
 
     data_by_id = collections.defaultdict(list)
@@ -457,11 +469,15 @@ def load_data_summeval(normalize=True, load_extra=True):
                 for sys, v in x["scores"].items()
             }
 
-            
-
-
     if normalize:
         _data_minmax_normalize(data)
+
+
+    # temporarily change to the root directory
+    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+        # save cache
+        with open(cache_f, "wb") as f:
+            pickle.dump(data, f)
 
     return data
 
