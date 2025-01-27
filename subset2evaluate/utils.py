@@ -349,10 +349,12 @@ def load_data_wmt_all(min_items=500, **kwargs):
     return {k: v for k, v in data.items() if len(v) > min_items}
 
 
-def load_data_summeval(normalize=True):
+def load_data_summeval(normalize=True, load_extra=True):
     from datasets import load_dataset
     from functools import reduce
     import collections
+    import contextlib
+    import os
     data_raw = load_dataset("KnutJaegersberg/summeval_pairs")["train"]
 
     data_by_id = collections.defaultdict(list)
@@ -404,6 +406,59 @@ def load_data_summeval(normalize=True):
         }
         for line in data
     ]
+
+    if load_extra:
+        # temporarily change to the root directory
+        with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+            # TODO: in the future these files need to be stored somewhere statically
+            data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_gpt.jsonl")
+
+        data_metrics_i = {
+            x["i"]: x
+            for x in data_metrics
+        }
+        assert all(x["i"] in data_metrics_i for x in data)
+        for x in data:
+            x["scores"] = {
+                sys: data_metrics_i[x["i"]]["scores"][sys] | v
+                for sys, v in x["scores"].items()
+                if sys in data_metrics_i[x["i"]]["scores"]
+            }
+            x["scores"] = {
+                sys: v | {
+                    "gpt_sum": v["gpt_relevance"] + v["gpt_coherence"] + v["gpt_consistency"] + v["gpt_fluency"],
+                    "gpt_mul": v["gpt_relevance"] * v["gpt_coherence"] * v["gpt_consistency"] * v["gpt_fluency"],
+                }
+                for sys, v in x["scores"].items()
+            }
+
+
+        # temporarily change to the root directory
+        with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+            # TODO: in the future these files need to be stored somewhere statically
+            data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_unieval.jsonl")
+
+        data_metrics_i = {
+            x["i"]: x
+            for x in data_metrics
+        }
+        assert all(x["i"] in data_metrics_i for x in data)
+        for x in data:
+            x["scores"] = {
+                sys: data_metrics_i[x["i"]]["scores"][sys] | v
+                for sys, v in x["scores"].items()
+                if sys in data_metrics_i[x["i"]]["scores"]
+            }
+            x["scores"] = {
+                sys: v | {
+                    "unieval_sum": v["unieval_relevance"] + v["unieval_coherence"] + v["unieval_consistency"] + v["unieval_fluency"],
+                    "unieval_mul": v["unieval_relevance"] * v["unieval_coherence"] * v["unieval_consistency"] * v["unieval_fluency"],
+                }
+                for sys, v in x["scores"].items()
+            }
+
+            
+
 
     if normalize:
         _data_minmax_normalize(data)

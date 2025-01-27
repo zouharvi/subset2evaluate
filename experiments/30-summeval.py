@@ -6,24 +6,25 @@ import numpy as np
 import collections
 import utils_fig
 
-data_old = subset2evaluate.utils.load_data_summeval(normalize=True)
+data_old = subset2evaluate.utils.load_data_summeval(normalize=True, load_extra=True)
 PROPS = np.geomspace(0.25, 0.75, 10)
 
 # %%
 # parity
 for method_kwargs in [
     dict(method="random"),
-    dict(method="metric_avg", metric="supert"),
-    dict(method="metric_var", metric="supert"),
-    dict(method="metric_cons", metric="supert"),
+    dict(method="metric_avg"),
+    dict(method="metric_var"),
+    dict(method="metric_cons"),
     dict(method="diversity", metric="LM"),
-    dict(method="pyirt_diffdisc", metric="supert"),
+    dict(method="pyirt_diffdisc"),
 ]:
     cor_local = []
     clu_local = []
     for metric_target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]:
-        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
-            subset2evaluate.select_subset.basic(data_old, **method_kwargs),
+        metric_train = "unieval_" + metric_target.split("_")[1]
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_par_randnorm(
+            subset2evaluate.select_subset.basic(data_old, **({"metric": metric_train} | method_kwargs)),
             data_old,
             metric=metric_target,
         )
@@ -36,13 +37,14 @@ for method_kwargs in [
 cor_all = collections.defaultdict(list)
 clu_all = collections.defaultdict(list)
 for metric_target in ["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]:
+    metric_train = "unieval_" + metric_target.split("_")[1]
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
-        (1, dict(method="metric_cons", metric="supert")),
-        (1, dict(method="metric_avg", metric="supert")),
-        (1, dict(method="metric_var", metric="supert")),
+        (1, dict(method="metric_cons", metric=metric_train)),
+        (1, dict(method="metric_avg", metric=metric_train)),
+        (1, dict(method="metric_var", metric=metric_train)),
         (1, dict(method="diversity", metric="LM")),
-        (5, dict(method="pyirt_diffdisc", metric="supert", retry_on_error=True)),
+        (5, dict(method="pyirt_diffdisc", metric=metric_train, retry_on_error=True)),
     ]:
         for _ in range(repetitions):
             data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
@@ -50,6 +52,7 @@ for metric_target in ["human_relevance", "human_coherence", "human_consistency",
             cor_all[method_kwargs['method']].append(cor_new)
             clu_all[method_kwargs['method']].append(clu_new)
         print(method_kwargs["method"], f"COR: {np.average(cor_all[method_kwargs['method']]):.1%} | CLU: {np.average(clu_all[method_kwargs['method']]):.2f}")
+    print()
 
 
 # %%

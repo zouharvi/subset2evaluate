@@ -7,26 +7,7 @@ import numpy as np
 import collections
 import utils_fig
 
-data_old = subset2evaluate.utils.load_data_summeval(normalize=True)
-data_old_metrics = subset2evaluate.utils.load_data("../../subset2evaluate-tmp/data_other/sumeval_gpt.jsonl")
-data_old_metrics_i = {
-    x["i"]: x
-    for x in data_old_metrics
-}
-assert all(x["i"] in data_old_metrics_i for x in data_old)
-for x in data_old:
-    x["scores"] = {
-        sys: v | data_old_metrics_i[x["i"]]["scores"][sys]
-        for sys, v in x["scores"].items()
-        if sys in data_old_metrics_i[x["i"]]["scores"]
-    }
-    x["scores"] = {
-        sys: v | {
-            "gpt_sum": v["gpt_relevance"] + v["gpt_coherence"] + v["gpt_consistency"] + v["gpt_fluency"],
-            "gpt_mul": v["gpt_relevance"] * v["gpt_coherence"] * v["gpt_consistency"] * v["gpt_fluency"],
-        }
-        for sys, v in x["scores"].items()
-    }
+data_old = subset2evaluate.utils.load_data_summeval(normalize=True, load_extra=True)
 
 PROPS = np.geomspace(0.25, 0.75, 5)
 
@@ -42,7 +23,7 @@ for method_kwargs in [
     cor_local = []
     clu_local = []
     for metric_target in ["gpt_relevance", "gpt_coherence", "gpt_consistency", "gpt_fluency", "gpt_sum"]:
-        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_randnorm(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor_par_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
             data_old,
             metric=metric_target,

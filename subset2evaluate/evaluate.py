@@ -110,7 +110,7 @@ def precompute_randnorm(
     return (clu_random, cor_random), (np.average(pars_clu_rand), np.average(pars_cor_rand))
 
 
-def eval_clucor_randnorm(
+def eval_clucor_par_randnorm(
     data_new: List[Dict],
     data_old: List[Dict],
     random_seeds=10,

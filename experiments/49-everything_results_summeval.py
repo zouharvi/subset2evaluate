@@ -14,13 +14,14 @@ PROPS = np.geomspace(0.25, 0.75, 10)
 results = collections.defaultdict(dict)
 
 for metric_target in tqdm.tqdm(["human_relevance", "human_coherence", "human_consistency", "human_fluency", "human_sum"]):
+    metric_train = "unieval_" + metric_target.split("_")[1]
     for repetitions, method_kwargs in [
         (100, dict(method="random")),
-        (1, dict(method="metric_avg", metric="supert")),
-        (1, dict(method="metric_var", metric="supert")),
-        (1, dict(method="metric_cons", metric="supert")),
+        (1, dict(method="metric_avg", metric=metric_train)),
+        (1, dict(method="metric_var", metric=metric_train)),
+        (1, dict(method="metric_cons", metric=metric_train)),
         (1, dict(method="diversity", metric="LM")),
-        (5, dict(method="pyirt_diffdisc", metric="supert", retry_on_error=True)),
+        (5, dict(method="pyirt_diffdisc", metric=metric_train, retry_on_error=True)),
     ]:
         clu_all = []
         cor_all = []
