@@ -31,7 +31,7 @@ for line in data:
 
 # %%
 fig_utils.matplotlib_default()
-bins = [0, 0.2, 0.4, 0.6, 1]
+bins = [0, 0.2, 0.4, 0.6, 0.8]
 bins_label = bins
 
 def plot_ax(ax, key):
@@ -105,22 +105,19 @@ for metric, corr in metrics_avg_flat:
 
 
 METRIC_NAMES = {
-    "BLEU": "BLEU",
-    "chrF": "ChrF",
-    "BLEURT-20": "BLEURT",
-    "BERTscore": "BERTscore",
-    "prismRef": "Prism",
-    "MetricX-23-b": "MetricX",
-    "XCOMET-Ensemble": "XCOMET-Ensemble",
-    "COMET": "COMET",
+    "bleu": "BLEU",
+    "chrf": "ChrF",
+    "supert": "Supert",
+    "unieval_sum": "UniEval",
+    "rouge_l_f_score": "ROUGE-L",
+    "gpt_sum": "G-Eval",
 }
 
 for item in [
-    # dict(metric="BLEU", line_yy=(0.9, 2.0), text_xy=(-0.08, -0.04)),
-    # dict(metric="chrF", line_yy=(0.8, 1.3), text_xy=(-0.08, -0.04)),
-    # dict(metric="BERTscore", line_yy=(0.7, 1.1), text_xy=(-0.15, -0.04)),
-    # dict(metric="MetricX-23-b", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
-    # dict(metric="COMET", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
+    dict(metric="bleu", line_yy=(0.9, 2.0), text_xy=(-0.08, -0.04)),
+    dict(metric="supert", line_yy=(0.7, 1.1), text_xy=(-0.15, -0.04)),
+    # dict(metric="unieval_sum", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
+    dict(metric="gpt_sum", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
 ]:
     metric = item["metric"]
     axs[0].vlines(
@@ -140,11 +137,10 @@ for item in [
     )
     
 for item in [
-    # dict(metric="BLEU", line_yy=(0, 1.3), text_xy=(-0.08, 0.04)),
-    # dict(metric="chrF", line_yy=(0, 1.22), text_xy=(-0.07, 0.04)),
-    # dict(metric="BERTscore", line_yy=(0, 1.15), text_xy=(-0.05, 0.04)),
-    # dict(metric="MetricX-23-b", line_yy=(0, 1.05), text_xy=(-0.02, 0.04)),
-    # dict(metric="COMET", line_yy=(0.5, 0.9), text_xy=(-0.09, 0.04)),
+    dict(metric="chrf", line_yy=(0, 1.3), text_xy=(-0.08, 0.04)),
+    dict(metric="supert", line_yy=(0, 1.15), text_xy=(-0.05, 0.04)),
+    # dict(metric="unieval_sum", line_yy=(0, 1.05), text_xy=(-0.02, 0.04)),
+    dict(metric="gpt_sum", line_yy=(0.5, 0.9), text_xy=(-0.09, 0.04)),
 ]:
     metric = item["metric"]
     axs[1].vlines(
