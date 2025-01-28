@@ -11,9 +11,9 @@ packages = ["subset2evaluate"]
 
 [project]
 name = "subset2evaluate"
-version = "0.0.1a11"
+version = "0.1.0"
 description = "Find informative examples to efficiently (human-)evaluate NLG models."
-license = {text = "MIT License"}
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

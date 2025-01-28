@@ -31,12 +31,16 @@ for line in data:
 
 # %%
 fig_utils.matplotlib_default()
-bins = [0, 0.2, 0.4, 0.6, 0.8]
+bins = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.0]
 bins_label = bins
 
 def plot_ax(ax, key):
     for method in ["metric_avg", "metric_var", "metric_cons", "diversity", "pyirt_diffdisc"]:
-        data_local = sorted(data_new[method], key=lambda x: x["correlation"])
+        data_local = sorted(
+            data_new[method],
+            # [x for x in data_new[method] if x["correlation"] <= 0.8],
+            key=lambda x: x["correlation"]
+        )
         data_i = np.digitize([abs(v["correlation"]) for v in data_local], bins=bins)
         data_y = collections.defaultdict(list)
         for i, v in zip(data_i, data_local):
@@ -47,7 +51,7 @@ def plot_ax(ax, key):
         ]
         ax.plot(
             bins_label,
-            scipy.signal.savgol_filter(data_y, 2, 1),
+            scipy.signal.savgol_filter(data_y, 2, 0),
             label=method,
             linewidth=1.5,
         )
@@ -67,8 +71,8 @@ plot_ax(axs[1], "clu")
 axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 axs[1].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 
-axs[0].set_ylim(0.45, 1.4)
-axs[1].set_ylim(0.45, 1.4)
+axs[0].set_ylim(0.5, 1.45)
+axs[1].set_ylim(0.5, 1.45)
 
 axs[0].set_ylabel("Needed to match correlation", labelpad=0)
 axs[1].set_ylabel("Needed to match clusters", labelpad=-3)
@@ -114,10 +118,9 @@ METRIC_NAMES = {
 }
 
 for item in [
-    dict(metric="bleu", line_yy=(0.9, 2.0), text_xy=(-0.08, -0.04)),
-    dict(metric="supert", line_yy=(0.7, 1.1), text_xy=(-0.15, -0.04)),
-    # dict(metric="unieval_sum", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
-    dict(metric="gpt_sum", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
+    dict(metric="chrf", line_yy=(0.52, 1.3), text_xy=(-0.08, 0.04)),
+    dict(metric="supert", line_yy=(0.52, 1.2), text_xy=(-0.08, 0.04)),
+    dict(metric="gpt_sum", line_yy=(0.52, 1.3), text_xy=(-0.09, 0.04)),
 ]:
     metric = item["metric"]
     axs[0].vlines(
@@ -129,7 +132,7 @@ for item in [
     )
     axs[0].text(
         x=item["text_xy"][0]+metrics_avg[metric],
-        y=item["text_xy"][1]+item["line_yy"][0],
+        y=item["text_xy"][1]+item["line_yy"][1],
         s=METRIC_NAMES[metric],
         fontsize=8,
         va="center",
@@ -137,10 +140,9 @@ for item in [
     )
     
 for item in [
-    dict(metric="chrf", line_yy=(0, 1.3), text_xy=(-0.08, 0.04)),
-    dict(metric="supert", line_yy=(0, 1.15), text_xy=(-0.05, 0.04)),
-    # dict(metric="unieval_sum", line_yy=(0, 1.05), text_xy=(-0.02, 0.04)),
-    dict(metric="gpt_sum", line_yy=(0.5, 0.9), text_xy=(-0.09, 0.04)),
+    dict(metric="chrf", line_yy=(0.52, 1.3), text_xy=(-0.08, 0.04)),
+    dict(metric="supert", line_yy=(0.52, 1.38), text_xy=(-0.08, 0.04)),
+    dict(metric="gpt_sum", line_yy=(0.52, 1.38), text_xy=(-0.09, 0.04)),
 ]:
     metric = item["metric"]
     axs[1].vlines(
