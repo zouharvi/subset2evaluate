@@ -1,18 +1,29 @@
-# subset2evaluate &nbsp;&nbsp;&nbsp; [![PyPI Version](https://img.shields.io/pypi/v/subset2evaluate)](https://pypi.org/project/subset2evaluate/) [![test subset2evaluate](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml/badge.svg)](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml)
+# subset2evaluate
+
+[![Paper](https://img.shields.io/badge/📜%20paper-481.svg)](https://vilda.net/papers/subset2evaluate.pdf)
+&nbsp;
+[![PyPi version](https://badgen.net/pypi/v/subset2evaluate/)](https://pypi.org/project/subset2evaluate)
+&nbsp;
+[![PyPI download/month](https://img.shields.io/pypi/dm/subset2evaluate.svg)](https://pypi.python.org/pypi/subset2evaluate/)
+&nbsp;
+[![PyPi license](https://badgen.net/pypi/license/subset2evaluate/)](https://pypi.org/project/subset2evaluate/)
+&nbsp;
+[![Testing](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml/badge.svg)](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml)
+<hr>
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
 It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
 
-> [Selecting Examples to Efficiently Human-Evaluate Models](https://vilda.net/papers/subset2evaluate.pdf):
-> Human evaluation for language generation is the gold-standard but expensive.
-> To fit the budgetary constraints, often only a random subset of the test set is chosen for evaluation.
-> The random selection is grossly inefficient and in this work we formalize the task of selecting most informative items for evaluation.
-> We show that methods based on variance in automated metric scores or diversity in model outputs, outperform the commonly used, yet inefficient, random selection.
-> However, these methods are not applicable for test set creation where the model outputs are not yet available.
-> This is applicable to blind test set creation or for selecting from a very large set of items.
-> To this end, we introduce COMETsrc which predicts item usefulness for human evaluation just based on the input alone.
-> We demonstrate the efficacy of our methods on two common language generations tasks, machine translation and summarization.
-> We show that only 30%-60% of human annotations are needed to produce the same evaluation result.
+> **Title:** [How to Select Datapoints for Efficient Human Evaluation of NLG Models?](https://vilda.net/papers/subset2evaluate.pdf)
+> 
+> **Abstract:** Human evaluation is the gold-standard for evaluating text generation models.
+> It is also expensive, and to fit budgetary constraints, a random subset of the test data is often chosen in practice.
+> The randomly selected data may not accurately represent test performance, making this approach economically inefficient for model comparison.
+> Thus, in this work, we develop a suite of selectors to get the most informative datapoints for human evaluation.
+> We show that selectors based on variance in automated metric scores, diversity in model outputs, or Item Response Theory outperform random selection.
+> We further develop an approach to distill these selectors to the scenario where the model outputs are not yet available.
+> In particular, we introduce source-based estimators, which predict item usefulness for human evaluation just based on the source texts.
+> We demonstrate the efficacy of our selectors in two common NLG tasks, machine translation and summarization, and show that up to only ~50% of the test data is needed to produce the same evaluation result as the entire data.
 
 <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em">
 
@@ -119,7 +130,7 @@ The intended usage is for your own custom datasets where you wish to choose whic
 The input to subset2evaluate needs to be a list of items.
 What each item needs to contain depends on the method.
 For example, `diversity` requires `tgt` on each item such that the output diversity can be computed.
-As another texample `var` requires `scores/metric` on each item such that the metric variance can be computed.
+As another example `var` requires `scores/metric` on each item such that the metric variance can be computed.
 The item can contain any additional extra fields even if they're not explicitly used.
 As an example, look at the existing loaders:
 

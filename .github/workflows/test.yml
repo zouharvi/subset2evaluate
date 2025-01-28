@@ -1,4 +1,4 @@
-name: test subset2evaluate
+name: tests
 
 on:
   push:
