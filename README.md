@@ -16,14 +16,16 @@ It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém
 
 > **Title:** [How to Select Datapoints for Efficient Human Evaluation of NLG Models?](https://vilda.net/papers/subset2evaluate.pdf)
 > 
-> **Abstract:** Human evaluation is the gold-standard for evaluating text generation models.
+> **Abstract:** 
+> Human evaluation is the gold-standard for evaluating text generation models.
 > It is also expensive, and to fit budgetary constraints, a random subset of the test data is often chosen in practice.
 > The randomly selected data may not accurately represent test performance, making this approach economically inefficient for model comparison.
-> Thus, in this work, we develop a suite of selectors to get the most informative datapoints for human evaluation.
-> We show that selectors based on variance in automated metric scores, diversity in model outputs, or Item Response Theory outperform random selection.
+> Thus, in this work, we develop a suite of selectors to get the most informative datapoints for human evaluation while taking the evaluation costs into account.
+> We show that selectors based on variance in automated metric scores, diversity in model outputs, or Item Response Theory outperform random selection. 
 > We further develop an approach to distill these selectors to the scenario where the model outputs are not yet available.
 > In particular, we introduce source-based estimators, which predict item usefulness for human evaluation just based on the source texts.
 > We demonstrate the efficacy of our selectors in two common NLG tasks, machine translation and summarization, and show that up to only ~50% of the test data is needed to produce the same evaluation result as the entire data.
+> Our implementations are published in the [subset2evaluate](https://pypi.org/project/subset2evaluate/) package.
 
 <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em">
 
