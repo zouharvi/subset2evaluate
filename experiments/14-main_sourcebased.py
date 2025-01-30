@@ -69,7 +69,7 @@ utils_fig.plot_subset_selection(
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="14-main_sourcebased",
-    height=2.5,
+    height=1.9,
 )
 utils_fig.plot_subset_selection(
     [
@@ -82,5 +82,5 @@ utils_fig.plot_subset_selection(
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="14-main_sourcebased",
-    height=2.5,
+    height=1.9,
 )
