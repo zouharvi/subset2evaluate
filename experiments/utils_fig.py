@@ -211,7 +211,7 @@ def plot_subset_selection(
             plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.pdf")
             plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.svg")
 
-            with open(f"figures_tex/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.tex", "w") as f:
+            with open(f"figures_tex/{filename}_{'clu' if IS_CLUSTERS else 'cor'}_legend.tex", "w") as f:
                 f.write(tex_out)
 
     plt.show()
