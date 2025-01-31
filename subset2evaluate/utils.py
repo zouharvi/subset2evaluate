@@ -68,7 +68,7 @@ def ensure_wmt_exists():
         os.remove("data/mt-metrics-eval-v2.tgz")
 
 
-def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False):  # noqa: C901
+def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False, file_protocol=None, file_reference=None):  # noqa: C901
     import glob
     import collections
     import numpy as np
@@ -81,7 +81,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False): 
         ensure_wmt_exists()
 
         os.makedirs("data/cache/", exist_ok=True)
-        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}.pkl"
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_fp{file_protocol}_fr{file_reference}.pkl"
 
         # load cache if exists
         if os.path.exists(cache_f):
@@ -91,20 +91,30 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False): 
         lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
         lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
         lines_ref = None
-        for fname in [
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
-            f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
-        ]:
+
+        if file_reference is not None:
+            f_references = [
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.{file_reference}.txt",
+            ]
+        else:
+            f_references = [
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
+            ]
+
+        for fname in [*f_references, False]:
             if os.path.exists(fname):
-                lines_ref = open(fname, "r").readlines()
                 break
-        if lines_ref is None:
+        if not fname:
+            # did not find reference
             return []
+
+        lines_ref = open(fname, "r").readlines()
 
         # take care of canaries because scores don't have them
         if lines_src[0].lower().startswith("canary"):
@@ -127,16 +137,22 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False): 
         models = list(line_model.keys())
 
         lines_score = collections.defaultdict(list)
-        for fname in [
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
-            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
-            False
-        ]:
+
+        if file_protocol is not None:
+            f_protocols = [
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.{file_protocol}.seg.score",
+            ]
+        else :
+            f_protocols = [
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
+            ]
+        for fname in [*f_protocols, False]:
             if fname and os.path.exists(fname):
                 break
 
