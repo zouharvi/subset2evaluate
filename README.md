@@ -1,6 +1,6 @@
 # subset2evaluate
 
-[![Paper](https://img.shields.io/badge/📜%20paper-481.svg)](https://vilda.net/papers/subset2evaluate.pdf)
+[![Paper](https://img.shields.io/badge/📜%20paper-481.svg)](https://arxiv.org/abs/2501.18251)
 &nbsp;
 [![PyPi version](https://badgen.net/pypi/v/subset2evaluate/)](https://pypi.org/project/subset2evaluate)
 &nbsp;
@@ -12,9 +12,9 @@
 <hr>
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
-It is based on a [paper](https://vilda.net/papers/subset2evaluate.pdf) by Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
+It is based on work of Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zürich.
 
-> **Title:** [How to Select Datapoints for Efficient Human Evaluation of NLG Models?](https://vilda.net/papers/subset2evaluate.pdf)
+> **Title:** [How to Select Datapoints for Efficient Human Evaluation of NLG Models?](https://arxiv.org/abs/2501.18251)
 > 
 > **Abstract:** 
 > Human evaluation is the gold-standard for evaluating text generation models.
