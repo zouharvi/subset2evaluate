@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- <meta name="viewport" content="width=device-width,initial-scale=0.9"> -->
+    <!-- <meta name="theme-color" content="#efefef"> -->
+
+    <title>subset2evaluate</title>
+    <link rel="shortcut icon" href="#" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Roboto+Mono&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+
+    <link rel='stylesheet' type='text/css' href='style.css?r=2'>
+</head>
+
+<body style='text-align: center; margin-bottom: 20px;'>
+    <div style="width: 1300px; margin-left: auto; margin-right: auto; background-color: none; padding: 10px;">
+        <h3 style="color: black; font-size: xxx-large; font-family: 'Roboto Mono';">
+            subset2evaluate
+            <span style="font-size: medium; font-family: Roboto;">human demo</span>
+        </h3>
+        <ul style="text-align: left;">
+            <li>
+                Your task is to rank the quality of 5 NLG models on the task of translation.
+                <img src="img/robot1.svg" style="height: 15pt; margin-bottom: -3px;">
+                <img src="img/robot2.svg" style="height: 15pt; margin-bottom: -3px;">
+                <img src="img/robot3.svg" style="height: 15pt; margin-bottom: -3px;">
+                <img src="img/robot4.svg" style="height: 15pt; margin-bottom: -3px;">
+                <img src="img/robot5.svg" style="height: 15pt; margin-bottom: -3px;">
+            </li>
+            <li>
+                You have to choose carefully which items to evaluate the models on because you have only a limited evaluation budget.
+            </li>
+            <li>
+                Once you select the items, you can inspect the model ranking on the right.
+            </li>
+            <li>
+                At the end, click <em>reveal</em> to see how close you were to the true model ranking.
+            </li>
+        </ul>
+        
+        <div id="div_intro_timeline">
+            <div style="width: 2%; background-color: #0000 !important;"></div>
+            <div style="width: 35%">
+                1. Choose items to be evaluated (scroll).<br>
+                Budget: <span id="span_budget">5 items</span> left to select.
+            </div>
+            <div style="width: 12%">
+                2. Models translate selected items.
+            </div>
+            <div style="width: 12%">
+                3. Humans assess translation quality.
+            </div>
+            <div style="width: 32%">
+                4. See model ranking on your selection.<br>
+                Click <em>reveal</em> to compare to the true model ranking on all items.
+            </div>
+        </div>
+        <br>
+
+        <div>
+            <div id="div_items" style="width: 500px; height: 400px; display: inline-block; overflow-y: scroll;"></div>
+            <!-- robot + annotators animation -->
+            <div style="width: 300px; height: 300px; display: inline-block; vertical-align: top;">
+                <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+                    <span style="font-size: 50pt;">➜</span>
+                    <div class="spin-container-robot">
+                        <img src="img/robot1.svg" class="spin-item-robot" style="width: 20px; --d:  0s">
+                        <img src="img/robot2.svg" class="spin-item-robot" style="width: 20px; --d: -1.2s">
+                        <img src="img/robot3.svg" class="spin-item-robot" style="width: 20px; --d: -2.4s">
+                        <img src="img/robot4.svg" class="spin-item-robot" style="width: 20px; --d: -3.6s">
+                        <img src="img/robot5.svg" class="spin-item-robot" style="width: 20px; --d: -4.8s">
+                        
+                    </div>
+                    <span style="font-size: 50pt;">➜</span>
+                    <div class="spin-container-human">
+                        <img src="img/worker1.svg" class="spin-item-human" style="width: 40px; --d:  0s">
+                        <img src="img/worker2.svg" class="spin-item-human" style="width: 40px; --d: -2s">
+                        <img src="img/worker3.svg" class="spin-item-human" style="width: 40px; --d: -4s">
+                    </div>
+                    <span style="font-size: 50pt;">➜</span>
+                </div>
+            </div>
+            <div id="div_results" style="width: 210px; height: 400px; display: inline-block; vertical-align: top; text-align: left;"></div>
+            <div id="div_results_total" style="width: 210px; height: 400px; display: inline-block; vertical-align: top; text-align: left;"></div>
+
+            <div style="position: relative; top: -180px; left: 850px; width: 400px;">
+                <input type="button" id="button_reveal" value="👆 Reveal evaluation on all items" style="padding: 10px 20px; width: 300px;">
+            </div>
+
+            <div id="span_correlation" style="font-size: small; width: 300px; position: relative; top: -240px; left: 900px;">FILLER</div>
+        </div>
+
+        <div style="text-align: justify;">
+            Have you finished? You just simulated (on real WMT 2024 English🠚Czech dataset) what the subset2evaluate tool does!
+            The goal is to find such a subset of items that ranks the models the same way as the full evaluation would.
+
+            Read the paper <a href="https://arxiv.org/pdf/2501.18251">How to Select Datapoints for Efficient Human Evaluation of NLG Models?</a> or just use the <a href="https://github.com/zouharvi/subset2evaluate">tool</a> for your NLG evaluation.
+        </div>
+    </div>
+
+
+    <script id="nocachescript"></script>
+    <script>
+        var randomNum = String((Math.floor(Math.random() * 10e10)));
+        document.getElementById('nocachescript').src = "web-source.js?t=" + randomNum;
+    </script>
+</body>
+
+</htm22
