@@ -1,0 +1,39 @@
+name: tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -e .
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # auto-fix some errors; to be run locally
+        # for f in experiments/*.py experiments/**/*.py experiments/**/**/*.py subset2evaluate/*.py; do autopep8 --select W293 -i $f; done
+    - name: Test subset2evaluate/test.py with pytest
+      run: |
+        pytest -v subset2evaluate/test.py
