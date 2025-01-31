@@ -1,0 +1,26 @@
+{
+    "main": "webpack.config.js",
+    "devDependencies": {
+        "@types/jquery": "^3.5",
+        "bibtex": "^0.9.0",
+        "gh-pages": "^6.3.0",
+        "ts-loader": "^9",
+        "typescript": "^4.5",
+        "webpack": "^5.68",
+        "webpack-cli": "^4.9",
+        "webpack-dev-server": "^4.7"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack --mode=production",
+        "build_dev": "webpack --mode=development",
+        "watch": "webpack --mode=development --watch ",
+        "dev": "webpack-dev-server --mode=development --open",
+        "dev_prod": "webpack-dev-server --mode=production --open",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d ../out --no-history"
+    },
+    "repository": {
+        "url": "git+https://github.com/zouharvi/subset2evaluate.git"
+    }
+}
