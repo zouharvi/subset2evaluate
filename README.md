@@ -244,3 +244,16 @@ Please file a GitHub issue or [send us an email](mailto:vilem.zouhar@gmail.com).
 The repository is structured as follows:
 - `subset2evaluate/` contains the primary package and all methods 
 - `experiments/` contains scripts to run experiments in the paper
+
+Cite as:
+```
+@misc{zouhar2025selectdatapointsefficienthuman,
+    title={How to Select Datapoints for Efficient Human Evaluation of NLG Models?}, 
+    author={Vilém Zouhar and Peng Cui and Mrinmaya Sachan},
+    year={2025},
+    eprint={2501.18251},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL},
+    url={https://arxiv.org/abs/2501.18251}, 
+}
+```

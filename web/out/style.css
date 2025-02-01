@@ -54,6 +54,14 @@ body {
   color: white;
 }
 
+.item-div:hover {
+  background-color: #0c8;
+}
+
+.item-div-selected:hover {
+  background-color: #066;
+}
+
 #div_intro_timeline > div {
   /* background-color: #c4b1d3; */
   background-color: #0bd;
@@ -82,6 +90,11 @@ input[type=button] {
   border: none;
   cursor: pointer;
 }
+
+input[type=button]:hover {
+  background-color: #f6a;
+}
+
 
 a {
   color: #055;
