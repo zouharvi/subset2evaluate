@@ -39,7 +39,7 @@ General recommendations based on MT evaluation:
 |-|-|-|
 | Good automated metric available, such as `MetricX-23`. | Variance in metric scores. | `method="metric_var", metric="MetricX-23"` |
 | Metric not available but model outputs available. | Diversity of model outputs. | `method="diversity", method="BLEU"` |
-| Model outputs not available, only sources. | Estimated diversity in model outputs. | `method="cometsrc_diversity"` |
+| Model outputs not available, only sources. | Estimated diversity in model outputs. | `method="precomet_diversity"` |
 
 The package supports multiple methods.
 We show benchmark of the methods on machine translation evaluation.
@@ -57,11 +57,11 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 | Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 93.9% | 2.81 |
 | DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
 | **Source-based selection** |
-| Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-var) | `method="cometsrc_var"` | Sources | 92.7% | 2.62 |
-| Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-avg) | `method="cometsrc_avg"` | Sources | 92.2% | 2.68 |
-| Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/COMETsrc-diversity) | `method="cometsrc_diversity"` | Sources | 94.0% | 2.86 |
-| DiffDisc<sup>SRC</sup> [model](TODO) | `method="cometsrc_diffdisc"` | Sources | 93.4% | 2.98 |
-| Consistency<sup>SRC</sup> [model](TODO) | `method="cometsrc_cons"` | Sources | 93.8% | 2.77 |
+| Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
+| Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-avg) | `method="precomet_avg"` | Sources | 92.2% | 2.68 |
+| Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-diversity) | `method="precomet_diversity"` | Sources | 94.0% | 2.86 |
+| DiffDisc<sup>SRC</sup> [model](TODO) | `method="precomet_diffdisc"` | Sources | 93.4% | 2.98 |
+| Consistency<sup>SRC</sup> [model](TODO) | `method="precomet_cons"` | Sources | 93.8% | 2.77 |
 
 
 And benchmark of the methods for summarization.
@@ -84,8 +84,8 @@ For metric-based methods we use coverage but others can be easily used if suppli
 Install the package and download WMT data:
 ```bash
 pip3 install subset2evaluate
-# optionally these two packages for IRT and COMETsrc based selections
-pip3 install git+https://github.com/zouharvi/COMETsrc.git git+https://github.com/zouharvi/py-irt.git
+# optionally these two packages for IRT and PreCOMET based selections
+pip3 install git+https://github.com/zouharvi/PreCOMET.git git+https://github.com/zouharvi/py-irt.git
 ```
 
 Then in Python we compute the baseline:

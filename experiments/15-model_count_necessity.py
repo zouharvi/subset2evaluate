@@ -68,11 +68,11 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
             # we dropped some models but we can recover them with the same ordering from data_old
             for cache, method_kwargs in [
                 (False, dict(method="random")),
-                (True, dict(method="cometsrc_var")),
-                (True, dict(method="cometsrc_avg")),
-                (True, dict(method="cometsrc_diversity")),
-                (True, dict(method="local_cometsrc_diffdisc")),
-                (True, dict(method="local_cometsrc_cons")),
+                (True, dict(method="precomet_var")),
+                (True, dict(method="precomet_avg")),
+                (True, dict(method="precomet_diversity")),
+                (True, dict(method="local_precomet_diffdisc")),
+                (True, dict(method="local_precomet_cons")),
                 (False, dict(method="metric_var", metric="MetricX-23-c")),
                 (False, dict(method="metric_avg", metric="MetricX-23-c")),
                 (False, dict(method="metric_cons", metric="MetricX-23-c")),
@@ -101,16 +101,16 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
 def method_formatter(method):
     DICT = {
         "random": "Random",
-        "cometsrc_var": r"MetricVar\textsuperscript{src}",
-        "cometsrc_avg": r"MetricAvg\textsuperscript{src}",
-        "cometsrc_diversity": r"Diversity\textsuperscript{src}",
+        "precomet_var": r"MetricVar\textsuperscript{src}",
+        "precomet_avg": r"MetricAvg\textsuperscript{src}",
+        "precomet_diversity": r"Diversity\textsuperscript{src}",
         "metric_var": "MetricVar",
         "metric_avg": "MetricAvg",
         "metric_cons": "MetricCons",
         "diversity": "Diversity",
         "pyirt_diffdisc": r"Diff.$\times$Disc.",
-        "local_cometsrc_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
-        "local_cometsrc_cons": r"MetricCons\textsuperscript{src}",
+        "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
+        "local_precomet_cons": r"MetricCons\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]

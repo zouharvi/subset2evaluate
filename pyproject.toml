@@ -11,7 +11,7 @@ packages = ["subset2evaluate"]
 
 [project]
 name = "subset2evaluate"
-version = "1.0.2"
+version = "1.0.3"
 description = "Find informative examples to efficiently (human-)evaluate NLG models."
 license = {text = "MIT"}
 readme = "README.md"
@@ -30,7 +30,7 @@ dependencies = [
   "matplotlib",
   "requests",
   "sentence-transformers",
-  # "unbabel_comet @ git+https://github.com/zouharvi/COMETsrc.git",
+  # "unbabel_comet @ git+https://github.com/zouharvi/PreCOMET.git",
   # "py_irt @ git+https://github.com/zouharvi/py-irt.git",
 ]
 classifiers = [

@@ -18,22 +18,22 @@ points_y_clu = collections.defaultdict(list)
 MODELS = {
     method: subset2evaluate.select_subset.basic(data_old_all[0][1], method=method, return_model=True)[1]
     for method in [
-        "cometsrc_avg",
-        "cometsrc_var",
-        "local_cometsrc_diffdisc",
-        "cometsrc_diversity",
-        "local_cometsrc_cons",
+        "precomet_avg",
+        "precomet_var",
+        "local_precomet_diffdisc",
+        "precomet_diversity",
+        "local_precomet_cons",
     ]
 }
 MODELS["random"] = None
 
 for data_name, data_old in tqdm.tqdm(data_old_all):
     for repetitions, method in [
-        (1, "cometsrc_avg"),
-        (1, "cometsrc_var"),
-        (1, "local_cometsrc_diffdisc"),
-        (1, "cometsrc_diversity"),
-        (1, "local_cometsrc_cons"),
+        (1, "precomet_avg"),
+        (1, "precomet_var"),
+        (1, "local_precomet_diffdisc"),
+        (1, "precomet_diversity"),
+        (1, "local_precomet_cons"),
         (100, "random"),
     ]:
         for _ in range(repetitions):
@@ -53,19 +53,19 @@ points_y_clu = {
 }
 
 # %%
-points_y_cor["cometsrc_cons"] = points_y_cor["local_cometsrc_cons"]
-points_y_clu["cometsrc_cons"] = points_y_clu["local_cometsrc_cons"]
-points_y_cor["cometsrc_diffdisc"] = points_y_cor["local_cometsrc_diffdisc"]
-points_y_clu["cometsrc_diffdisc"] = points_y_clu["local_cometsrc_diffdisc"]
+points_y_cor["precomet_cons"] = points_y_cor["local_precomet_cons"]
+points_y_clu["precomet_cons"] = points_y_clu["local_precomet_cons"]
+points_y_cor["precomet_diffdisc"] = points_y_cor["local_precomet_diffdisc"]
+points_y_clu["precomet_diffdisc"] = points_y_clu["local_precomet_diffdisc"]
 
 utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_cor["random"], f"Random {np.average(points_y_cor['random']):.1%}"),
-        (utils.PROPS, points_y_cor["cometsrc_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_cor['cometsrc_avg']):.1%}"),
-        (utils.PROPS, points_y_cor["cometsrc_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_cor['cometsrc_var']):.1%}"),
-        (utils.PROPS, points_y_cor['cometsrc_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_cor['cometsrc_cons']):.1%}"),
-        (utils.PROPS, points_y_cor['cometsrc_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_cor['cometsrc_diversity']):.1%}"),
-        (utils.PROPS, points_y_cor['cometsrc_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_cor['cometsrc_diffdisc']):.1%}"),
+        (utils.PROPS, points_y_cor["precomet_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_avg']):.1%}"),
+        (utils.PROPS, points_y_cor["precomet_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_var']):.1%}"),
+        (utils.PROPS, points_y_cor['precomet_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_cons']):.1%}"),
+        (utils.PROPS, points_y_cor['precomet_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_diversity']):.1%}"),
+        (utils.PROPS, points_y_cor['precomet_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_cor['precomet_diffdisc']):.1%}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="14-main_sourcebased",
@@ -74,11 +74,11 @@ utils_fig.plot_subset_selection(
 utils_fig.plot_subset_selection(
     [
         (utils.PROPS, points_y_clu["random"], f"Random {np.average(points_y_clu['random']):.2f}"),
-        (utils.PROPS, points_y_clu["cometsrc_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_clu['cometsrc_avg']):.2f}"),
-        (utils.PROPS, points_y_clu["cometsrc_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_clu['cometsrc_var']):.2f}"),
-        (utils.PROPS, points_y_clu['cometsrc_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_clu['cometsrc_cons']):.2f}"),
-        (utils.PROPS, points_y_clu['cometsrc_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_clu['cometsrc_diversity']):.2f}"),
-        (utils.PROPS, points_y_clu['cometsrc_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_clu['cometsrc_diffdisc']):.2f}"),
+        (utils.PROPS, points_y_clu["precomet_avg"], f"MetricAvg$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_avg']):.2f}"),
+        (utils.PROPS, points_y_clu["precomet_var"], f"MetricVar$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_var']):.2f}"),
+        (utils.PROPS, points_y_clu['precomet_cons'], f"MetricCons$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_cons']):.2f}"),
+        (utils.PROPS, points_y_clu['precomet_diversity'], f"Diversity$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_diversity']):.2f}"),
+        (utils.PROPS, points_y_clu['precomet_diffdisc'], f"DiffDisc$^\\mathrm{{src}}$ {np.average(points_y_clu['precomet_diffdisc']):.2f}"),
     ],
     colors=["#000000"] + utils_fig.COLORS,
     filename="14-main_sourcebased",
