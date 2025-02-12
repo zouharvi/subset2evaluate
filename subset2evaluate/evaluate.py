@@ -146,8 +146,15 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
 
     models = list(data_old[0]["scores"].keys())
 
-    scores_old = get_model_absolute(data_old, metric=metric)
-    scores_new = get_model_absolute(data_new, metric=metric)
+
+    if type(metric) == tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
+
+    scores_new = get_model_absolute(data_new, metric=metric1)
+    scores_old = get_model_absolute(data_old, metric=metric2)
 
     result = []
     for model1, model2 in itertools.combinations(models, 2):
@@ -161,13 +168,19 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
     import scipy.stats
     import warnings
 
-    systems = list(data_old[0]["scores"].keys())
+    models = list(data_old[0]["scores"].keys())
 
-    scores_old = get_model_absolute(data_old, metric=metric)
-    scores_new = get_model_absolute(data_new, metric=metric)
+    if type(metric) == tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
 
-    values_old = [scores_old[sys] for sys in systems]
-    values_new = [scores_new[sys] for sys in systems]
+    scores_new = get_model_absolute(data_new, metric=metric1)
+    scores_old = get_model_absolute(data_old, metric=metric2)
+
+    values_new = [scores_new[sys] for sys in models]
+    values_old = [scores_old[sys] for sys in models]
 
     # handle constant input warning
     with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="error"):
@@ -184,14 +197,21 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
     # if we have just 3 samples, we can't say that there are clusters
     if len(data) < 3:
         return 1
+    
+    # for compatibility with the rest of the code, but use metric1 anyway
+    if type(metric) == tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
 
     # sort from top
-    model_ord = list(get_model_absolute(data, metric=metric).items())
+    model_ord = list(get_model_absolute(data, metric=metric1).items())
     model_ord.sort(key=lambda x: x[1], reverse=True)
     model_ord = [model for model, _ in model_ord]
 
     def get_scores(model):
-        return [line["scores"][model][metric] for line in data]
+        return [line["scores"][model][metric1] for line in data]
 
     clusters = [[get_scores(model_ord.pop(0))]]
     while model_ord:
