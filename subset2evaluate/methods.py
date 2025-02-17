@@ -631,9 +631,7 @@ METHODS = {
         model_path2="zouharvi/PreCOMET-disc",
         reverse=False,
     ),
-
-    "local_precomet_cons": partial(precomet, model_path="../../PreCOMET/lightning_logs/ali/checkpoints/e4.ckpt", reverse=False),
-    "local_precomet_diffdisc": partial(precomet, model_path="../../PreCOMET/lightning_logs/diffdisc/checkpoints/e4.ckpt", reverse=False),
+    "precomet_cons": partial(precomet, model_path="zouharvi/PreCOMET-cons", reverse=False),
 }
 
 METHOD_NAMES = {

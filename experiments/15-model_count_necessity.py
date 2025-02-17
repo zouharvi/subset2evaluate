@@ -71,8 +71,8 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                 (True, dict(method="precomet_var")),
                 (True, dict(method="precomet_avg")),
                 (True, dict(method="precomet_diversity")),
-                (True, dict(method="local_precomet_diffdisc")),
-                (True, dict(method="local_precomet_cons")),
+                (True, dict(method="precomet_diffdisc_direct")),
+                (True, dict(method="precomet_cons")),
                 (False, dict(method="metric_var", metric="MetricX-23-c")),
                 (False, dict(method="metric_avg", metric="MetricX-23-c")),
                 (False, dict(method="metric_cons", metric="MetricX-23-c")),
@@ -109,8 +109,8 @@ def method_formatter(method):
         "metric_cons": "MetricCons",
         "diversity": "Diversity",
         "pyirt_diffdisc": r"Diff.$\times$Disc.",
-        "local_precomet_diffdisc": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
-        "local_precomet_cons": r"MetricCons\textsuperscript{src}",
+        "precomet_diffdisc_direct": r"Diff.\textsuperscript{src}$\times$Disc\textsuperscript{src}",
+        "precomet_cons": r"MetricCons\textsuperscript{src}",
     }
     if method in DICT:
         return DICT[method]

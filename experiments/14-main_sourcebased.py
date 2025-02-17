@@ -20,9 +20,9 @@ MODELS = {
     for method in [
         "precomet_avg",
         "precomet_var",
-        "local_precomet_diffdisc",
+        "precomet_diffdisc_direct",
         "precomet_diversity",
-        "local_precomet_cons",
+        "precomet_cons",
     ]
 }
 MODELS["random"] = None
@@ -31,9 +31,9 @@ for data_name, data_old in tqdm.tqdm(data_old_all):
     for repetitions, method in [
         (1, "precomet_avg"),
         (1, "precomet_var"),
-        (1, "local_precomet_diffdisc"),
+        (1, "precomet_diffdisc_direct"),
         (1, "precomet_diversity"),
-        (1, "local_precomet_cons"),
+        (1, "precomet_cons"),
         (100, "random"),
     ]:
         for _ in range(repetitions):
@@ -53,10 +53,10 @@ points_y_clu = {
 }
 
 # %%
-points_y_cor["precomet_cons"] = points_y_cor["local_precomet_cons"]
-points_y_clu["precomet_cons"] = points_y_clu["local_precomet_cons"]
-points_y_cor["precomet_diffdisc"] = points_y_cor["local_precomet_diffdisc"]
-points_y_clu["precomet_diffdisc"] = points_y_clu["local_precomet_diffdisc"]
+points_y_cor["precomet_cons"] = points_y_cor["precomet_cons"]
+points_y_clu["precomet_cons"] = points_y_clu["precomet_cons"]
+points_y_cor["precomet_diffdisc"] = points_y_cor["precomet_diffdisc"]
+points_y_clu["precomet_diffdisc"] = points_y_clu["precomet_diffdisc"]
 
 utils_fig.plot_subset_selection(
     [

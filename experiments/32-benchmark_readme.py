@@ -50,8 +50,8 @@ benchmark_method_mt(repetitions=5, kwargs_dict=dict(method="pyirt_diffdisc", met
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diversity"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_avg"))
 benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_var"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_diffdisc"))
-benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="local_precomet_cons"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_diffdisc_direct"))
+benchmark_method_mt(repetitions=1, kwargs_dict=dict(method="precomet_cons"))
 
 # %%
 benchmark_method_summeval(repetitions=100, kwargs_dict=dict(method="random"))

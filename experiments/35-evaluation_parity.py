@@ -28,9 +28,9 @@ for method_kwargs in [
     dict(method="pyirt_diffdisc", metric="MetricX-23"),
     dict(method="precomet_avg"),
     dict(method="precomet_var"),
-    dict(method="local_precomet_cons"),
+    dict(method="precomet_cons"),
     dict(method="precomet_diversity"),
-    dict(method="local_precomet_diffdisc"),
+    dict(method="precomet_diffdisc_direct"),
 ]:
     par_clu_all = []
     par_cor_all = []
