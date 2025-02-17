@@ -464,7 +464,103 @@ def diversity(data, metric, **kwargs) -> List[float]:
         return diversity_lm(data, **kwargs)
     else:
         raise Exception(f"Unknown diversity metric: {metric}")
+
+
+def diffuse(
+    data: List[Dict],
+    budget: int,
+    load_model=None,
+    return_model=False,
+    **kwargs
+) -> List[float]:
+    """
+    DiffUse is a method based on "Label-Efficient Model Selection for Text Generation"
+    Authors: Shir Ashury-Tahan, Ariel Gera, Benjamin Sznajder, Leshem Choshen, Liat Ein-Dor, Eyal Shnarch
+    Link: https://aclanthology.org/2024.acl-long.456.pdf
+
+    This method requires budget to be specified and can't return a prioritized list because
+    the results non-sequentially depend on the budget parameter.
+    """
+    import warnings
+    import sentence_transformers
+    import itertools
+    import scipy.cluster
+    import copy
     
+    if load_model is not None:
+        # loading data and not model
+        data_x, clusters_desc_all = load_model
+    else:
+        with warnings.catch_warnings(action="ignore", category=FutureWarning):
+            model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+        # encode all in batch
+        data_x_all = [x for line in data for x in line["tgt"].values()]
+        data_embd = list(model_embd.encode(data_x_all))
+
+        # reconstruct original_structure
+        data_x = []
+        for line in data:
+            data_x.append([data_embd.pop(0) for _ in line["tgt"]])
+        assert len(data_embd) == 0
+
+        # TODO: try using abs
+        # compute average difference
+        data_x = [
+            np.average([
+                embd_a - embd_b
+                for embd_a, embd_b in itertools.combinations(line, 2)
+            ], axis=1)
+            for line in data_x
+        ]
+        clusters = scipy.cluster.hierarchy.linkage(data_x, method="ward")
+
+        # maps cluster index to item sets
+        clusters_map = [frozenset({i}) for i in range(len(data))]
+        # shows sets of items in each cluster at each timepoint
+        # start with each item being a cluster on its own
+        clusters_desc_all = [{frozenset({i}) for i in range(len(data))}]
+        for i in range(len(clusters)):
+            # retrieve indices that are being merged
+            cluster_0 = clusters_map[int(clusters[i, 0])]
+            cluster_1 = clusters_map[int(clusters[i, 1])]
+            
+            # add the new cluster to our map
+            cluster_new = cluster_0.union(cluster_1)
+            clusters_map.append(cluster_new)
+
+            cluster_desc = copy.deepcopy(clusters_desc_all[-1])
+            # remove individual old clusters
+            cluster_desc.remove(cluster_0)
+            cluster_desc.remove(cluster_1)
+            # add new cluster
+            cluster_desc.add(cluster_new)
+            clusters_desc_all.append(cluster_desc)
+
+    # take first that fits within budget
+    cluster_desc = [cluster_desc for cluster_desc in clusters_desc_all if len(cluster_desc) <= budget][0]
+    
+    # for each cluster compute the average distance
+    cluster_desc = [list(fs) for fs in cluster_desc]
+    # baseline don't pick any item
+    data_y = [0 for _ in data]
+    # get closest to cluster center
+    for cluster_is in cluster_desc:
+        data_embd_local = [data_x[i] for i in cluster_is]
+        center = np.average(data_embd_local, axis=0)
+
+        dist = np.linalg.norm(data_embd_local - center, axis=1)
+        idx = np.argmin(dist)
+        idx = cluster_is[idx]
+
+        # set utility
+        data_y[idx] = 1
+
+    if return_model:
+        return data_y, (data_x, clusters_desc_all)
+    else:
+        return data_y
+
 
 def combinator(
         data,
@@ -512,6 +608,7 @@ METHODS = {
     "combinator": combinator,
 
     "kmeans": kmeans,
+    "diffuse": diffuse,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),
     "pyirt_disc": partial(pyirt, fn_utility="disc"),

@@ -56,6 +56,7 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 | Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 92.5% | 2.62 |
 | Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 93.9% | 2.81 |
 | DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
+| [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf) | `method="diffuse"` | Outputs | 93.8% | CLU: 2.18 |
 | **Source-based selection** |
 | Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
 | Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-avg) | `method="precomet_avg"` | Sources | 92.2% | 2.68 |
@@ -240,6 +241,7 @@ subset2evaluate.evaluate.eval_subset_correlation(data_costaware, data_full)
 
 We are look forward to contributions, especially (1) using subset2evaluate for other tasks, (2) adding new methods, (3) finding bugs and increasing package usability.
 Please file a GitHub issue or [send us an email](mailto:vilem.zouhar@gmail.com).
+Some methods from other works have already found their way into subset2evaluate, such as [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf).
 
 The repository is structured as follows:
 - `subset2evaluate/` contains the primary package and all methods 
