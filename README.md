@@ -32,7 +32,7 @@ It is based on work of Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zü
 ## Usage
 
 In short, you put list of items in the package and the package sorts the list in descending order (first is better) based on how suitable each item is for evaluation, such as with human annotations.
-In addition to the sorting, the package also returns the item utility stored in the `subset2evalute_utility` field of each item.
+In addition to the sorting, the package also returns the item utility stored in the `subset2evaluate_utility` field of each item.
 General recommendations based on MT evaluation:
 
 | When to use? | What is it? | How to use? |
@@ -99,11 +99,11 @@ len(data_full)
 
 # take only top 100 items to "human-evaluate"
 data_new = subset2evaluate.select_subset.basic(data_full, method="random")
-subset2evaluate.evalute.eval_subset_clusters(data_new[:100])
+subset2evaluate.evaluate.eval_subset_clusters(data_new[:100])
 > 1
 
 # compare it to something better:
-data_new = subset2evaluate.select_subset.basic(data_full, method="metric_var" metric="MetricX-23")
+data_new = subset2evaluate.select_subset.basic(data_full, method="metric_var", metric="MetricX-23")
 subset2evaluate.evaluate.eval_subset_clusters(data_new[:100])
 > 3
 ```
@@ -210,7 +210,7 @@ For cost-aware selection, the package requires two things:
 1. the data has already been ran through `select_subset.basic` method (such that each item now has `subset2evaluate_utility` property), ans
 2. each item has a `cost` value
 The WMT data already have the cost values for each item (estimated annotation time):
-```
+```python
 import subset2evaluate
 data_full = subset2evaluate.utils.load_data("wmt23/en-zh")
 data_full[0]["cost"]

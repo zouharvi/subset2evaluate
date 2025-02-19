@@ -260,24 +260,13 @@ def pyirt(  # noqa: C901
         return scores
 
 
-def _assert_comet_version():
-    try:
-        import comet
-    except ImportError:
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
-
-    if "HypothesislessRegression" not in dir(comet.models):
-        raise Exception("Please install COMET with `pip install git+https://github.com/zouharvi/PreCOMET.git`")
-
-
 def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
     prev_tqdm_setting = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
-    _assert_comet_version()
 
     import logging
-    import comet
+    import precomet
     import warnings
 
     logging.disable(logging.INFO)
@@ -286,9 +275,9 @@ def precomet(data, model_path, return_model=False, load_model=None, reverse=Fals
         if load_model is not None:
             model = load_model
         elif os.path.exists(model_path):
-            model = comet.load_from_checkpoint(model_path)
+            model = precomet.load_from_checkpoint(model_path)
         else:
-            model = comet.load_from_checkpoint(comet.download_model(model_path))
+            model = precomet.load_from_checkpoint(precomet.download_model(model_path))
         scores = model.predict([
             {"src": line["src"]}
             for line in data
@@ -312,9 +301,8 @@ def precomet_dual(data, model_path1, model_path2, return_model=False, load_model
     import os
     tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
-    _assert_comet_version()
 
-    import comet
+    import precomet
     import warnings
     import logging
 
@@ -325,14 +313,14 @@ def precomet_dual(data, model_path1, model_path2, return_model=False, load_model
             model1, model2 = load_model
         else:
             if os.path.exists(model_path1):
-                model1 = comet.load_from_checkpoint(model_path1)
+                model1 = precomet.load_from_checkpoint(model_path1)
             else:
-                model1 = comet.load_from_checkpoint(comet.download_model(model_path1))
+                model1 = precomet.load_from_checkpoint(precomet.download_model(model_path1))
 
             if os.path.exists(model_path2):
-                model2 = comet.load_from_checkpoint(model_path2)
+                model2 = precomet.load_from_checkpoint(model_path2)
             else:
-                model2 = comet.load_from_checkpoint(comet.download_model(model_path2))
+                model2 = precomet.load_from_checkpoint(precomet.download_model(model_path2))
         scores1 = model1.predict([
             {"src": line["src"]}
             for line in data
