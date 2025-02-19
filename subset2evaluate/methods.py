@@ -297,6 +297,45 @@ def precomet(data, model_path, return_model=False, load_model=None, reverse=Fals
         return scores
 
 
+def sentinel_src(
+        data,
+        model_path,
+        return_model=False,
+        load_model=None,
+        reverse=False,
+        **kwargs
+):
+    """
+    Sentinel-SRC is a method based on "Guardians of the Machine Translation Meta-Evaluation: Sentinel Metrics Fall In!"
+    Authors: Stefano Perrella, Lorenzo Proietti, Alessandro Scirè, Edoardo Barba, Roberto Navigli
+    Link: https://aclanthology.org/2024.acl-long.856.pdf
+
+    To use this method, you need to install sentinel_metric with:
+    ```
+    pip install git+https://github.com/SapienzaNLP/guardians-mt-eval.git
+    ```
+    """
+    import sentinel_metric
+    if load_model is not None:
+        model = load_model
+    elif os.path.exists(model_path):
+        model = sentinel_metric.load_from_checkpoint(model_path)
+    else:
+        model = sentinel_metric.load_from_checkpoint(sentinel_metric.download_model(model_path))
+
+    scores = model.predict([
+        {"src": line["src"]}
+        for line in data
+    ], progress_bar=False).scores
+    if reverse:
+        scores = [-x for x in scores]
+        
+    if return_model:
+        return scores, model
+    else:
+        return scores
+
+
 def precomet_dual(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
     import os
     tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
@@ -620,6 +659,9 @@ METHODS = {
         reverse=False,
     ),
     "precomet_cons": partial(precomet, model_path="zouharvi/PreCOMET-cons", reverse=False),
+
+    "sentinel_src": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-da", reverse=True),
+    "sentinel_src_mqm": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-mqm", reverse=True),
 }
 
 METHOD_NAMES = {

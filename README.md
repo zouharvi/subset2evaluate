@@ -47,7 +47,7 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 
 | Method | Function signature | Requirements | Correlation | Clusters |
 |-|-|-|-|-|
-| Random | `random` | | 92.5% | 2.25
+| Random | `method="random"` | | 92.5% | 2.25
 | **Output-based selection** |
 | Metric variance | `method="metric_var", metric="MetricX-23"` | Metric scores | 93.8% | 3.22
 | Metric average | `method="metric_avg", metric="MetricX-23"` | Metric scores | 92.9% | 3.16 |
@@ -56,13 +56,15 @@ For the metric-based methods, the results use MetricX-23 but others can be easil
 | Diversity unigram | `method="diversity", metric="unigram"` | Outputs | 92.5% | 2.62 |
 | Diversity [LM](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2) | `method="diversity", metric="lm"` | Outputs | 93.9% | 2.81 |
 | DiffDisc | `method="pyirt_diffdisc", metric="MetricX-23"` | Metric scores | 93.7% | 2.83 |
-| [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf) | `method="diffuse"` | Outputs | 93.8% | CLU: 2.18 |
+| [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf) | `method="diffuse"` | Outputs | 93.8% | 2.18 |
 | **Source-based selection** |
 | Var<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-var) | `method="precomet_var"` | Sources | 92.7% | 2.62 |
 | Avg<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-avg) | `method="precomet_avg"` | Sources | 92.2% | 2.68 |
 | Diversity<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-diversity) | `method="precomet_diversity"` | Sources | 94.0% | 2.86 |
-| DiffDisc<sup>SRC</sup> [model](TODO) | `method="precomet_diffdisc"` | Sources | 93.4% | 2.98 |
-| Consistency<sup>SRC</sup> [model](TODO) | `method="precomet_cons"` | Sources | 93.8% | 2.77 |
+| DiffDisc<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-diffdisc_direct) | `method="precomet_diffdisc_direct"` | Sources | 93.4% | 2.98 |
+| Consistency<sup>SRC</sup> [model](https://huggingface.co/zouharvi/PreCOMET-cons) | `method="precomet_cons"` | Sources | 93.8% | 2.77 |
+| [Sentinel-SRC-DA](https://huggingface.co/sapienzanlp/sentinel-src-da) | `method="sentinel_src"` | Sources | 92.7% | 2.83 |
+| [Sentinel-SRC-MQM](https://huggingface.co/sapienzanlp/sentinel-src-mqm) | `method="sentinel_src_mqm"` | Sources | 92.9% | 3.00 |
 
 
 And benchmark of the methods for summarization.
