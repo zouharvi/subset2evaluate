@@ -9,6 +9,8 @@
 [![PyPi license](https://badgen.net/pypi/license/subset2evaluate/)](https://pypi.org/project/subset2evaluate/)
 &nbsp;
 [![Testing](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml/badge.svg)](https://github.com/zouharvi/subset2evaluate/actions/workflows/test.yml)
+&nbsp;
+[![Hugging Face Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Collection-FCD21D)](https://huggingface.co/collections/zouharvi/precomet-67b5e9ce9782a5e2fd289268)
 <hr>
 
 Package to select informative samples to human-evaluate for NLG tasks such as machine translation or summarization.
