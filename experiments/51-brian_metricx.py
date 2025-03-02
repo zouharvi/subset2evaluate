@@ -2,8 +2,6 @@
 
 import subset2evaluate.utils
 import subset2evaluate.evaluate
-import json
-import random
 import collections
 import numpy as np
 

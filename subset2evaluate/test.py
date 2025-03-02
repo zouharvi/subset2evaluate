@@ -12,11 +12,13 @@ def test_wmt_loader():
     assert "tgt" in data[("wmt23", "en-cs")][0]
     assert "scores" in data[("wmt23", "en-cs")][0]
 
+
 def test_wmt_loader_mqm():
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es")
     assert len(data) == 635
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", file_protocol="mqm")
     assert len(data) == 622
+
 
 def test_wmt_method_random():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-cs", method="random", seed=0)

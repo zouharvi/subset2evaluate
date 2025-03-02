@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 from typing import Dict
 import numpy as np
 PROPS = np.geomspace(0.05, 0.5, 10)
@@ -68,7 +68,14 @@ def ensure_wmt_exists():
         os.remove("data/mt-metrics-eval-v2.tgz")
 
 
-def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False, file_protocol=None, file_reference=None):  # noqa: C901
+def load_data_wmt(  # noqa: C901
+    year: str = "wmt23",
+    langs: str = "en-cs",
+    normalize: bool = True,
+    binarize: bool = False,
+    file_protocol: Optional[str] = None,
+    file_reference: Optional[str] = None,
+):
     import glob
     import collections
     import numpy as np
@@ -76,7 +83,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False, f
     import pickle
     import contextlib
 
-    # temporarily change to the root directory
+    # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
         ensure_wmt_exists()
 
@@ -142,7 +149,7 @@ def load_data_wmt(year="wmt23", langs="en-cs", normalize=True, binarize=False, f
             f_protocols = [
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.{file_protocol}.seg.score",
             ]
-        else :
+        else:
             f_protocols = [
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
@@ -365,7 +372,10 @@ def load_data_wmt_all(min_items=500, **kwargs):
     return {k: v for k, v in data.items() if len(v) > min_items}
 
 
-def load_data_summeval(normalize=True, load_extra=False):
+def load_data_summeval(  # noqa: C901
+    normalize: str = True,
+    load_extra: str = False,
+):
     from datasets import load_dataset
     from functools import reduce
     import collections
@@ -373,7 +383,7 @@ def load_data_summeval(normalize=True, load_extra=False):
     import os
     import pickle
 
-    # temporarily change to the root directory
+    # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
         os.makedirs("data/cache/", exist_ok=True)
         cache_f = f"data/cache/summeval_n{int(normalize)}_l{int(load_extra)}.pkl"
@@ -436,7 +446,7 @@ def load_data_summeval(normalize=True, load_extra=False):
     ]
 
     if load_extra:
-        # temporarily change to the root directory
+        # temporarily change to the root directory, this requires Python 3.11
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
             data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_gpt.jsonl")
@@ -460,8 +470,7 @@ def load_data_summeval(normalize=True, load_extra=False):
                 for sys, v in x["scores"].items()
             }
 
-
-        # temporarily change to the root directory
+        # temporarily change to the root directory, this requires Python 3.11
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
             data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_unieval.jsonl")
@@ -479,8 +488,12 @@ def load_data_summeval(normalize=True, load_extra=False):
             }
             x["scores"] = {
                 sys: v | {
-                    "unieval_sum": v["unieval_relevance"] + v["unieval_coherence"] + v["unieval_consistency"] + v["unieval_fluency"],
-                    "unieval_mul": v["unieval_relevance"] * v["unieval_coherence"] * v["unieval_consistency"] * v["unieval_fluency"],
+                    "unieval_sum": (
+                        v["unieval_relevance"] + v["unieval_coherence"] + v["unieval_consistency"] + v["unieval_fluency"]
+                    ),
+                    "unieval_mul": (
+                        v["unieval_relevance"] * v["unieval_coherence"] * v["unieval_consistency"] * v["unieval_fluency"]
+                    ),
                 }
                 for sys, v in x["scores"].items()
             }
@@ -488,8 +501,7 @@ def load_data_summeval(normalize=True, load_extra=False):
     if normalize:
         _data_minmax_normalize(data)
 
-
-    # temporarily change to the root directory
+    # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
         # save cache
         with open(cache_f, "wb") as f:

@@ -1,5 +1,4 @@
 from typing import Callable, List, Text, Tuple
-import warnings
 
 
 COLORS = [
@@ -173,10 +172,10 @@ def plot_subset_selection(
     tex_out += "\n"
 
     if IS_CLUSTERS:
-        plt.ylabel("Cluster count" + " " * 5,fontweight='bold')
+        plt.ylabel("Cluster count" + " " * 5, fontweight='bold')
     else:
         # set bold ylabel
-        plt.ylabel("Rank correlation" + " " * 5,fontweight='bold')
+        plt.ylabel("Rank correlation" + " " * 5, fontweight='bold')
     plt.xlabel("Proportion of original data", labelpad=-0.5)
 
     plt.xticks(

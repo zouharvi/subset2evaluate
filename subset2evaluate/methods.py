@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from functools import partial
 import numpy as np
 import subset2evaluate.evaluate
@@ -6,27 +6,27 @@ import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-def random_subset(data, seed=None, **kwargs) -> List[float]:
+def random_subset(data: List[Dict], seed=None, **kwargs) -> List[float]:
     import random
     r = random.Random(seed)
     return [r.random() for _ in data]
 
 
-def metric_avg(data, metric, **kwargs) -> List[float]:
+def metric_avg(data: List[Dict], metric, **kwargs) -> List[float]:
     return [
         -np.average([model_v[metric] for model_v in item["scores"].values()])
         for item in data
     ]
 
 
-def metric_var(data, metric, **kwargs) -> List[float]:
+def metric_var(data: List[Dict], metric, **kwargs) -> List[float]:
     return [
         np.var([model_v[metric] for model_v in item["scores"].values()])
         for item in data
     ]
 
 
-def metric_consistency(data, metric, metric_target=None, **kwargs) -> List[float]:
+def metric_consistency(data: List[Dict], metric, metric_target=None, **kwargs) -> List[float]:
     import scipy.stats
     import warnings
     if metric_target is None:
@@ -52,11 +52,12 @@ def metric_consistency(data, metric, metric_target=None, **kwargs) -> List[float
 
 
 def kmeans(
-        data, budget,
-        load_model=None,
-        return_model=False,
-        features: Literal["src", "tgt_rand", "tgt_0"] = "src",
-        **kwargs
+    data: List[Dict],
+    budget: float,
+    load_model: Optional[object] = None,
+    return_model: bool = False,
+    features: Literal["src", "tgt_rand", "tgt_0"] = "src",
+    **kwargs
 ) -> List[float]:
     import sklearn.cluster
     import sentence_transformers
@@ -124,13 +125,15 @@ def fn_irt_utility(item_old, item_irt, data_irt, fn_utility) -> float:
 
 
 def pyirt(  # noqa: C901
-        data, metric,
-        return_model=False,
-        load_model=None,
-        model="4pl_score",
-        dropout=0.25, epochs=1000,
-        enforce_positive_disc=False,
-        **kwargs
+    data: List[Dict],
+    metric: str,
+    return_model: bool = False,
+    load_model: Optional[object] = None,
+    model: str = "4pl_score",
+    dropout=0.25,
+    epochs=1000,
+    enforce_positive_disc: bool = False,
+    **kwargs
 ) -> Union[List[float], Tuple[List[float], Any]]:
     try:
         import py_irt
@@ -260,7 +263,14 @@ def pyirt(  # noqa: C901
         return scores
 
 
-def precomet(data, model_path, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+def precomet(
+    data: List[Dict],
+    model_path: str,
+    return_model: bool = False,
+    load_model: Optional[object] = None,
+    reverse: bool = False,
+    **kwargs
+) -> Union[List, Tuple[List, Any]]:
     import os
     prev_tqdm_setting = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
@@ -298,12 +308,12 @@ def precomet(data, model_path, return_model=False, load_model=None, reverse=Fals
 
 
 def sentinel_src(
-        data,
-        model_path,
-        return_model=False,
-        load_model=None,
-        reverse=False,
-        **kwargs
+    data: List[Dict],
+    model_path: str,
+    return_model: str = False,
+    load_model: Optional[object] = None,
+    reverse: bool = False,
+    **kwargs
 ):
     """
     Sentinel-SRC is a method based on "Guardians of the Machine Translation Meta-Evaluation: Sentinel Metrics Fall In!"
@@ -329,14 +339,22 @@ def sentinel_src(
     ], progress_bar=False).scores
     if reverse:
         scores = [-x for x in scores]
-        
+
     if return_model:
         return scores, model
     else:
         return scores
 
 
-def precomet_dual(data, model_path1, model_path2, return_model=False, load_model=None, reverse=False, **kwargs) -> Union[List, Tuple[List, Any]]:
+def precomet_dual(
+    data: List[Dict],
+    model_path1: str,
+    model_path2: str,
+    return_model: bool = False,
+    load_model: Optional[object] = None,
+    reverse: bool = False,
+    **kwargs
+) -> Union[List, Tuple[List, Any]]:
     import os
     tqdm_disable_prev = os.environ.get("TQDM_DISABLE", None)
     os.environ["TQDM_DISABLE"] = "1"
@@ -452,7 +470,6 @@ def diversity_chrf(data, **kwargs) -> List[float]:
     ]
 
 
-
 def diversity_lm(data, **kwargs) -> List[float]:
     import itertools
     import sentence_transformers
@@ -460,7 +477,7 @@ def diversity_lm(data, **kwargs) -> List[float]:
 
     with warnings.catch_warnings(action="ignore", category=FutureWarning):
         model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
-    
+
     embds = list(model_embd.encode([
         tgt
         for line in data
@@ -513,7 +530,7 @@ def diffuse(
     import itertools
     import scipy.cluster
     import copy
-    
+
     if load_model is not None:
         # loading data and not model
         data_x, clusters_desc_all = load_model
@@ -551,7 +568,7 @@ def diffuse(
             # retrieve indices that are being merged
             cluster_0 = clusters_map[int(clusters[i, 0])]
             cluster_1 = clusters_map[int(clusters[i, 1])]
-            
+
             # add the new cluster to our map
             cluster_new = cluster_0.union(cluster_1)
             clusters_map.append(cluster_new)
@@ -566,7 +583,7 @@ def diffuse(
 
     # take first that fits within budget
     cluster_desc = [cluster_desc for cluster_desc in clusters_desc_all if len(cluster_desc) <= budget][0]
-    
+
     # for each cluster compute the average distance
     cluster_desc = [list(fs) for fs in cluster_desc]
     # baseline don't pick any item
@@ -590,12 +607,12 @@ def diffuse(
 
 
 def combinator(
-        data,
-        methods: List[Dict],
-        operation: Literal["mul", "sum"] = "mul",
-        normalize_zscore: bool = True,
-        normalize_01: bool = True,
-        **kwargs
+    data: List[Dict],
+    methods: List[Dict],
+    operation: Literal["mul", "sum"] = "mul",
+    normalize_zscore: bool = True,
+    normalize_01: bool = True,
+    **kwargs
 ) -> List[float]:
     scores = []
     for method_kwargs in methods:
@@ -612,7 +629,10 @@ def combinator(
 
     if normalize_01:
         # make positive and in [0, 1]
-        scores = (scores - np.min(scores, axis=1, keepdims=True)) / (np.max(scores, axis=1, keepdims=True) - np.min(scores, axis=1, keepdims=True))
+        scores = (
+            (scores - np.min(scores, axis=1, keepdims=True)) /
+            (np.max(scores, axis=1, keepdims=True) - np.min(scores, axis=1, keepdims=True))
+        )
 
     if operation == "mul":
         scores = np.prod(scores, axis=0)
@@ -629,7 +649,7 @@ METHODS = {
     "metric_avg": metric_avg,
     "metric_var": metric_var,
     "metric_cons": metric_consistency,
-    
+
     "diversity": diversity,
 
     "combinator": combinator,

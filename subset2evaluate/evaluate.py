@@ -146,8 +146,7 @@ def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="hum
 
     models = list(data_old[0]["scores"].keys())
 
-
-    if type(metric) == tuple:
+    if type(metric) is tuple:
         metric1, metric2 = metric
     else:
         metric1 = metric
@@ -170,7 +169,7 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
 
     models = list(data_old[0]["scores"].keys())
 
-    if type(metric) == tuple:
+    if type(metric) is tuple:
         metric1, metric2 = metric
     else:
         metric1 = metric
@@ -197,9 +196,9 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
     # if we have just 3 samples, we can't say that there are clusters
     if len(data) < 3:
         return 1
-    
+
     # for compatibility with the rest of the code, but use metric1 anyway
-    if type(metric) == tuple:
+    if type(metric) is tuple:
         metric1, metric2 = metric
     else:
         metric1 = metric
