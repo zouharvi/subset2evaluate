@@ -75,6 +75,7 @@ def load_data_wmt(  # noqa: C901
     binarize: bool = False,
     file_protocol: Optional[str] = None,
     file_reference: Optional[str] = None,
+    zero_bad: bool = True,
 ):
     import glob
     import collections
@@ -88,7 +89,7 @@ def load_data_wmt(  # noqa: C901
         ensure_wmt_exists()
 
         os.makedirs("data/cache/", exist_ok=True)
-        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_fp{file_protocol}_fr{file_reference}.pkl"
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_zb{int(zero_bad)}_fp{file_protocol}_fr{file_reference}.pkl"
 
         # load cache if exists
         if os.path.exists(cache_f):
@@ -191,9 +192,12 @@ def load_data_wmt(  # noqa: C901
         line_id_true = 0
 
         # remove models that have no outputs
+        ANNOTATION_BAD = {"None"}
+        if zero_bad:
+            ANNOTATION_BAD |= {"0"}
         models_bad = set()
         for model, scores in lines_score.items():
-            if all([x["human"] in {"None", "0"} for x in scores]):
+            if all([x["human"] in ANNOTATION_BAD for x in scores]):
                 models_bad.add(model)
         models = [model for model in models if model not in models_bad]
 
@@ -201,7 +205,7 @@ def load_data_wmt(  # noqa: C901
             # filter None on the whole row
             # TODO: maybe still consider segments with 0?
             # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
-            if any([lines_score[model][line_i]["human"] in {"None", "0"} for model in models]):
+            if any([lines_score[model][line_i]["human"] in ANNOTATION_BAD for model in models]):
                 continue
             # metrics = set(lines_score[models[0]][line_i].keys())
             # # if we're missing some metric, skip the line
