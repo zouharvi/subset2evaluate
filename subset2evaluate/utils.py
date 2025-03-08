@@ -1,6 +1,8 @@
+import importlib.metadata
 from typing import List, Optional, Union
 from typing import Dict
 import numpy as np
+import subset2evaluate
 PROPS = np.geomspace(0.05, 0.5, 10)
 
 
@@ -83,6 +85,7 @@ def load_data_wmt(  # noqa: C901
     import os
     import pickle
     import contextlib
+    import importlib.metadata
 
     # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
@@ -94,7 +97,11 @@ def load_data_wmt(  # noqa: C901
         # load cache if exists
         if os.path.exists(cache_f):
             with open(cache_f, "rb") as f:
-                return pickle.load(f)
+                cache = pickle.load(f)
+                # only load data if they come from the same version
+                if isinstance(cache, dict) and "version" in cache.keys() and cache["version"] == importlib.metadata.version("subset2evaluate"):
+                    return cache["data"]
+        
 
         lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
         lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
@@ -270,7 +277,7 @@ def load_data_wmt(  # noqa: C901
 
         # save cache
         with open(cache_f, "wb") as f:
-            pickle.dump(data, f)
+            pickle.dump({"version": importlib.metadata.version("subset2evaluate"), "data": data}, f)
 
     return data
 

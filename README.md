@@ -245,7 +245,7 @@ subset2evaluate.evaluate.eval_subset_correlation(data_costaware, data_full)
 
 We are look forward to contributions, especially (1) using subset2evaluate for other tasks, (2) adding new methods, (3) finding bugs and increasing package usability.
 Please file a GitHub issue or [send us an email](mailto:vilem.zouhar@gmail.com).
-Some methods from other works have already found their way into subset2evaluate, such as [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf).
+Some methods from other works have already found their way into subset2evaluate, such as [DiffUse](https://aclanthology.org/2024.acl-long.456.pdf) or [Sentinel Metrics](https://huggingface.co/sapienzanlp/sentinel-src-mqm).
 
 The repository is structured as follows:
 - `subset2evaluate/` contains the primary package and all methods 

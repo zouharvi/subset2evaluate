@@ -1,3 +1,5 @@
+# %%
+
 import numpy as np
 import subset2evaluate
 
@@ -5,9 +7,9 @@ import subset2evaluate
 def test_wmt_loader():
     data = subset2evaluate.utils.load_data("wmt/all", min_items=400)
     assert isinstance(data, dict)
-    assert len(data) == 53
+    assert len(data) == 58
     assert len(data[("wmt23", "en-cs")]) == 1098
-    assert len([k for k, v in data.items() if k[0].startswith("wmt23")]) == 9
+    assert len([k for k, v in data.items() if k[0].startswith("wmt23")]) == 10
     assert "src" in data[("wmt23", "en-cs")][0]
     assert "tgt" in data[("wmt23", "en-cs")][0]
     assert "scores" in data[("wmt23", "en-cs")][0]
@@ -15,7 +17,7 @@ def test_wmt_loader():
 
 def test_wmt_loader_mqm():
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es")
-    assert len(data) == 635
+    assert len(data) == 634
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", file_protocol="mqm")
     assert len(data) == 622
 
