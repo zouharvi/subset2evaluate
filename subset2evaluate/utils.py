@@ -75,7 +75,7 @@ def load_data_wmt(  # noqa: C901
     binarize: bool = False,
     file_protocol: Optional[str] = None,
     file_reference: Optional[str] = None,
-    zero_bad: bool = True,
+    zero_bad: bool = False,
 ):
     import glob
     import collections
@@ -124,13 +124,13 @@ def load_data_wmt(  # noqa: C901
 
         lines_ref = open(fname, "r").readlines()
 
-        # take care of canaries because scores don't have them
-        if lines_src[0].lower().startswith("canary"):
+        # do not consider canary line
+        contain_canary_line = lines_src[0].lower().startswith("canary")
+        if contain_canary_line:
             lines_src.pop(0)
-        if lines_doc[0].lower().startswith("canary"):
             lines_doc.pop(0)
-        if lines_ref[0].lower().startswith("canary"):
             lines_ref.pop(0)
+
 
         line_model = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
@@ -139,7 +139,7 @@ def load_data_wmt(  # noqa: C901
                 continue
 
             line_model[model] = open(f, "r").readlines()
-            if line_model[model][0].lower().startswith("canary"):
+            if contain_canary_line:
                 line_model[model].pop(0)
 
         models = list(line_model.keys())
@@ -171,7 +171,13 @@ def load_data_wmt(  # noqa: C901
         for line_raw in open(fname, "r").readlines():
             model, score = line_raw.strip().split()
             lines_score[model].append({"human": score})
+        if contain_canary_line:
+            for model in lines_score:
+                lines_score[model].pop(0)
 
+        total_n_srcs = len(lines_src)
+        if contain_canary_line:
+            total_n_srcs += 1
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
             metric = f.split("/")[-1].removesuffix("-refA.seg.score")
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
@@ -180,8 +186,16 @@ def load_data_wmt(  # noqa: C901
                 # NOTE: another option is remove the *models*
                 if model not in lines_score:
                     continue
-                # NOTE: there's no guarantee that this indexing is correct
-                lines_score[model][line_i % len(lines_src)][metric] = float(score)
+
+                model_line_i = line_i % total_n_srcs
+                if contain_canary_line:
+                    # do not include canary line scores
+                    if model_line_i == 0:
+                        continue
+
+                    model_line_i -= 1
+
+                lines_score[model][model_line_i][metric] = float(score)
 
         # filter out lines that have no human score
         lines_score = {k: v for k, v in lines_score.items() if len(v) > 0}
