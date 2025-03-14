@@ -78,6 +78,7 @@ def load_data_wmt(  # noqa: C901
     file_protocol: Optional[str] = None,
     file_reference: Optional[str] = None,
     zero_bad: bool = False,
+    include_ref: bool = False,
 ):
     import glob
     import collections
@@ -92,7 +93,7 @@ def load_data_wmt(  # noqa: C901
         ensure_wmt_exists()
 
         os.makedirs("data/cache/", exist_ok=True)
-        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_zb{int(zero_bad)}_fp{file_protocol}_fr{file_reference}.pkl"
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_zb{int(zero_bad)}_ir{int(include_ref)}_fp{file_protocol}_fr{file_reference}.pkl"
 
         # load cache if exists
         if os.path.exists(cache_f):
@@ -142,7 +143,9 @@ def load_data_wmt(  # noqa: C901
         line_model = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
             model = f.split("/")[-1].removesuffix(".txt")
-            if model in {"synthetic_ref", "refA", "chrf_bestmbr"}:
+            if model in {"refA"} and not include_ref:
+                continue
+            if model in {"synthetic_ref", "chrf_bestmbr"}:
                 continue
 
             line_model[model] = open(f, "r").readlines()
@@ -224,8 +227,6 @@ def load_data_wmt(  # noqa: C901
 
         for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
             # filter None on the whole row
-            # TODO: maybe still consider segments with 0?
-            # NOTE: if we do that, then we won't have metrics annotations for all segments, which is bad
             if any([lines_score[model][line_i]["human"] in ANNOTATION_BAD for model in models]):
                 continue
             # metrics = set(lines_score[models[0]][line_i].keys())
@@ -290,11 +291,16 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt23", "cs-uk"),
             ("wmt23", "de-en"),
             ("wmt23", "en-cs"),
+            ("wmt23", "en-he"),
             ("wmt23", "en-de"),
             ("wmt23", "en-ja"),
+            ("wmt23", "en-ru"),
+            ("wmt23", "en-uk"),
             ("wmt23", "en-zh"),
             ("wmt23", "he-en"),
             ("wmt23", "ja-en"),
+            ("wmt23", "ru-en"),
+            ("wmt23", "uk-en"),
             ("wmt23", "zh-en"),
 
             # NOTE: intentionally not the first so that [:9] is reserved for evaluation
@@ -313,6 +319,7 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt22", "cs-en"),
             ("wmt22", "cs-uk"),
             ("wmt22", "de-en"),
+            ("wmt22", "de-fr"),
             ("wmt22", "en-cs"),
             ("wmt22", "en-de"),
             ("wmt22", "en-hr"),
@@ -321,9 +328,11 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt22", "en-ru"),
             ("wmt22", "en-uk"),
             ("wmt22", "en-zh"),
+            ("wmt22", "fr-de"),
             ("wmt22", "ja-en"),
             ("wmt22", "liv-en"),
             ("wmt22", "ru-en"),
+            ("wmt22", "ru-sah"),
             ("wmt22", "sah-ru"),
             ("wmt22", "uk-cs"),
             ("wmt22", "uk-en"),
