@@ -1,4 +1,5 @@
 import importlib.metadata
+import itertools
 from typing import List, Optional, Union
 from typing import Dict
 import numpy as np
@@ -188,7 +189,8 @@ def load_data_wmt(  # noqa: C901
         total_n_srcs = len(lines_src)
         if contain_canary_line:
             total_n_srcs += 1
-        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*-refA.seg.score"):
+        
+        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"):
             metric = f.split("/")[-1].removesuffix("-refA.seg.score")
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
                 model, score = line_raw.strip().split("\t")
