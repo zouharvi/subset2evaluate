@@ -4,6 +4,8 @@ from typing import List, Optional, Union
 from typing import Dict
 import numpy as np
 import subset2evaluate
+from subset2evaluate.reference_info import year2std_refs
+
 PROPS = np.geomspace(0.05, 0.5, 10)
 
 
@@ -80,6 +82,7 @@ def load_data_wmt(  # noqa: C901
     file_reference: Optional[str] = None,
     zero_bad: bool = False,
     include_ref: bool = False,
+    include_human: bool = False,
 ):
     import glob
     import collections
@@ -94,7 +97,7 @@ def load_data_wmt(  # noqa: C901
         ensure_wmt_exists()
 
         os.makedirs("data/cache/", exist_ok=True)
-        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_zb{int(zero_bad)}_ir{int(include_ref)}_fp{file_protocol}_fr{file_reference}.pkl"
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_fp{file_protocol}_fr{file_reference}_zb{int(zero_bad)}_ir{int(include_ref)}_ih{include_human}.pkl"
 
         # load cache if exists
         if os.path.exists(cache_f):
@@ -109,29 +112,25 @@ def load_data_wmt(  # noqa: C901
         lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
         lines_ref = None
 
-        if file_reference is not None:
-            f_references = [
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.{file_reference}.txt",
-            ]
-        else:
-            f_references = [
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refB.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refC.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refa.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refb.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refc.txt",
-                f"data/mt-metrics-eval-v2/{year}/references/{langs}.ref.txt",
-            ]
+        refs_dir = f"data/mt-metrics-eval-v2/{year}/references"
+        selected_human_ref = file_reference if file_reference is not None else year2std_refs[year][langs]
+        file_reference_path = f"{refs_dir}/{langs}.{selected_human_ref}.txt"
 
-        for fname in [*f_references, False]:
-            if os.path.exists(fname):
-                break
-        if not fname:
+        if not os.path.exists(file_reference_path):
             # did not find reference
             return []
 
-        lines_ref = open(fname, "r").readlines()
+        lines_ref = open(file_reference_path, "r").readlines()
+
+        # collect all human reference names (used for filtering in case include_human is True)
+        pattern = f"{langs}.*.txt"
+        ref_files = glob.glob(os.path.join(refs_dir, pattern))
+        human_refs = set()
+        for filepath in ref_files:
+            basename = os.path.basename(filepath)  # es. "en-de.refB.txt"
+            parts = basename.split(".")  # -> ["en-de", "refB", "txt"]
+            if len(parts) == 3 and parts[0] == langs:
+                human_refs.add(parts[1])
 
         # do not consider canary line
         contain_canary_line = lines_src[0].lower().startswith("canary")
@@ -144,9 +143,11 @@ def load_data_wmt(  # noqa: C901
         line_model = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
             model = f.split("/")[-1].removesuffix(".txt")
-            if model in {"refA"} and not include_ref:
+            if model == selected_human_ref and not include_ref:
                 continue
             if model in {"synthetic_ref", "chrf_bestmbr"}:
+                continue
+            if model in human_refs and not include_human:
                 continue
 
             line_model[model] = open(f, "r").readlines()
@@ -191,7 +192,11 @@ def load_data_wmt(  # noqa: C901
             total_n_srcs += 1
         
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"):
-            metric = f.split("/")[-1].removesuffix("-refA.seg.score")
+            # among ref-based metrics, load only the scores for the selected human ref
+            if not f.endswith(f"-{selected_human_ref}.seg.score") and not f.endswith("-src.seg.score"):
+                continue
+            # remove suffix for both ref-based and ref-less metrics
+            metric = f.split("/")[-1].removesuffix(f"-{selected_human_ref}.seg.score").removesuffix("-src.seg.score")
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
                 model, score = line_raw.strip().split("\t")
                 # for refA, refB, synthetic_ref, and other "modeltems" not evaluated
@@ -248,7 +253,7 @@ def load_data_wmt(  # noqa: C901
                 "src": line_src.strip(),
                 "ref": line_ref.strip(),
                 "tgt": {model: line_model[model][line_i].strip() for model in models},
-                # just very rough estimate, the coefficients don't matter because it'll be normalized later anyway
+                # just a very rough estimate, the coefficients don't matter because it'll be normalized later anyway
                 "cost": 0.15 * word_count + 33.7,
                 "domain": line_domain,
                 "doc": line_doc,
