@@ -7,7 +7,7 @@ import tqdm
 import subset2evaluate.evaluate
 import subset2evaluate.select_subset
 
-data_old_all = list(utils.load_data_wmt_all().values())[:9]
+data_old_all = list(utils.load_data_wmt_test().values())
 
 points_y_cor_all = []
 points_y_clu_all = []

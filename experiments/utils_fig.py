@@ -131,6 +131,7 @@ def plot_subset_selection(
         colors: List[str] = COLORS,
         height=2.5,
         ylim=None,
+        fn_extra: Callable = lambda _: None,
 ):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as mtick
@@ -184,6 +185,8 @@ def plot_subset_selection(
     )
 
     ax = plt.gca()
+    fn_extra(ax)
+
     ax.spines[['top', 'right']].set_visible(False)
     # ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
     if not IS_CLUSTERS:

@@ -289,11 +289,39 @@ def load_data_wmt(  # noqa: C901
 
     return data
 
+def load_data_wmt_test(**kwargs):
+    data = {
+        args: load_data_wmt(*args, **kwargs)
+        for args in [
+            ("wmt23", "cs-uk"),
+            ("wmt23", "de-en"),
+            ("wmt23", "en-cs"),
+            ("wmt23", "en-de"),
+            ("wmt23", "en-ja"),
+            ("wmt23", "en-zh"),
+            ("wmt23", "he-en"),
+            ("wmt23", "ja-en"),
+            ("wmt23", "zh-en"),
+        ]
+    }
+    return data
 
 def load_data_wmt_all(min_items=500, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
+            ("wmt24", "cs-uk"),
+            ("wmt24", "en-cs"),
+            ("wmt24", "en-de"),
+            ("wmt24", "en-es"),
+            ("wmt24", "en-hi"),
+            ("wmt24", "en-is"),
+            ("wmt24", "en-ja"),
+            ("wmt24", "en-ru"),
+            ("wmt24", "en-uk"),
+            ("wmt24", "en-zh"),
+            ("wmt24", "ja-zh"),
+
             ("wmt23.sent", "en-de"),
             ("wmt23", "cs-uk"),
             ("wmt23", "de-en"),
@@ -309,19 +337,6 @@ def load_data_wmt_all(min_items=500, **kwargs):
             ("wmt23", "ru-en"),
             ("wmt23", "uk-en"),
             ("wmt23", "zh-en"),
-
-            # NOTE: intentionally not the first so that [:9] is reserved for evaluation
-            ("wmt24", "cs-uk"),
-            ("wmt24", "en-cs"),
-            ("wmt24", "en-de"),
-            ("wmt24", "en-es"),
-            ("wmt24", "en-hi"),
-            ("wmt24", "en-is"),
-            ("wmt24", "en-ja"),
-            ("wmt24", "en-ru"),
-            ("wmt24", "en-uk"),
-            ("wmt24", "en-zh"),
-            ("wmt24", "ja-zh"),
 
             ("wmt22", "cs-en"),
             ("wmt22", "cs-uk"),
