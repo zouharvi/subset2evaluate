@@ -102,7 +102,7 @@ for method_kwargs in [
         #     data_old,
         #     clucor_precomputed=clucor_precomputed[data_name],
         # )
-        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clu_cor(
             data_new,
             data_old,
         )

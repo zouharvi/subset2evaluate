@@ -82,8 +82,9 @@ for budget in tqdm.tqdm(range(10*len(systems), len(data_old) * len(systems))):
         sys: np.mean(system_scores[sys]["scores"])
         for sys in systems
     }
-    points_y.append((budget, scipy.stats.spearmanr(
-        list(sys_ord_true.values()), list(sys_ord_tmp.values())).correlation))
+    points_y.append((budget, scipy.stats.kendalltau(
+        list(sys_ord_true.values()), list(sys_ord_tmp.values()), variant="c",
+    ).correlation))
 
 # %%
 
@@ -114,7 +115,7 @@ plt.show()
 cor_all = []
 clu_all = []
 for _ in range(100):
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
         subset2evaluate.select_subset.basic(data_old, method="random"),
         data_old
     )

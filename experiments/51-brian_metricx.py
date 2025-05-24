@@ -23,14 +23,14 @@ for data_old in data_all:
     ]:
         for _ in range(repetitions):
             data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
                 data_new, data_old,
                 metric="human",
             )
             points_y_cor[method_kwargs["method"]].append(cor_new)
             points_y_clu[method_kwargs["method"]].append(clu_new)
 
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
                 data_new, data_old,
                 metric=("MetricX-23", "human"),
             )

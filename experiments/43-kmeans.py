@@ -35,7 +35,7 @@ clu_random = []
 cor_random = []
 for data_old in tqdm.tqdm(data_old_all):
     for _ in range(100):
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
             subset2evaluate.select_subset.basic(data_old, method="random"),
             data_old,
             metric="human"

@@ -85,7 +85,7 @@ for subset_size in tqdm.tqdm(SUBSET_SIZE, desc="Subset size"):
                     load_model=cache_model[method_kwargs["method"]],
                 )
 
-                clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+                clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
                     [
                         data_old_i_to_line[line["i"]]
                         for line in data_new

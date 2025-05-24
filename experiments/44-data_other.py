@@ -27,7 +27,7 @@ def benchmark(data_old, repetitions=1, metric_target=None, method_kwargs={}):
             data_old,
             **method_kwargs,
         )
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=metric_target)
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old, metric=metric_target)
         clu_all.append(clu_new)
         cor_all.append(cor_new)
     print(f'{method_kwargs["method"]:>20}', f"COR: {np.average(cor_all):.1%} | CLU: {np.average(clu_all):.2f}")

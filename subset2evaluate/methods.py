@@ -40,7 +40,7 @@ def metric_consistency(data: List[Dict], metric, metric_target=None, **kwargs) -
         sys_absolute = subset2evaluate.evaluate.get_model_absolute([item], metric=metric)
         sys_absolute = [sys_absolute[sys] for sys in systems]
         with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="ignore"):
-            corr = scipy.stats.spearmanr(sys_absolute, data_ord).correlation
+            corr = scipy.stats.kendalltau(sys_absolute, data_ord, variant="c").correlation
         if np.isnan(corr):
             return 0.0
         return corr

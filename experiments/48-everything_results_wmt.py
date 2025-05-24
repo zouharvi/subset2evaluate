@@ -35,7 +35,7 @@ for data_old_name, data_old in tqdm.tqdm(list(data_old_all.items())):
         cor_all = []
         for _ in range(repetitions):
             data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
-            clu, cor = subset2evaluate.evaluate.eval_clucor(data_new, data_old)
+            clu, cor = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old)
             clu_all.append(clu)
             cor_all.append(cor)
 

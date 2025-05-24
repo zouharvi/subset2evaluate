@@ -1,4 +1,4 @@
-from typing import Callable, List, Text, Tuple
+from typing import Callable, List, Literal, Text, Tuple
 
 
 COLORS = [
@@ -127,9 +127,10 @@ def plot_subset_selection_legend(
 
 def plot_subset_selection(
         points: List[Tuple[List, List, Text]],
+        measure: Literal["spa", "top", "clu", "cor"],
         filename=None,
         colors: List[str] = COLORS,
-        height=2.5,
+        height=3.0,
         ylim=None,
         fn_extra: Callable = lambda _: None,
 ):
@@ -137,14 +138,6 @@ def plot_subset_selection(
     import matplotlib.ticker as mtick
     import contextlib
     import os
-
-    # if there is ever a value above 1 it can't be correlation
-    # so it has to be clusters
-    IS_CLUSTERS = any(
-        y > 1
-        for _, points_y, _ in points
-        for y in points_y
-    )
 
     matplotlib_default()
     plt.figure(figsize=(4, height))
@@ -172,16 +165,20 @@ def plot_subset_selection(
             tex_out += r"\\"
     tex_out += "\n"
 
-    if IS_CLUSTERS:
+    if measure == "top":
+        plt.ylabel("Top-1 accuracy" + " " * 5, fontweight='bold')
+    elif measure == "spa":
+        plt.ylabel("Soft pairwise accuracy" + " " * 5, fontweight='bold')
+    elif measure == "clu":
         plt.ylabel("Cluster count" + " " * 5, fontweight='bold')
-    else:
+    elif measure == "cor":
         # set bold ylabel
         plt.ylabel("Rank correlation" + " " * 5, fontweight='bold')
     plt.xlabel("Proportion of original data", labelpad=-0.5)
 
     plt.xticks(
-        list(range(len(points_x)))[::3],
-        [f"{x:.0%}" for x in points_x][::3],
+        list(range(len(points_x)))[::2],
+        [f"{x:.0%}" for x in points_x][::2],
     )
 
     ax = plt.gca()
@@ -189,15 +186,19 @@ def plot_subset_selection(
 
     ax.spines[['top', 'right']].set_visible(False)
     # ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
-    if not IS_CLUSTERS:
+    if measure in {"cor", "spa"}:
         ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda y, _: f'{y:.0%}'))
 
     # default for MT
     if ylim is None:
-        if IS_CLUSTERS:
+        if measure == "clu":
             plt.ylim(1.2, 5.0)
-        else:
+        elif measure == "cor":
             plt.ylim(0.87, 0.99)
+        elif measure == "spa":
+            plt.ylim(0.85, 0.965)
+        elif measure == "top":
+            plt.ylim(0.8, 1.01)
     else:
         plt.ylim(ylim)
     plt.tight_layout(pad=0.1)
@@ -210,10 +211,10 @@ def plot_subset_selection(
             os.makedirs("figures_tex", exist_ok=True)
 
             # save in files compatible with both LaTeX and Typst
-            plt.savefig(f"figures_pdf/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.pdf")
-            plt.savefig(f"figures_svg/{filename}_{'clu' if IS_CLUSTERS else 'cor'}.svg")
+            plt.savefig(f"figures_pdf/{filename}_{measure}.pdf")
+            plt.savefig(f"figures_svg/{filename}_{measure}.svg")
 
-            with open(f"figures_tex/{filename}_{'clu' if IS_CLUSTERS else 'cor'}_legend.tex", "w") as f:
+            with open(f"figures_tex/{filename}_{measure}_legend.tex", "w") as f:
                 f.write(tex_out)
 
     plt.show()

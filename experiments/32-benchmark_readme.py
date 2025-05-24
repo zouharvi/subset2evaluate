@@ -17,7 +17,7 @@ def benchmark_method(repetitions, data, target="human", kwargs_dict={}):
     for data_old in tqdm.tqdm(data_old_all):
         # run multiple times to smooth variance
         for _ in range(repetitions):
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
                 subset2evaluate.select_subset.basic(data_old, **kwargs_dict),
                 data_old,
                 metric=target,

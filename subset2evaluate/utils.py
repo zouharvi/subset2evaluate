@@ -34,6 +34,17 @@ def _data_minmax_normalize(data):
                 line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (data_flat[met_k][1] - data_flat[met_k][0])
 
 
+
+def confidence_interval(data, confidence=0.95):
+    import scipy.stats
+    return scipy.stats.t.interval(
+        confidence=confidence,
+        df=len(data)-1,
+        loc=np.mean(data),
+        scale=np.std(data)
+    )
+
+
 def _data_median_binarize(data):
     """
     In-place median binarization of all scores
