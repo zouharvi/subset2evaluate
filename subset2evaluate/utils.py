@@ -6,7 +6,7 @@ import numpy as np
 import subset2evaluate
 from subset2evaluate.reference_info import year2std_refs
 
-PROPS = np.geomspace(0.05, 0.5, 10)
+PROPS = np.linspace(0.05, 0.5, 10)
 
 
 def _data_minmax_normalize(data):

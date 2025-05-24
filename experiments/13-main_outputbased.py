@@ -11,7 +11,6 @@ import subset2evaluate.evaluate
 data_old_all = list(utils.load_data_wmt_test().items())
 
 points_y_spa = collections.defaultdict(list)
-PROPS = np.linspace(0.05, 0.5, 10)
 
 for data_old_name, data_old in tqdm.tqdm(data_old_all):
     for repetitions, method_kwargs in [
@@ -22,14 +21,13 @@ for data_old_name, data_old in tqdm.tqdm(data_old_all):
         (1, dict(method="diversity", metric="lm")),
         (100, dict(method="random")),
     ]:
-        points_y_top_local = []
         points_y_spa_local = []
         for _ in range(repetitions):
             spa_new = subset2evaluate.evaluate.eval_spa(
                 subset2evaluate.select_subset.basic(data_old, **method_kwargs),
                 data_old,
                 metric="human",
-                props=PROPS,
+                props=utils.PROPS,
             )
             points_y_spa_local.append(spa_new)
 
@@ -60,12 +58,12 @@ points_y_spa = {
 
 utils_fig.plot_subset_selection(
     points=[
-        (PROPS, points_y_spa["random"], f"Random {np.average(points_y_spa['random']):.1%}"),
-        (PROPS, points_y_spa["metric_avg"], f"MetricAvg {np.average(points_y_spa['metric_avg']):.1%}"),
-        (PROPS, points_y_spa["metric_var"], f"MetricVar {np.average(points_y_spa['metric_var']):.1%}"),
-        (PROPS, points_y_spa["metric_cons"], f"MetricCons {np.average(points_y_spa['metric_cons']):.1%}"),
-        (PROPS, points_y_spa['diversity'], f"Diversity {np.average(points_y_spa['diversity']):.1%}"),
-        (PROPS, points_y_spa['pyirt_diffdisc'], f"DiffDisc {np.average(points_y_spa['pyirt_diffdisc']):.1%}"),
+        (utils.PROPS, points_y_spa["random"], f"Random {np.average(points_y_spa['random']):.1%}"),
+        (utils.PROPS, points_y_spa["metric_avg"], f"MetricAvg {np.average(points_y_spa['metric_avg']):.1%}"),
+        (utils.PROPS, points_y_spa["metric_var"], f"MetricVar {np.average(points_y_spa['metric_var']):.1%}"),
+        (utils.PROPS, points_y_spa["metric_cons"], f"MetricCons {np.average(points_y_spa['metric_cons']):.1%}"),
+        (utils.PROPS, points_y_spa['diversity'], f"Diversity {np.average(points_y_spa['diversity']):.1%}"),
+        (utils.PROPS, points_y_spa['pyirt_diffdisc'], f"DiffDisc {np.average(points_y_spa['pyirt_diffdisc']):.1%}"),
     ],
     measure="spa",
     colors=["#000000"] + utils_fig.COLORS,
