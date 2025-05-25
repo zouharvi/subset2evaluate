@@ -8,12 +8,14 @@ import pickle
 import os
 import scipy.signal
 
-# scp euler:/cluster/work/sachan/vilem/subset2evaluate/computed/16-metric_quality/d*_m*.pkl computed/16-metric_quality/
+"""
+scp euler:/cluster/work/sachan/vilem/subset2evaluate/computed/16-metric_quality/d*_m*.pkl computed/16-metric_quality/
+"""
 
 # load all available
 data = []
 for di in range(9):
-    for mi in range(26):
+    for mi in range(45):
         fname = f"../computed/16-metric_quality/d{di}_m{mi}.pkl"
         if os.path.exists(fname):
             with open(fname, "rb") as f:
@@ -25,8 +27,7 @@ for line in data:
         data_new[method].append({
             "metric": line["metric"],
             "correlation": line["correlation"],
-            "clu": line["clu"][method],
-            "cor": line["cor"][method],
+            "spa": line["spa"][method],
         })
 
 # %%
@@ -34,56 +35,46 @@ fig_utils.matplotlib_default()
 bins = [0.15, 0.25, 0.35, 0.45, 1.0]
 bins_label = [0.1, 0.2, 0.3, 0.4, 0.5]
 
-def plot_ax(ax, key):
-    for method in ["metric_avg", "metric_var", "metric_cons", "diversity", "pyirt_diffdisc"]:
-        data_local = sorted(data_new[method], key=lambda x: x["correlation"])
-        data_i = np.digitize([v["correlation"] for v in data_local], bins=bins)
-        data_y = collections.defaultdict(list)
-        for i, v in zip(data_i, data_local):
-            data_y[bins[i]].append(v[key])
-        data_y = [
-            np.average(data_y[bins[i]])
-            for i in range(len(bins))
-        ]
-        ax.plot(
-            bins_label,
-            scipy.signal.savgol_filter(data_y, 2, 1),
-            label=method,
-            linewidth=1.5,
-        )
-    ax.axhline(
-        y=1,
-        color="black",
-        label="Random",
+plt.figure(figsize=(4, 2.5))
+for method in ["metric_avg", "metric_var", "metric_cons", "diversity", "pyirt_diffdisc"]:
+    data_local = sorted(data_new[method], key=lambda x: x["correlation"])
+    data_i = np.digitize([v["correlation"] for v in data_local], bins=bins)
+    data_y = collections.defaultdict(list)
+    for i, v in zip(data_i, data_local):
+        data_y[bins[i]].append(v["spa"])
+    data_y = [
+        np.average(data_y[bins[i]])
+        for i in range(len(bins))
+    ]
+    plt.plot(
+        bins_label,
+        scipy.signal.savgol_filter(data_y, 2, 1),
+        label=method,
         linewidth=1.5,
     )
-    ax.spines[['top', 'right']].set_visible(False)
-
-fig, axs = plt.subplots(1, 2, figsize=(4, 2.5))
-plot_ax(axs[0], "cor")
-plot_ax(axs[1], "clu")
+plt.axhline(
+    y=1,
+    color="black",
+    label="Random",
+    linewidth=1.5,
+)
+plt.gca().spines[['top', 'right']].set_visible(False)
 
 # show y-axis as percentage
-axs[0].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
-axs[1].yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
+plt.gca().yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
 
-axs[0].set_ylim(0.45, 1.4)
-axs[1].set_ylim(0.45, 1.4)
+plt.ylim(0.7, 1.35)
 
-axs[0].set_ylabel("Needed to match correlation", labelpad=0)
-axs[1].set_ylabel("Needed to match clusters", labelpad=-3)
+plt.ylabel("Size needed to match\nsoft pairwise accuracy", labelpad=0)
 
-axs[0].set_xticks([0.1, 0.3, 0.5])
-axs[1].set_xticks([0.1, 0.3, 0.5])
-axs[1].set_xlabel("Metric correlation with human scores" + " " * 45)
-axs[0].tick_params(axis='y', which='major', pad=-1)
+plt.xticks([0.1, 0.2,  0.3, 0.4, 0.5])
+plt.xlabel("Metric correlation with human scores")
+plt.gca().tick_params(axis='y', which='major', pad=-1)
 # remove tiny tick lines
-axs[0].tick_params(left=False)
-axs[1].set_yticks(axs[0].get_yticks())
-axs[1].set_yticklabels([])
-axs[1].tick_params(left=True)
-
-
+plt.gca().tick_params(left=False)
+# axs[1].yticks(axs[0].get_yticks())
+# axs[1].set_yticklabels([])
+# axs[1].tick_params(left=True)
 
 # avg metrics correlations
 
@@ -110,59 +101,36 @@ METRIC_NAMES = {
     "BLEURT-20": "BLEURT",
     "BERTscore": "BERTscore",
     "prismRef": "Prism",
-    "MetricX-23-b": "MetricX",
+    "MetricX-23-c": "MetricX",
     "XCOMET-Ensemble": "XCOMET-Ensemble",
     "COMET": "COMET",
+    "GEMBA-MQM": "GEMBA",
 }
 
 for item in [
-    dict(metric="BLEU", line_yy=(0.9, 2.0), text_xy=(-0.08, -0.04)),
-    dict(metric="chrF", line_yy=(0.8, 1.3), text_xy=(-0.08, -0.04)),
-    dict(metric="BERTscore", line_yy=(0.7, 1.1), text_xy=(-0.15, -0.04)),
-    dict(metric="MetricX-23-b", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
-    # dict(metric="COMET", line_yy=(0.6, 1.1), text_xy=(-0.09, -0.04)),
+    dict(metric="BLEU", line_yy=(0.7, 0.78), text_xy=(-0.0, 0.02)),
+    dict(metric="chrF", line_yy=(0.7, 0.78), text_xy=(-0.0, 0.02)),
+    dict(metric="BERTscore", line_yy=(0.7, 0.78), text_xy=(-0.00, 0.06)),
+    dict(metric="MetricX-23-c", line_yy=(0.7, 0.78), text_xy=(-0.00, 0.02)),
+    dict(metric="GEMBA-MQM", line_yy=(0.7, 0.78), text_xy=(0.06, 0.02)),
 ]:
     metric = item["metric"]
-    axs[0].vlines(
+    plt.vlines(
         ymin=item["line_yy"][0], ymax=item["line_yy"][1],
         x=metrics_avg[metric],
         color="gray",
         linestyle="--",
         linewidth=0.5,
     )
-    axs[0].text(
+    plt.text(
         x=item["text_xy"][0]+metrics_avg[metric],
         y=item["text_xy"][1]+item["line_yy"][0],
         s=METRIC_NAMES[metric],
         fontsize=8,
         va="center",
-        ha="left",
+        ha="right",
     )
-    
-for item in [
-    dict(metric="BLEU", line_yy=(0, 1.3), text_xy=(-0.08, 0.04)),
-    dict(metric="chrF", line_yy=(0, 1.22), text_xy=(-0.07, 0.04)),
-    dict(metric="BERTscore", line_yy=(0, 1.15), text_xy=(-0.05, 0.04)),
-    dict(metric="MetricX-23-b", line_yy=(0, 1.05), text_xy=(-0.02, 0.04)),
-    # dict(metric="COMET", line_yy=(0.5, 0.9), text_xy=(-0.09, 0.04)),
-]:
-    metric = item["metric"]
-    axs[1].vlines(
-        ymin=item["line_yy"][0], ymax=item["line_yy"][1],
-        x=metrics_avg[metric],
-        color="gray",
-        linestyle="--",
-        linewidth=0.5,
-    )
-    axs[1].text(
-        x=item["text_xy"][0]+metrics_avg[metric],
-        y=item["text_xy"][1]+item["line_yy"][1],
-        s=METRIC_NAMES[metric],
-        fontsize=8,
-        va="center",
-        ha="left",
-    )
-    
+
 
 # separator between subplots
 plt.tight_layout(pad=0)

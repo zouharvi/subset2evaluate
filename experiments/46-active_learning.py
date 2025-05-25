@@ -115,7 +115,7 @@ plt.show()
 cor_all = []
 clu_all = []
 for _ in range(100):
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
         subset2evaluate.select_subset.basic(data_old, method="random"),
         data_old
     )

@@ -12,7 +12,7 @@ data_old = data_old_all[1]
 
 cor_random = []
 for seed in range(100):
-    _, cor_new = subset2evaluate.evaluate.eval_clu_cor(
+    _, cor_new = subset2evaluate.evaluate.eval_clucor(
         data_old,
         subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
         metric="human"
@@ -21,27 +21,27 @@ for seed in range(100):
 
 # %%
 
-_, cor_metric_var = subset2evaluate.evaluate.eval_clu_cor(
+_, cor_metric_var = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="metric_var", metric="MetricX-23"),
     data_old,
     metric="human"
 )
-_, cor_metric_avg = subset2evaluate.evaluate.eval_clu_cor(
+_, cor_metric_avg = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="metric_avg", metric="MetricX-23"),
     data_old,
     metric="human"
 )
-_, cor_diffdisc = subset2evaluate.evaluate.eval_clu_cor(
+_, cor_diffdisc = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="pyirt_diffdisc", metric="MetricX-23", retry_on_error=True),
     data_old,
     metric="human",
 )
-_, cor_precomet_diffdisc = subset2evaluate.evaluate.eval_clu_cor(
+_, cor_precomet_diffdisc = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="precomet_diffdisc"),
     data_old,
     metric="human",
 )
-_, cor_precomet_var = subset2evaluate.evaluate.eval_clu_cor(
+_, cor_precomet_var = subset2evaluate.evaluate.eval_clucor(
     subset2evaluate.select_subset.basic(data_old, method="precomet_var"),
     data_old,
     metric="human",

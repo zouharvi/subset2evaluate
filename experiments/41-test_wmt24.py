@@ -31,7 +31,7 @@ for _, data_old in data_old_all:
 # %%
 with multiprocessing.Pool(len(data_old_all)) as pool:
     clucor_precomputed_values = pool.starmap(
-        subset2evaluate.evaluate.precompute_randnorm,
+        subset2evaluate.evaluate.precompute_clucor_randnorm,
         [(x[1], 10, "human", 2) for x in data_old_all]
     )
 clucor_precomputed = dict(zip([x[0] for x in data_old_all], clucor_precomputed_values))
@@ -102,7 +102,7 @@ for method_kwargs in [
         #     data_old,
         #     clucor_precomputed=clucor_precomputed[data_name],
         # )
-        par_clu, par_cor = subset2evaluate.evaluate.eval_clu_cor(
+        par_clu, par_cor = subset2evaluate.evaluate.eval_clucor(
             data_new,
             data_old,
         )

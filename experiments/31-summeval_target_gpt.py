@@ -48,7 +48,7 @@ for repetitions, method_kwargs in [
     for _ in range(repetitions):
         data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
         for metric_target in ["gpt_relevance", "gpt_coherence", "gpt_consistency", "gpt_fluency", "gpt_sum"]:
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old, metric=metric_target, props=PROPS)
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=metric_target, props=PROPS)
             cor_all[method_kwargs['method']].append(cor_new)
             clu_all[method_kwargs['method']].append(clu_new)
     print(method_kwargs["method"], f"COR: {np.average(cor_all[method_kwargs['method']]):.1%} | CLU: {np.average(clu_all[method_kwargs['method']]):.2f}")

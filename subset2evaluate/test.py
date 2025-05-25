@@ -24,7 +24,7 @@ def test_wmt_loader_mqm():
 
 def test_wmt_method_random():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-cs", method="random", seed=0)
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "wmt23/en-cs", metric="human")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "wmt23/en-cs", metric="human")
     # random is usually random but we fix the seed
     assert abs(np.average(clu_new) - 1.4000) < 0.01
     assert abs(np.average(cor_new) - 0.7814) < 0.01
@@ -32,14 +32,14 @@ def test_wmt_method_random():
 
 def test_wmt_method_metric_var():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-cs", method="metric_var", metric="MetricX-23-c")
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "wmt23/en-cs", metric="human")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "wmt23/en-cs", metric="human")
     assert abs(np.average(clu_new) - 1.8000) < 0.01
     assert abs(np.average(cor_new) - 0.8450) < 0.01
 
 
 def test_wmt_method_diversity():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-de", method="diversity", metric="BLEU")
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "wmt23/en-de", metric="human")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "wmt23/en-de", metric="human")
     assert abs(np.average(clu_new) - 2.3000) < 0.01
     assert abs(np.average(cor_new) - 0.9328) < 0.01
 
@@ -54,7 +54,7 @@ def test_summeval_loader():
 
 def test_summeval_method_random():
     data_new = subset2evaluate.select_subset.basic("summeval", method="random", seed=0)
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "summeval", metric="human_sum")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "summeval", metric="human_sum")
     # random is usually random but we fix the seed
     # it is a bit different on GitHub actions, therefore higher error margin
     assert abs(np.average(clu_new) - 1.6000) < 0.2
@@ -63,14 +63,14 @@ def test_summeval_method_random():
 
 def test_summeval_method_metric_var():
     data_new = subset2evaluate.select_subset.basic("summeval", method="metric_var", metric="coverage")
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "summeval", metric="human_sum")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "summeval", metric="human_sum")
     assert abs(np.average(clu_new) - 2.5000) < 0.01
     assert abs(np.average(cor_new) - 0.9682) < 0.01
 
 
 def test_summeval_method_diversity():
     data_new = subset2evaluate.select_subset.basic("summeval", method="diversity", metric="BLEU")
-    clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, "summeval", metric="human_sum")
+    clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, "summeval", metric="human_sum")
     # it is a bit different on GitHub actions, therefore higher error margin
     assert abs(np.average(clu_new) - 2.6000) < 0.2
     assert abs(np.average(cor_new) - 0.9364) < 0.2
