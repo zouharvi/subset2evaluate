@@ -35,11 +35,11 @@ for data_old in tqdm.tqdm(data_old_all):
                 data_old,
                 **method_kwargs,
             )
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old, metric="human")
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="human")
             cor_new_all_hum_local.append(np.average(cor_new))
             clu_new_all_hum_local.append(np.average(clu_new))
 
-            clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old, metric="MetricX-23-c")
+            clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric="MetricX-23-c")
             cor_new_all_met_local.append(np.average(cor_new))
             clu_new_all_met_local.append(np.average(clu_new))
 

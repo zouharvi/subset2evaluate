@@ -80,14 +80,14 @@ class IRTModelBase(L.LightningModule):
 
         data_new = [x[0] for x in items_joint]
 
-        clu_new_metric, cor_new_metric = subset2evaluate.evaluate.eval_clu_cor(
+        clu_new_metric, cor_new_metric = subset2evaluate.evaluate.eval_clucor(
             data_new,
             self.data_old,
             # TODO: set this dynamically
             metric="MetricX-23"
         )
 
-        clu_new_human, cor_new_human = subset2evaluate.evaluate.eval_clu_cor(
+        clu_new_human, cor_new_human = subset2evaluate.evaluate.eval_clucor(
             data_new,
             self.data_old,
             # TODO: set this dynamically

@@ -18,7 +18,7 @@ metric_target = ["human_relevance", "human_coherence", "human_consistency", "hum
 
 # %%
 # precompute parity randnorm
-clucor_precomputed = subset2evaluate.evaluate.precompute_randnorm(data_old, metric=metric_target, props=PROPS)
+clucor_precomputed = subset2evaluate.evaluate.precompute_clucor_randnorm(data_old, metric=metric_target, props=PROPS)
 
 # %%
 os.makedirs("computed/17-metric_quality/", exist_ok=True)

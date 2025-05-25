@@ -1,23 +1,11 @@
 import subset2evaluate.utils as utils
 import utils_fig
 import random
-import numpy as np
 import tqdm
-import scipy.stats as st
 import matplotlib.pyplot as plt
 import subset2evaluate.evaluate
 
 data_old = utils.load_data_wmt()
-
-
-def confidence_interval(data):
-    return st.t.interval(
-        confidence=0.95,
-        df=len(data) - 1,
-        loc=np.mean(data),
-        scale=np.std(data)
-    )
-
 
 points_x = []
 points_y_struct = []
@@ -43,7 +31,7 @@ models_highlighted = random.Random(3).sample(models, k=5)
 points_y_single = [points_y_local[0] for points_y_local in points_y_struct]
 points_y_interval = [
     {
-        model: confidence_interval([x[model] for x in points_y_local])
+        model: utils.confidence_interval([x[model] for x in points_y_local])
         for model in models
     }
     for points_y_local in points_y_struct

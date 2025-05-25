@@ -27,7 +27,7 @@ for metric_target in tqdm.tqdm(["human_relevance", "human_coherence", "human_con
         cor_all = []
         for _ in range(repetitions):
             data_new = subset2evaluate.select_subset.basic(data_old, **method_kwargs)
-            clu, cor = subset2evaluate.evaluate.eval_clu_cor(data_new, data_old, metric=metric_target, props=PROPS)
+            clu, cor = subset2evaluate.evaluate.eval_clucor(data_new, data_old, metric=metric_target, props=PROPS)
             clu_all.append(clu)
             cor_all.append(cor)
 

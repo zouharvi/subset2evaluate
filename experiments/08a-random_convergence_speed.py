@@ -9,16 +9,6 @@ import subset2evaluate.evaluate
 
 data_old = utils.load_data_wmt()
 
-
-def confidence_interval(data):
-    return st.t.interval(
-        confidence=0.95,
-        df=len(data) - 1,
-        loc=np.mean(data),
-        scale=np.std(data)
-    )
-
-
 points_x = []
 points_y = []
 mean_true = subset2evaluate.evaluate.get_model_absolute(data_old)

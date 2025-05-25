@@ -18,7 +18,7 @@ for data_old in tqdm.tqdm(data_old_all):
 
     # repeat each sampling 100 times to smooth it out
     for _ in range(100):
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(
             subset2evaluate.select_subset.basic(data_old, method="random"),
             data_old,
             metric="human"

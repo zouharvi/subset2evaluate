@@ -32,7 +32,7 @@ for data_old in tqdm.tqdm(data_old_all):
         # create a list of ABCDABCDABCDCDCDDDD
         data_new_flat = [doc for docs in itertools.zip_longest(*data_aggregated) for doc in docs]
         data_new_flat = [line for line in data_new_flat if line is not None]
-        clu_new, cor_new = subset2evaluate.evaluate.eval_clu_cor(data_new_flat, data_old, metric="human")
+        clu_new, cor_new = subset2evaluate.evaluate.eval_clucor(data_new_flat, data_old, metric="human")
         return np.average(clu_new), np.average(cor_new)
 
     for repetitions, method_kwargs in [

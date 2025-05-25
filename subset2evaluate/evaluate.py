@@ -21,7 +21,7 @@ def eval_spa(
     return spa_new
 
 
-def eval_clu_cor(
+def eval_clucor(
         data_new: List[Dict],
         data_old: List[Dict],
         metric="human",
@@ -41,7 +41,7 @@ def eval_clu_cor(
     return clu_new, cor_new
 
 
-def eval_clu_cor_par(
+def eval_clucor_par(
     data_new: List[Dict],
     data_old: List[Dict],
     clus_tgt: List[float],
@@ -89,7 +89,42 @@ def eval_clu_cor_par(
     return np.average(ks_clu_par), np.average(ks_cor_par)
 
 
-def precompute_randnorm(
+def eval_spa_par(
+    data_new: List[Dict],
+    data_old: List[Dict],
+    spas_tgt: List[float],
+    metric="human",
+    props: List[float] = utils.PROPS,
+    workers=10,
+) -> Tuple[float, float]:
+    """
+    Evaluates the proportion of data that is needed to achieve parity with target.
+    """
+    import multiprocessing.pool
+
+    # both list or descriptor is fine
+    data_new = utils.load_data(data_new)
+    data_old = utils.load_data(data_old)
+
+    def _par_spa(data_new, clu_tgt, metric):
+        for k in range(5, len(data_new) + 1):
+            if eval_subset_spa(data_new[:k], data_old, metric=metric) >= clu_tgt:
+                break
+        return k
+
+    # multiprocess for each prop rather than k because the thread
+    # orchestration would be more expensive otherwise
+    with multiprocessing.pool.ThreadPool(min(workers, len(props))) as pool:
+        ks_spa_par = pool.starmap(
+            _par_spa,
+            [(data_new, clu_tgt, metric) for prop, clu_tgt in zip(props, spas_tgt)]
+        )
+        ks_spa_par = [k / (len(data_old) * prop) for k, prop in zip(ks_spa_par, props)]
+
+    return np.average(ks_spa_par)
+
+
+def precompute_clucor_randnorm(
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
@@ -101,7 +136,7 @@ def precompute_randnorm(
     clu_random = []
     cor_random = []
     for seed in range(random_seeds):
-        clu_new, cor_new = eval_clu_cor(
+        clu_new, cor_new = eval_clucor(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             metric=metric,
@@ -116,7 +151,7 @@ def precompute_randnorm(
     pars_cor_rand = []
 
     for seed in range(random_seeds, 2*random_seeds):
-        par_clu_rand, par_cor_rand = eval_clu_cor_par(
+        par_clu_rand, par_cor_rand = eval_clucor_par(
             subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
             data_old,
             clu_random,
@@ -143,12 +178,12 @@ def eval_clucor_par_randnorm(
     if clucor_precomputed is not None:
         (clu_random, cor_random), (clu_random_norm, cor_random_norm) = clucor_precomputed
     else:
-        (clu_random, cor_random), (clu_random_norm, cor_random_norm) = precompute_randnorm(
+        (clu_random, cor_random), (clu_random_norm, cor_random_norm) = precompute_clucor_randnorm(
             data_old, random_seeds=random_seeds, metric=metric, props=props,
         )
 
     # compute the parity of the new data
-    par_clu, par_cor = eval_clu_cor_par(
+    par_clu, par_cor = eval_clucor_par(
         data_new, data_old,
         clu_random, cor_random,
         metric=metric,
@@ -156,6 +191,70 @@ def eval_clucor_par_randnorm(
     )
 
     return par_clu/clu_random_norm, par_cor/cor_random_norm
+
+
+def precompute_spa_randnorm(
+    data_old: List[Dict],
+    random_seeds=10,
+    metric="human",
+    workers=10,
+    props: List[float] = utils.PROPS,
+) -> Tuple[List[float], List[float], float, float]:
+    import subset2evaluate.select_subset
+
+    spa_random = []
+    for seed in range(random_seeds):
+        spa_new = eval_spa(
+            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            data_old,
+            metric=metric,
+            props=props
+        )
+        spa_random.append(spa_new)
+    spa_random = np.average(spa_random, axis=0)
+
+    pars_spa_rand = []
+
+    for seed in range(random_seeds, 2*random_seeds):
+        par_spa_rand = eval_spa_par(
+            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            data_old,
+            spa_random,
+            metric=metric,
+            workers=workers,
+            props=props,
+        )
+        pars_spa_rand.append(par_spa_rand)
+
+    return spa_random, np.average(pars_spa_rand)
+
+
+
+def eval_spa_par_randnorm(
+    data_new: List[Dict],
+    data_old: List[Dict],
+    random_seeds=10,
+    metric="human",
+    clucor_precomputed=None,
+    props: List[float] = utils.PROPS,
+) -> Tuple[float, float]:
+
+    if clucor_precomputed is not None:
+        spa_random, spa_random_norm = clucor_precomputed
+    else:
+        spa_random, spa_random_norm = precompute_spa_randnorm(
+            data_old, random_seeds=random_seeds, metric=metric, props=props,
+        )
+
+    # compute the parity of the new data
+    par_spa = eval_spa_par(
+        data_new, data_old,
+        spa_random,
+        metric=metric,
+        props=props,
+    )
+
+    return par_spa/spa_random_norm
 
 
 def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):
@@ -542,7 +641,7 @@ def main_cli():
     )
     args = args.parse_args()
 
-    clu_new, cor_new = eval_clu_cor(args.data_old, args.data_new, args.metric)
+    clu_new, cor_new = eval_clucor(args.data_old, args.data_new, args.metric)
 
     print(f"Correlation: {np.average(cor_new):.1%}")
     print(f"Clusters: {np.average(clu_new):.2f}")
