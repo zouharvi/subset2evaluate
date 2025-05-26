@@ -94,24 +94,19 @@ METRICS_ALL = ['human', 'MetricX-23-QE', 'mre-score-labse-regular', 'MetricX-23'
 
 for metric in tqdm.tqdm(METRICS_ALL):
     points_y_spa = []
-    points_y_top = []
     for data_old_name, data_old in data_old_all:
-        spa_new, top_new = subset2evaluate.evaluate.eval_spa(
+        spa_new = subset2evaluate.evaluate.eval_spa(
             subset2evaluate.select_subset.basic(data_old, method="metric_cons", metric=metric),
             data_old,
             metric="human",
             props=PROPS,
         )
         points_y_spa.append(spa_new)
-        points_y_top.append(top_new)
-    print(metric, f"{np.average(points_y_spa):.1%}", f"{np.average(points_y_top):.1%}")
+    print(metric, f"{np.average(points_y_spa):.1%}")
 
-# metric_cons: 
-    
 # %%
 
 points_y_spa = []
-points_y_top = []
 for _ in tqdm.tqdm(range(10)):
     for data_old_name, data_old in data_old_all:
         spa_new, top_new = subset2evaluate.evaluate.eval_spa(
@@ -121,7 +116,4 @@ for _ in tqdm.tqdm(range(10)):
             props=PROPS,
         )
         points_y_spa.append(spa_new)
-        points_y_top.append(top_new)
-print("random", f"{np.average(points_y_spa):.1%}", f"{np.average(points_y_top):.1%}")
-
-# random 90.2%
+print("random", f"{np.average(points_y_spa):.1%}")

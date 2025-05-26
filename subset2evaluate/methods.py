@@ -53,12 +53,15 @@ def metric_consistency(data: List[Dict], metric, metric_target=None, **kwargs) -
 
 def kmeans(
     data: List[Dict],
-    budget: float,
+    budget: int,
     load_model: Optional[object] = None,
     return_model: bool = False,
-    features: Literal["src", "tgt_rand", "tgt_0"] = "src",
+    features: Literal["src", "tgt_rand", "tgt_0", "tgt_avg"] = "src",
     **kwargs
-) -> List[float]:
+) -> List[bool]:
+    """
+    This method return a list of bools (select/don't select).
+    """
     import sklearn.cluster
     import sentence_transformers
     import warnings
@@ -76,13 +79,76 @@ def kmeans(
         data_x = [r_feature.choice(list(line["tgt"].values())) for line in data]
     elif features == "tgt_0":
         data_x = [list(line["tgt"].values())[0] for line in data]
+    elif features == "tgt_avg":
+        data_x = [list(line["tgt"].values()) for line in data]
     else:
         raise Exception(f"Unknown feature type: {features}")
 
-    data_embd = model_embd.encode(data_x)
+    if features == "tgt_avg":
+        data_embd = [
+            np.average(model_embd.encode(tgts), axis=0)
+            for tgts in data_x
+        ]
+    else:
+        data_embd = model_embd.encode(data_x)
 
     # baseline don't pick any item
     data_y = [0 for _ in data]
+
+    kmeans = sklearn.cluster.KMeans(n_clusters=budget, random_state=0).fit(data_embd)
+    # get closest to cluster center
+    for i, center in enumerate(kmeans.cluster_centers_):
+        dist = np.linalg.norm(data_embd - center, axis=1)
+        idx = np.argmin(dist)
+        data_y[idx] = 1
+
+    if return_model:
+        return data_y, model_embd
+    else:
+        return data_y
+    
+
+def kmeans_supersample(
+    data: List[Dict],
+    budget: int,
+    load_model: Optional[object] = None,
+    return_model: bool = False,
+    features: Literal["src", "tgt_rand", "tgt_0", "tgt_avg"] = "src",
+    supersample: bool = False,
+    **kwargs
+) -> List[Dict]:
+    """
+    This method return a list that might be different from the data.
+    """
+    import sklearn.cluster
+    import sentence_transformers
+    import warnings
+    import random
+
+    if load_model is not None:
+        model_embd = load_model
+    else:
+        with warnings.catch_warnings(action="ignore", category=FutureWarning):
+            model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    if features == "src":
+        data_x = [line["src"] for line in data]
+    elif features == "tgt_rand":
+        r_feature = random.Random(0)
+        data_x = [r_feature.choice(list(line["tgt"].values())) for line in data]
+    elif features == "tgt_0":
+        data_x = [list(line["tgt"].values())[0] for line in data]
+    elif features == "tgt_avg":
+        data_x = [list(line["tgt"].values()) for line in data]
+    else:
+        raise Exception(f"Unknown feature type: {features}")
+
+    if features == "tgt_avg":
+        data_embd = [
+            np.average(model_embd.encode(tgts), axis=0)
+            for tgts in data_x
+        ]
+    else:
+        data_embd = model_embd.encode(data_x)
 
     kmeans = sklearn.cluster.KMeans(n_clusters=budget, random_state=0).fit(data_embd)
     data_new = []
@@ -90,15 +156,71 @@ def kmeans(
     for i, center in enumerate(kmeans.cluster_centers_):
         dist = np.linalg.norm(data_embd - center, axis=1)
         idx = np.argmin(dist)
-        data_y[idx] = 1
-        data_new += [data[idx]]*1
-        # cluster_size = np.sum(kmeans.labels_ == i)
-        # # data_new += [data[idx]]*cluster_size
+        if supersample:
+            cluster_size = np.sum(kmeans.labels_ == i)
+            data_new += [data[idx]]*cluster_size
+        else:
+            data_new += [data[idx]]*1
 
     if return_model:
-        return data_y, model_embd
+        return data_new, model_embd
     else:
-        return data_y
+        return data_new
+
+
+def bruteforce_greedy(
+    data: List[Dict],
+    budget : int,
+    stepsize: int = 10,
+    simulations : int = 1000,
+    metric: Union[str, Tuple[str, str]]="human",
+    **kwargs,
+) -> List[bool]:
+    """
+    This method return a list of bools (select/don't select).
+
+    Set stepsize to budget to get one-step bruteforce.
+    """
+    import multiprocessing.pool
+    import random
+    import copy
+    r_subset = random.Random(0)
+
+    def _run_simulation(data_new, data_unused):
+        data_new = [*data_new] + r_subset.sample(data_unused, k=min(len(data_unused), stepsize))
+        spa_cur = subset2evaluate.evaluate.eval_subset_spa(data_new, data, metric=metric)
+        return data_new, spa_cur
+
+    data_new = []
+    data_unused = copy.deepcopy(data)
+    while len(data_new) < budget:
+        # print("Remaining", budget-len(data_new))
+        with multiprocessing.pool.ThreadPool(20) as pool:
+            results = pool.starmap(_run_simulation, [(data_new, data_unused)] * simulations)
+
+        data_new = max(results, key=lambda x: x[1])[0]
+        data_best_i = {line["i"] for line in data_new}
+        data_unused = [line for line in data if line["i"] not in data_best_i]
+
+    # 0/1 encode presence
+    data_new_i = {line["i"] for line in data_new}
+    return [1 if i in data_new_i else 0 for i in range(len(data))]
+
+
+
+def bruteforce_once(
+    data: List[Dict],
+    budget : int,
+    simulations : int = 1000,
+    metric: Union[str, Tuple[str, str]]="human",
+    **kwargs,
+) -> List[bool]:
+    """
+    This method return a list of bools (select/don't select).
+
+    Set stepsize to budget to get one-step bruteforce.
+    """
+    return bruteforce_greedy(data, budget, stepsize=budget, simulations=simulations, metric=metric, **kwargs)
 
 
 def _fn_information_content(item_old, item_irt, data_irt) -> float:
@@ -606,12 +728,12 @@ def diffuse(
         return data_y
 
 
+
 def combinator(
     data: List[Dict],
     methods: List[Dict],
-    operation: Literal["mul", "sum"] = "mul",
-    normalize_zscore: bool = True,
-    normalize_01: bool = True,
+    operation: Literal["mul", "avg"] = "avg",
+    normalize: Literal["zscore", "01", "rank"] = "rank",
     **kwargs
 ) -> List[float]:
     scores = []
@@ -623,21 +745,23 @@ def combinator(
 
     scores = np.array(scores)
 
-    if normalize_zscore:
-        # z-score
+    if normalize == "zscore":
         scores = (scores - np.mean(scores, axis=1, keepdims=True)) / np.std(scores, axis=1, keepdims=True)
-
-    if normalize_01:
+    elif normalize == "01":
         # make positive and in [0, 1]
         scores = (
             (scores - np.min(scores, axis=1, keepdims=True)) /
             (np.max(scores, axis=1, keepdims=True) - np.min(scores, axis=1, keepdims=True))
         )
+    elif normalize == "rank":
+        assert operation == "avg"
+        raise NotImplementedError("Using ranking aggregation is not implemented yet.")
+
 
     if operation == "mul":
         scores = np.prod(scores, axis=0)
-    elif operation == "sum":
-        scores = np.sum(scores, axis=0)
+    elif operation == "avg":
+        scores = np.average(scores, axis=0)
     else:
         raise Exception(f"Unknown operation: {operation}")
 
@@ -655,6 +779,8 @@ METHODS = {
     "combinator": combinator,
 
     "kmeans": kmeans,
+    "bruteforce_greedy": bruteforce_greedy,
+    "bruteforce": bruteforce_once,
     "diffuse": diffuse,
 
     "pyirt_diff": partial(pyirt, fn_utility="diff"),

@@ -1,11 +1,7 @@
 # These are some subset selection methods that are not polished enough to be used in practice
-from typing import Any, Callable, List, Tuple, Union, Dict
-from functools import partial
+from typing import Any, Callable, List, Dict
 import subset2evaluate.utils as utils
-import subset2evaluate
 import subset2evaluate.evaluate
-import numpy as np
-import random
 
 
 def _fn_information_content_old(item_irt, data_irt) -> float:
@@ -18,28 +14,6 @@ def _fn_information_content_old(item_irt, data_irt) -> float:
         )
         information += prob * (1 - prob) * (item_irt["disc"]**2)
     return information
-
-
-def metric_consistency(data, metric, **kwargs) -> List[float]:
-    metric_scores = subset2evaluate.evaluate.get_model_absolute(data, metric=metric)
-    rank_correlation = {}
-    model_names = list(metric_scores.keys())
-    for example in data:
-        consistency = 0
-        total = 0
-        for i in range(len(model_names)):
-            for j in range(i + 1, len(model_names)):
-                if (metric_scores[model_names[i]] - metric_scores[model_names[j]]) * (example['scores'][model_names[i]][metric] - example['scores'][model_names[j]][metric]) > 0:
-                    consistency += 1
-                else:
-                    consistency -= 1
-                total += 1
-        rank_correlation[example['i']] = consistency / total
-
-    return [
-        rank_correlation[item['i']]
-        for item in data
-    ]
 
 
 def nn_irt(data, metric, **kwargs):
@@ -307,22 +281,6 @@ def our_irt(data, metric, **kwargs):
     ]
 
 
-def get_nice_subset(data_old, target_size=100, step_size=10, metric="human") -> List[float]:
-    raise NotImplementedError("This method is not yet implemented for use.")
-    import numpy as np
-    order_full = subset2evaluate.evaluate.get_model_ordering(data_old, metric=metric)
-
-    print(f"Previous average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)) for line in data_old]):.1%}")
-
-    while len(data_old) > target_size:
-        order_full = subset2evaluate.evaluate.get_model_ordering(data_old, metric=metric)
-        data_old.sort(key=lambda line: subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)))
-        data_old = data_old[step_size:]
-
-    print(f"New average accuracy: {np.average([subset2evaluate.evaluate.eval_order_accuracy(order_full, subset2evaluate.evaluate.get_model_ordering([line], metric=metric)) for line in data_old]):.1%}")
-    return data_old
-
-
 def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float]:
     # turn off warnings from sentence-transformers
     import warnings
@@ -347,64 +305,6 @@ def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float
     return list(data_y_test)
 
 
-def premlp_irt(data, data_train, load_model=None, return_model=False, **kwargs) -> Union[List[float], Tuple[List[float], Any]]:
-    import sklearn.neural_network
-    import sentence_transformers
-    import subset2evaluate.methods
-
-    # turn off warnings from sentence-transformers
-    import warnings
-    warnings.filterwarnings('ignore')
-
-    embd_model = sentence_transformers.SentenceTransformer("paraphrase-MiniLM-L12-v2")
-    data_x_train = embd_model.encode([line["src"] for line in data_train])
-
-    model_fn = lambda: sklearn.neural_network.MLPRegressor(
-        hidden_layer_sizes=(128, 16),
-        max_iter=1000,
-        verbose=False,
-    )
-
-    if load_model is not None:
-        model_diff, model_disc = load_model
-    else:
-        model_diff = model_fn()
-        model_disc = model_fn()
-
-        data_y_diff = [line["irt"]["diff"] for line in data_train]
-        data_y_disc = [line["irt"]["disc"] for line in data_train]
-
-        model_diff.fit(data_x_train, data_y_diff)
-        model_disc.fit(data_x_train, data_y_disc)
-
-    data_x_test = embd_model.encode([line["src"] for line in data])
-    data_y_diff = model_diff.predict(data_x_test)
-    data_y_disc = model_disc.predict(data_x_test)
-
-    data_irt_items = [
-        {"diff": diff, "disc": disc}
-        for diff, disc in zip(data_y_diff, data_y_disc)
-    ]
-
-    items_joint = list(zip(data, data_irt_items))
-    items_joint.sort(
-        key=lambda x: subset2evaluate.methods.fn_irt_utility(x[0], x[1], None, kwargs["fn_utility"]),
-        reverse=True
-    )
-
-    items = [x[0] for x in items_joint]
-
-    if return_model:
-        return items, (model_diff, model_disc)
-    else:
-        return items
-
-
-def _run_simulation(args):
-    data_old, data_prior = args
-    data_new = random.sample(data_old, k=min(len(data_old), 20))
-    clusters = subset2evaluate.evaluate.eval_subset_clusters(data_new + data_prior, metric="MetricX-23-c")
-    return data_new + data_prior, clusters
 
 
 def synthetic_simulation(data, **kwargs):
@@ -423,13 +323,3 @@ def synthetic_simulation(data, **kwargs):
         data = [line for line in data if line["i"] not in data_best_i]
 
     return data_new
-
-
-METHODS = {
-    "synthetic_simulation": synthetic_simulation,
-    "premlp_irt_diffdisc": partial(premlp_irt, fn_utility="diffdisc"),
-    "premlp_irt_diff": partial(premlp_irt, fn_utility="diff"),
-    "premlp_irt_disc": partial(premlp_irt, fn_utility="disc"),
-    "premlp_var": partial(premlp_other, fn_utility=lambda line: np.var([model_v["human"] for model_v in line["scores"].values()])),
-    "premlp_avg": partial(premlp_other, fn_utility=lambda line: np.average([model_v["human"] for model_v in line["scores"].values()])),
-}

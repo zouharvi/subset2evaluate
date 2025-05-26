@@ -422,12 +422,6 @@ def eval_subset_spa(data_new: List[Dict], data_old: List[Dict], metric="human"):
         metric1 = metric
         metric2 = metric
 
-    # scores_new = get_model_absolute(data_new, metric=metric1)
-    # scores_old = get_model_absolute(data_old, metric=metric2)
-
-    # values_new = [scores_new[sys] for sys in models]
-    # values_old = [scores_old[sys] for sys in models]
-
     values_new = [[line["scores"][model][metric1] for model in models] for line in data_new]
     values_old = [[line["scores"][model][metric2] for model in models] for line in data_old]
 
