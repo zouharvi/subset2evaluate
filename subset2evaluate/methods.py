@@ -654,54 +654,53 @@ def diffuse(
     import copy
 
     if load_model is not None:
-        # loading data and not model
-        data_x, clusters_desc_all = load_model
+        model_embd = load_model
     else:
         with warnings.catch_warnings(action="ignore", category=FutureWarning):
             model_embd = sentence_transformers.SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
-        # encode all in batch
-        data_x_all = [x for line in data for x in line["tgt"].values()]
-        data_embd = list(model_embd.encode(data_x_all))
+    # encode all in batch
+    data_x_all = [x for line in data for x in line["tgt"].values()]
+    data_embd = list(model_embd.encode(data_x_all))
 
-        # reconstruct original_structure
-        data_x = []
-        for line in data:
-            data_x.append([data_embd.pop(0) for _ in line["tgt"]])
-        assert len(data_embd) == 0
+    # reconstruct original_structure
+    data_x = []
+    for line in data:
+        data_x.append([data_embd.pop(0) for _ in line["tgt"]])
+    assert len(data_embd) == 0
 
-        # TODO: try using abs
-        # compute average difference
-        data_x = [
-            np.average([
-                embd_a - embd_b
-                for embd_a, embd_b in itertools.combinations(line, 2)
-            ], axis=1)
-            for line in data_x
-        ]
-        clusters = scipy.cluster.hierarchy.linkage(data_x, method="ward")
+    # TODO: try using abs
+    # compute average difference
+    data_x = [
+        np.average([
+            embd_a - embd_b
+            for embd_a, embd_b in itertools.combinations(line, 2)
+        ], axis=1)
+        for line in data_x
+    ]
+    clusters = scipy.cluster.hierarchy.linkage(data_x, method="ward")
 
-        # maps cluster index to item sets
-        clusters_map = [frozenset({i}) for i in range(len(data))]
-        # shows sets of items in each cluster at each timepoint
-        # start with each item being a cluster on its own
-        clusters_desc_all = [{frozenset({i}) for i in range(len(data))}]
-        for i in range(len(clusters)):
-            # retrieve indices that are being merged
-            cluster_0 = clusters_map[int(clusters[i, 0])]
-            cluster_1 = clusters_map[int(clusters[i, 1])]
+    # maps cluster index to item sets
+    clusters_map = [frozenset({i}) for i in range(len(data))]
+    # shows sets of items in each cluster at each timepoint
+    # start with each item being a cluster on its own
+    clusters_desc_all = [{frozenset({i}) for i in range(len(data))}]
+    for i in range(len(clusters)):
+        # retrieve indices that are being merged
+        cluster_0 = clusters_map[int(clusters[i, 0])]
+        cluster_1 = clusters_map[int(clusters[i, 1])]
 
-            # add the new cluster to our map
-            cluster_new = cluster_0.union(cluster_1)
-            clusters_map.append(cluster_new)
+        # add the new cluster to our map
+        cluster_new = cluster_0.union(cluster_1)
+        clusters_map.append(cluster_new)
 
-            cluster_desc = copy.deepcopy(clusters_desc_all[-1])
-            # remove individual old clusters
-            cluster_desc.remove(cluster_0)
-            cluster_desc.remove(cluster_1)
-            # add new cluster
-            cluster_desc.add(cluster_new)
-            clusters_desc_all.append(cluster_desc)
+        cluster_desc = copy.deepcopy(clusters_desc_all[-1])
+        # remove individual old clusters
+        cluster_desc.remove(cluster_0)
+        cluster_desc.remove(cluster_1)
+        # add new cluster
+        cluster_desc.add(cluster_new)
+        clusters_desc_all.append(cluster_desc)
 
     # take first that fits within budget
     cluster_desc = [cluster_desc for cluster_desc in clusters_desc_all if len(cluster_desc) <= budget][0]
@@ -723,7 +722,7 @@ def diffuse(
         data_y[idx] = 1
 
     if return_model:
-        return data_y, (data_x, clusters_desc_all)
+        return data_y, model_embd
     else:
         return data_y
 
@@ -731,11 +730,17 @@ def diffuse(
 
 def combinator(
     data: List[Dict],
-    methods: List[Dict],
+    methods: Union[List[Dict], List[Tuple[float, Dict]]],
     operation: Literal["mul", "avg"] = "avg",
     normalize: Literal["zscore", "01", "rank"] = "rank",
     **kwargs
 ) -> List[float]:
+    if type(methods[0]) is tuple:
+        weights = [np.abs(weight) for weight, _ in methods]
+        methods = [method_kwargs for _, method_kwargs in methods]
+    else:
+        weights = None
+
     scores = []
     for method_kwargs in methods:
         assert \
@@ -744,6 +749,7 @@ def combinator(
         scores.append(METHODS[method_kwargs["method"]](data, **method_kwargs))
 
     scores = np.array(scores)
+
 
     if normalize == "zscore":
         scores = (scores - np.mean(scores, axis=1, keepdims=True)) / np.std(scores, axis=1, keepdims=True)
@@ -754,14 +760,15 @@ def combinator(
             (np.max(scores, axis=1, keepdims=True) - np.min(scores, axis=1, keepdims=True))
         )
     elif normalize == "rank":
-        assert operation == "avg"
-        raise NotImplementedError("Using ranking aggregation is not implemented yet.")
+        # turn scores into ranks
+        import scipy.stats
+        scores = scipy.stats.rankdata(scores, method="average", axis=1)
 
 
     if operation == "mul":
         scores = np.prod(scores, axis=0)
     elif operation == "avg":
-        scores = np.average(scores, axis=0)
+        scores = np.average(scores, axis=0, weights=weights)
     else:
         raise Exception(f"Unknown operation: {operation}")
 
@@ -806,7 +813,7 @@ METHODS = {
     ),
     "precomet_cons": partial(precomet, model_path="zouharvi/PreCOMET-cons", reverse=False),
 
-    "sentinel_src": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-da", reverse=True),
+    "sentinel_src_da": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-da", reverse=True),
     "sentinel_src_mqm": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-mqm", reverse=True),
 }
 
