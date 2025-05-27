@@ -14,6 +14,8 @@ data_old_all = list(subset2evaluate.utils.load_data_wmt_test().values())
 # %%
 # "standard" subset selection methods
 for repetitions, method_kwargs in [
+    (1, dict(method="comet_instant_confidence")),
+    (1, dict(method="comet_instant_confidence", reverse=True)),
     (1, dict(method="metric_avg", metric="human")),
     (1, dict(method="metric_var", metric="human")),
     (1, dict(method="metric_cons", metric="human")),
@@ -74,7 +76,6 @@ for repetitions, method_kwargs in [
         ]
     )),
 ]:
-    load_model = None
     spa_all = []
     for _ in range(repetitions):
         for data_old in tqdm.tqdm(data_old_all):
@@ -94,19 +95,19 @@ for repetitions, method_kwargs in [
 
 for method_kwargs in [
     dict(method="diffuse"),
-    # dict(method="kmeans", features="tgt_0"),
-    # dict(method="kmeans", features="src"),
-    # dict(method="bruteforce", metric="human", simulations=1), # this is random!
-    # dict(method="bruteforce", metric="human", simulations=10),
-    # dict(method="bruteforce", metric="human", simulations=100),
-    # dict(method="bruteforce", metric="human", simulations=1000),
-    # dict(method="bruteforce", metric="MetricX-23-c", simulations=10),
-    # dict(method="bruteforce", metric="MetricX-23-c", simulations=100),
-    # dict(method="bruteforce", metric="MetricX-23-c", simulations=1000),
-    # dict(method="bruteforce_greedy", metric="human", simulations=10, stepsize=10),
-    # dict(method="bruteforce_greedy", metric="human", simulations=100, stepsize=10),
-    # dict(method="bruteforce_greedy", metric="MetricX-23-c", simulations=10, stepsize=10),
-    # dict(method="bruteforce_greedy", metric="MetricX-23-c", simulations=100, stepsize=10),
+    dict(method="kmeans", features="tgt_0"),
+    dict(method="kmeans", features="src"),
+    dict(method="bruteforce", metric="human", simulations=1), # this is random!
+    dict(method="bruteforce", metric="human", simulations=10),
+    dict(method="bruteforce", metric="human", simulations=100),
+    dict(method="bruteforce", metric="human", simulations=1000),
+    dict(method="bruteforce", metric="MetricX-23-c", simulations=10),
+    dict(method="bruteforce", metric="MetricX-23-c", simulations=100),
+    dict(method="bruteforce", metric="MetricX-23-c", simulations=1000),
+    dict(method="bruteforce_greedy", metric="human", simulations=10, stepsize=10),
+    dict(method="bruteforce_greedy", metric="human", simulations=100, stepsize=10),
+    dict(method="bruteforce_greedy", metric="MetricX-23-c", simulations=10, stepsize=10),
+    dict(method="bruteforce_greedy", metric="MetricX-23-c", simulations=100, stepsize=10),
 ]:
     load_model = None
     spa_all = []

@@ -429,6 +429,71 @@ def precomet(
         return scores
 
 
+
+def comet_instant_confidence(
+    data: List[Dict],
+    model_path: str,
+    return_model: bool = False,
+    load_model: Optional[object] = None,
+    reverse: bool = False,
+    **kwargs
+) -> Union[List, Tuple[List, Any]]:
+    import os
+    prev_tqdm_setting = os.environ.get("TQDM_DISABLE", None)
+    os.environ["TQDM_DISABLE"] = "1"
+
+    import logging
+    try:
+        import comet_early_exit
+    except ImportError:
+        raise Exception('Please install comet_early_exit with `pip install "git+https://github.com/zouharvi/COMET-early-exit#egg=comet-early-exit&subdirectory=comet_early_exit"`')
+    import warnings
+
+    logging.disable(logging.INFO)
+
+    with warnings.catch_warnings(action="ignore"):
+        if load_model is not None:
+            model = load_model
+        elif os.path.exists(model_path):
+            model = comet_early_exit.load_from_checkpoint(model_path)
+        else:
+            model = comet_early_exit.load_from_checkpoint(comet_early_exit.download_model(model_path))
+        predictions = list({
+            (line["src"], tgt)
+            for line in data
+            for tgt in line["tgt"].values()
+        })
+        confidences_flat = model.predict([
+            {"src" : src, "mt": mt}
+            for src, mt in predictions
+        ], progress_bar=False)["confidences"]
+        srcmt2confidence = {
+            (src, mt): confidence
+            for (src, mt), confidence in zip(predictions, confidences_flat)
+        }
+
+        scores = [
+            np.average([
+                srcmt2confidence[(line["src"], tgt)]
+                for tgt in line["tgt"].values()
+            ])
+            for line in data
+        ]
+        if reverse:
+            scores = [-x for x in scores]
+
+    logging.disable(logging.NOTSET)
+    if prev_tqdm_setting is not None:
+        os.environ["TQDM_DISABLE"] = prev_tqdm_setting
+    else:
+        os.environ.pop("TQDM_DISABLE")
+
+    if return_model:
+        return scores, model
+    else:
+        return scores
+
+
 def sentinel_src(
     data: List[Dict],
     model_path: str,
@@ -812,6 +877,8 @@ METHODS = {
         reverse=False,
     ),
     "precomet_cons": partial(precomet, model_path="zouharvi/PreCOMET-cons", reverse=False),
+
+    "comet_instant_confidence": partial(comet_instant_confidence, model_path="zouharvi/comet-instant-confidence", reverse=False),
 
     "sentinel_src_da": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-da", reverse=True),
     "sentinel_src_mqm": partial(sentinel_src, model_path="sapienzanlp/sentinel-src-mqm", reverse=True),
