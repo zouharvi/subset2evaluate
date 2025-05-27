@@ -14,10 +14,10 @@ PROPS = np.linspace(0.25, 0.75, 10)
 # %%
 # parity
 for method_kwargs in [
-    # dict(method="metric_avg"),
-    # dict(method="metric_var"),
-    # dict(method="metric_cons"),
-    # dict(method="diversity", metric="LM"),
+    dict(method="metric_avg"),
+    dict(method="metric_var"),
+    dict(method="metric_cons"),
+    dict(method="diversity", metric="LM"),
     dict(method="pyirt_diffdisc", retry_on_error=True),
 ]:
     spa_local = []

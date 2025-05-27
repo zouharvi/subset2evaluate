@@ -76,7 +76,7 @@ for repetitions, method_kwargs in tqdm.tqdm([
         print("Evaluating", method_kwargs["method"], "on", metric, flush=True)
         spa_new = subset2evaluate.evaluate.eval_spa_par_randnorm(
             data_new_avg, data_old,
-            clucor_precomputed=clucor_precomputed,
+            spa_precomputed=clucor_precomputed,
         )
         clus_local.append(spa_new)
     result_item["spa"][method_kwargs["method"]] = np.average(clus_local)

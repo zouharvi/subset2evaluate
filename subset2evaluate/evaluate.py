@@ -235,12 +235,12 @@ def eval_spa_par_randnorm(
     data_old: List[Dict],
     random_seeds=10,
     metric="human",
-    clucor_precomputed=None,
+    spa_precomputed=None,
     props: List[float] = utils.PROPS,
 ) -> Tuple[float, float]:
 
-    if clucor_precomputed is not None:
-        spa_random, spa_random_norm = clucor_precomputed
+    if spa_precomputed is not None:
+        spa_random, spa_random_norm = spa_precomputed
     else:
         spa_random, spa_random_norm = precompute_spa_randnorm(
             data_old, random_seeds=random_seeds, metric=metric, props=props,

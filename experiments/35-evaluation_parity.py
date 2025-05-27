@@ -39,7 +39,7 @@ for method_kwargs in [
         par_spa = subset2evaluate.evaluate.eval_spa_par_randnorm(
             subset2evaluate.select_subset.basic(data_old, **method_kwargs),
             data_old,
-            clucor_precomputed=spa_precomputed[data_name],
+            spa_precomputed=spa_precomputed[data_name],
         )
         par_spa_all.append(np.average(par_spa))
     print(f'{method_kwargs["method"]:<15}', f"SPA: {np.average(par_spa_all):.1%}")
