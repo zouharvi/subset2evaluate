@@ -91,12 +91,8 @@ points_y_spa_random = points_y_spa_random.reshape(-1, 100, len(PROPS))
 points_y_spa_random = np.average(points_y_spa_random, axis=(0))
 points_y_spa_random.sort(axis=0)
 
-points_y_spa_random_075 = [
-    utils.confidence_interval(points_y_spa_random[:, i], confidence=0.75)
-    for i in range(len(PROPS))
-]
-points_y_spa_random_095 = [
-    utils.confidence_interval(points_y_spa_random[:, i], confidence=0.95)
+points_y_spa_random_090 = [
+    utils.confidence_interval(points_y_spa_random[:, i], confidence=0.90)
     for i in range(len(PROPS))
 ]
 
@@ -122,18 +118,9 @@ utils_fig.plot_subset_selection(
     fn_extra=lambda ax: [
         ax.fill_between(
             range(len(PROPS)),
-            [x[0] for x in points_y_spa_random_095],
-            [x[1] for x in points_y_spa_random_095],
+            [x[0] for x in points_y_spa_random_090],
+            [x[1] for x in points_y_spa_random_090],
             alpha=0.2,
-            color="#000000",
-            linewidth=0,
-        ),
-
-        ax.fill_between(
-            range(len(PROPS)),
-            [x[0] for x in points_y_spa_random_075],
-            [x[1] for x in points_y_spa_random_075],
-            alpha=0.4,
             color="#000000",
             linewidth=0,
         ),
