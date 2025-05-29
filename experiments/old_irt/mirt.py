@@ -173,7 +173,7 @@ def rank(param_file, ):
         all_acc = []
         for prop in utils.PROPS:
             subset = sorted_data[:int(len(all_data) * prop)]
-            acc = subset2evaluate.evaluate.eval_subset_accuracy(subset, all_data)
+            acc = subset2evaluate.evaluate.eval_subset_pairwise_accuracy(subset, all_data)
             all_acc.append(acc)
             print('{}: {}'.format(prop, acc))
         print('avg acc: {}'.format(sum(all_acc) / len(all_acc)))

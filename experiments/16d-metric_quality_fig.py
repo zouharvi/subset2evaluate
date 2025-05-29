@@ -35,7 +35,7 @@ fig_utils.matplotlib_default()
 bins = [0.15, 0.25, 0.35, 0.45, 1.0]
 bins_label = [0.1, 0.2, 0.3, 0.4, 0.5]
 
-plt.figure(figsize=(4, 2.5))
+plt.figure(figsize=(4, 2.9))
 for method in ["metric_avg", "metric_var", "metric_cons", "diversity", "pyirt_diffdisc"]:
     data_local = sorted(data_new[method], key=lambda x: x["correlation"])
     data_i = np.digitize([v["correlation"] for v in data_local], bins=bins)

@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Literal, Tuple, Union
 import numpy as np
 import subset2evaluate.utils as utils
 
@@ -229,7 +229,6 @@ def precompute_spa_randnorm(
     return spa_random, np.average(pars_spa_rand)
 
 
-
 def eval_spa_par_randnorm(
     data_new: List[Dict],
     data_old: List[Dict],
@@ -257,7 +256,7 @@ def eval_spa_par_randnorm(
     return par_spa/spa_random_norm
 
 
-def eval_subset_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):
+def eval_subset_pairwise_accuracy(data_new: List[Dict], data_old: List[Dict], metric="human"):
     # evaluates against ordering from data_old
     import itertools
 
@@ -454,7 +453,12 @@ def eval_subset_top(data_new: List[Dict], data_old: List[Dict], metric="human"):
     return 1- (rank_top_new / (len(scores_old) - 1))
 
 
-def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="human"):
+def eval_subset_correlation(
+        data_new: List[Dict],
+        data_old: List[Dict],
+        metric="human",
+        correlation: Literal["kendall", "spearman", "pearson"] = "kendall",
+    ):
     # evaluates spearman correlation of systems
     import scipy.stats
     import warnings
@@ -476,16 +480,58 @@ def eval_subset_correlation(data_new: List[Dict], data_old: List[Dict], metric="
     # handle constant input warning
     with warnings.catch_warnings(category=scipy.stats.ConstantInputWarning, action="error"):
         try:
-            return scipy.stats.kendalltau(values_old, values_new, variant="c").correlation
+            if correlation == "spearman":
+                return scipy.stats.spearmanr(values_old, values_new).correlation
+            elif correlation == "pearson":
+                return scipy.stats.pearsonr(values_old, values_new).correlation
+            elif correlation == "kendall":
+                return scipy.stats.kendalltau(values_old, values_new, variant="b").correlation
+            else:
+                raise ValueError(f"Unknown correlation type: {correlation}.")
         except scipy.stats.ConstantInputWarning:
             return 0
+
+
+def eval_subset_error(
+        data_new: List[Dict],
+        data_old: List[Dict],
+        metric="human",
+        error: Literal["absolute", "squared", "root_squared"] = "absolute",
+    ):
+    models = list(data_old[0]["scores"].keys())
+
+    if type(metric) is tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
+
+    scores_new = get_model_absolute(data_new, metric=metric1)
+    scores_old = get_model_absolute(data_old, metric=metric2)
+
+    values_new = [scores_new[sys] for sys in models]
+    values_old = [scores_old[sys] for sys in models]
+
+    if error == "absolute":
+        return np.average([abs(x - y) for x, y in zip(values_old, values_new)])
+    elif error == "squared":
+        return np.average([(x - y) ** 2 for x, y in zip(values_old, values_new)])
+    elif error == "root_squared":
+        return np.sqrt(np.average([(x - y) ** 2 for x, y in zip(values_old, values_new)]))
+    else:
+        raise ValueError(f"Unknown error type: {error}.")
 
 
 def eval_subset_clusters(data: List[Dict], metric="human"):
     return len(compute_clusters(data, metric=metric))
 
 
-def eval_subset_clusters_top(data_new: List[Dict], data_old: List[Dict], clusters_old: List[List[str]], metric="human"):
+def eval_subset_clusters_top(
+        data_new: List[Dict],
+        data_old: List[Dict],
+        clusters_old: Union[None, List[List[str]]] = None,
+        metric="human"
+    ):
     clusters_new = compute_clusters(data_new, metric=metric)
     if clusters_old is None:
         clusters_old = compute_clusters(data_old, metric=metric)
