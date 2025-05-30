@@ -4,18 +4,6 @@ import subset2evaluate.utils as utils
 import subset2evaluate.evaluate
 
 
-def _fn_information_content_old(item_irt, data_irt) -> float:
-    # This formula is based on the simplified formula of Rodriquez et al 2021
-    information = 0
-    for theta in data_irt["models"].values():
-        prob = utils.pred_irt(
-            theta,
-            item_irt
-        )
-        information += prob * (1 - prob) * (item_irt["disc"]**2)
-    return information
-
-
 def nn_irt(data, metric, **kwargs):
     raise NotImplementedError("This method is not yet implemented for use.")
     import torch
@@ -303,23 +291,3 @@ def premlp_other(data, data_train, fn_utility: Callable, **kwargs) -> List[float
 
     warnings.resetwarnings()
     return list(data_y_test)
-
-
-
-
-def synthetic_simulation(data, **kwargs):
-    raise NotImplementedError("This method is not yet implemented for use.")
-    import multiprocessing
-
-    data_new = []
-    while len(data) > 0:
-        print("Remaining", len(data))
-        with multiprocessing.Pool(20) as pool:
-            results = pool.map(_run_simulation, [[data, data_new]] * 1000)
-
-        # take best clustering but evaluate on human data
-        data_new = max(results, key=lambda x: x[1])[0]
-        data_best_i = {line["i"] for line in data_new}
-        data = [line for line in data if line["i"] not in data_best_i]
-
-    return data_new
