@@ -4,17 +4,14 @@ import random
 import argparse
 
 args = argparse.ArgumentParser()
-args.add_argument("--exclude", default="wmt23")
+args.add_argument("split", choices=["test", "train"])
 args = args.parse_args()
 
 data_all = []
 
-for i in range(53):
-    data_name, data_val = pickle.load(open(f"computed/irt_params/{i}.pkl", "rb"))
-    if data_name[0] == args.exclude:
-        print("Skipping", data_name)
-    else:
-        data_all += data_val
+for i in range(49 if args.split == "train" else 9):
+    data_name, data_val = pickle.load(open(f"computed/irt_params/{args.split}_{i}.pkl", "rb"))
+    data_all += data_val
 
 data_diff = [
     {
@@ -38,33 +35,42 @@ data_diffdisc = [
     for line in data_all
 ]
 
-# prepare comet-compatible data
-with open("../PreCOMET/data/csv/train_disc.csv", "w") as f:
+
+with open(f"../PreCOMET/data/csv/{args.split}_disc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_disc)
 
-with open("../PreCOMET/data/csv/dev_disc.csv", "w") as f:
-    writer = csv.DictWriter(f, fieldnames=["src", "score"])
-    writer.writeheader()
-    writer.writerows(random.Random(0).sample(data_disc, k=1000))
+if args.split == "train":
+    with open("../PreCOMET/data/csv/dev_disc.csv", "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["src", "score"])
+        writer.writeheader()
+        writer.writerows(random.Random(0).sample(data_disc, k=1000))
 
-with open("../PreCOMET/data/csv/train_diff.csv", "w") as f:
+with open(f"../PreCOMET/data/csv/{args.split}_diff.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_diff)
 
-with open("../PreCOMET/data/csv/dev_diff.csv", "w") as f:
-    writer = csv.DictWriter(f, fieldnames=["src", "score"])
-    writer.writeheader()
-    writer.writerows(random.Random(0).sample(data_diff, k=1000))
+if args.split == "train":
+    with open("../PreCOMET/data/csv/dev_diff.csv", "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["src", "score"])
+        writer.writeheader()
+        writer.writerows(random.Random(0).sample(data_diff, k=1000))
 
-with open("../PreCOMET/data/csv/train_diffdisc.csv", "w") as f:
+with open(f"../PreCOMET/data/csv/{args.split}_diffdisc.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames=["src", "score"])
     writer.writeheader()
     writer.writerows(data_diffdisc)
 
-with open("../PreCOMET/data/csv/dev_diffdisc.csv", "w") as f:
-    writer = csv.DictWriter(f, fieldnames=["src", "score"])
-    writer.writeheader()
-    writer.writerows(random.Random(0).sample(data_diffdisc, k=1000))
+if args.split == "train":
+    with open("../PreCOMET/data/csv/dev_diffdisc.csv", "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["src", "score"])
+        writer.writeheader()
+        writer.writerows(random.Random(0).sample(data_diffdisc, k=1000))
+
+
+"""
+python3 experiments/27-prepare_precometirt_data.py train
+python3 experiments/27-prepare_precometirt_data.py test
+"""

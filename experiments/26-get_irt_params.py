@@ -1,6 +1,5 @@
 # %%
 import collections
-
 import tqdm
 import subset2evaluate.utils
 import subset2evaluate.evaluate
@@ -11,11 +10,22 @@ import pickle
 import argparse
 
 args = argparse.ArgumentParser()
+args.add_argument("split", choices=["train", "test"])
 args.add_argument("i", type=int)
 args = args.parse_args()
 
-# 53 items
-data_old_name, data_old = list(subset2evaluate.utils.load_data_wmt_all(normalize=True, min_items=400).items())[args.i]
+data_test = subset2evaluate.utils.load_data_wmt_test().keys()
+data_all = subset2evaluate.utils.load_data_wmt_all(normalize=True, min_items=400).items()
+data_all = [
+    (data_name, data_local)
+    for data_name, data_local in data_all
+    if (data_name in data_test) == (args.split == "test")
+]
+
+
+# 49 items for train
+# 9 items for test
+data_old_name, data_old = data_all[args.i]
 data_train = collections.defaultdict(list)
 data_params = []
 
@@ -49,11 +59,14 @@ data_params = average_irt_params(data_params)
 
 # dump to computed/irt_params
 os.makedirs("computed/irt_params", exist_ok=True)
-with open(f"computed/irt_params/{args.i}.pkl", "wb") as f:
+with open(f"computed/irt_params/{args.split}_{args.i}.pkl", "wb") as f:
     pickle.dump((data_old_name, data_params), f)
 
 """
-for i in $(seq 0 52); do
-    sbatch_gpu_short "irt_params_$i" "python3 experiments/26-get_irt_params.py $i"
+for i in $(seq 0 48); do
+    sbatch_gpu_short "irt_params_train_$i" "python3 experiments/26-get_irt_params.py train $i"
+done;
+for i in $(seq 0 8); do
+    sbatch_gpu_short "irt_params_test_$i"  "python3 experiments/26-get_irt_params.py test $i"
 done;
 """
