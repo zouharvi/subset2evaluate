@@ -19,9 +19,6 @@ with multiprocessing.Pool(len(data_old_all)) as pool:
 spa_precomputed = dict(zip([x[0] for x in data_old_all], spa_precomputed_values))
 
 # %%
-import importlib
-importlib.reload(subset2evaluate.evaluate)
-
 for method_kwargs in [
     dict(method="metric_avg", metric="MetricX-23-c"),
     dict(method="metric_var", metric="MetricX-23-c"),
@@ -44,11 +41,23 @@ for method_kwargs in [
         par_spa_all.append(np.average(par_spa))
     print(f'{method_kwargs["method"]:<15}', f"SPA: {np.average(par_spa_all):.1%}")
 
+# %%
+par_spa_all = []
+for repetitions in range(10):
+    for data_name, data_old in tqdm.tqdm(data_old_all):
+        par_spa = subset2evaluate.evaluate.eval_spa_par_randnorm(
+            subset2evaluate.select_subset.basic(data_old, method="random"),
+            data_old,
+            spa_precomputed=spa_precomputed[data_name],
+        )
+        par_spa_all.append(par_spa)
 
-# metric_avg      SPA: 85.0%
-# metric_var      SPA: 81.0%
-# metric_cons     SPA: 71.4%
-# diversity       SPA: 76.8%
-# pyirt_diffdisc  SPA: 87.2%
 
-# precomet_avg    SPA: 106.9%
+
+# %%
+
+import subset2evaluate.utils
+
+spa_all_random_arr = np.array(par_spa_all).reshape(-1, 10).mean(axis=1)
+conf = subset2evaluate.utils.confidence_interval(spa_all_random_arr, confidence=0.90,)
+print(f"{(conf[1]-conf[0])/2:.2%}")

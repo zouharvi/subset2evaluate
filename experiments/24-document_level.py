@@ -7,22 +7,22 @@ import numpy as np
 import tqdm
 
 data_old_all = list(utils.load_data_wmt_test(normalize=True).values())
+spa_all_random = []
 
 # %%
-spa_new_all = collections.defaultdict(list)
 
 for repetitions, method_kwargs in [
     (100, dict(method="random")),
-    (1, dict(method="metric_avg", metric="MetricX-23-c")),
-    (1, dict(method="metric_var", metric="MetricX-23-c")),
-    (1, dict(method="metric_cons", metric="MetricX-23-c")),
-    (1, dict(method="diversity", metric="lm")),
-    (5, dict(method="pyirt_diffdisc", metric="MetricX-23-c", model="4pl_score", retry_on_error=True)),
-    (1, dict(method="precomet_avg")),
-    (1, dict(method="precomet_var")),
-    (1, dict(method="precomet_cons")),
-    (1, dict(method="precomet_diversity")),
-    (1, dict(method="precomet_diffdisc_direct")),
+    # (1, dict(method="metric_avg", metric="MetricX-23-c")),
+    # (1, dict(method="metric_var", metric="MetricX-23-c")),
+    # (1, dict(method="metric_cons", metric="MetricX-23-c")),
+    # (1, dict(method="diversity", metric="lm")),
+    # (5, dict(method="pyirt_diffdisc", metric="MetricX-23-c", model="4pl_score", retry_on_error=True)),
+    # (1, dict(method="precomet_avg")),
+    # (1, dict(method="precomet_var")),
+    # (1, dict(method="precomet_cons")),
+    # (1, dict(method="precomet_diversity")),
+    # (1, dict(method="precomet_diffdisc_direct")),
 ]:
     load_model = None
     spa_all = []
@@ -57,5 +57,16 @@ for repetitions, method_kwargs in [
                 return_model=True
             )
             spa_all.append(evaluate_aggregate_doc(data_y))
+            if method_kwargs["method"] == "random":
+                spa_all_random.append(spa_all[-1])
 
     print(method_kwargs["method"], f"{np.average(spa_all):.1%}")
+
+
+# %%
+
+import subset2evaluate.utils
+
+spa_all_random_arr = np.array(spa_all_random).mean(axis=1).reshape(100, -1).mean(axis=0)
+conf = subset2evaluate.utils.confidence_interval(spa_all_random_arr, confidence=0.90,)
+print(f"{(conf[1]-conf[0])/2:.2%}")
