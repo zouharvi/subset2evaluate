@@ -1,8 +1,6 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Literal
 import numpy as np
 from subset2evaluate.reference_info import year2std_refs
-import json
-from collections import defaultdict
 
 PROPS = np.linspace(0.05, 0.5, 10)
 
@@ -81,36 +79,27 @@ def ensure_wmt_exists():
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
 
-
-def ensure_bio_mqm_exists():
-    import requests
-    import os
-    import tarfile
-
-    if not os.path.exists("data/bio-mqm/"):
-        print("Downloading BioMQM data because data/bio-mqm/ does not exist..")
-        os.makedirs("data/bio-mqm", exist_ok=True)
-        r = requests.get("https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/dev.jsonl?download=true")
-        with open("data/bio-mqm/dev.jsonl", "wb") as f:
-            f.write(r.content)
-
-        r = requests.get("https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/test.jsonl?download=true")
-        with open("data/bio-mqm/test.jsonl", "wb") as f:
-            f.write(r.content)
-
-
-
+    
 def load_data_bio_mqm(
-    split="dev",  # or "test"
-    normalize=False,
+    split: Literal["dev", "test"]="dev",
+    normalize: bool=False,
 ):
+    import json
+    import os
+    import collections
     assert split in {"dev", "test"}, "split must be either 'dev' or 'test'"
 
-    ensure_bio_mqm_exists()
+    # ensure BioMQM exists
+    if not os.path.exists(f"data/bio-mqm/{split}"):
+        import requests
+        print(f"Downloading {split} BioMQM data because data/bio-mqm/{split} does not exist..")
+        os.makedirs("data/bio-mqm", exist_ok=True)
+        
+        r = requests.get(f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
+        with open(f"data/bio-mqm/{split}.jsonl", "wb") as f:
+            f.write(r.content)
 
-    fpath = f"data/bio-mqm/{split}.jsonl"
-
-    with open(fpath, "r", encoding="utf-8") as f:
+    with open(f"data/bio-mqm/{split}.jsonl", "r") as f:
         lines = [json.loads(line) for line in f]
 
     grouped = {}
@@ -149,7 +138,7 @@ def load_data_bio_mqm(
         grouped[key]["scores"][model] = {"human": float(score)}
 
     # convert to list
-    data = defaultdict(list)
+    data = collections.defaultdict(list)
     for i, item in enumerate(grouped.values()):
         # calculate word count
         word_count = len(item["src"].split())
@@ -166,16 +155,16 @@ def load_data_bio_mqm(
         }
         data[("bio-mqm", item["langs"])].append(entry)
 
-    # Normalize cost
-    for data_per_lang in data.values():
-        costs = np.array([x["cost"] for x in data_per_lang])
-        cost_norm = (costs - costs.mean()) / costs.std() + 1
-        cost_norm = (cost_norm - cost_norm.min()) / (1 - cost_norm.min())
-        for i, x in enumerate(data_per_lang):
-            x["cost"] = float(cost_norm[i])
+    if normalize:
+        for data_per_lang in data.values():
+            # Normalize cost
+            costs = np.array([x["cost"] for x in data_per_lang])
+            cost_norm = (costs - costs.mean()) / costs.std() + 1
+            cost_norm = (cost_norm - cost_norm.min()) / (1 - cost_norm.min())
+            for i, x in enumerate(data_per_lang):
+                x["cost"] = float(cost_norm[i])
 
-        # Normalize scores to 0–100 if needed
-        if normalize:
+            # Normalize scores to 0–100 if requested
             all_scores = [
                 score["human"]
                 for item in data_per_lang
