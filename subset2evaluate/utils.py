@@ -80,27 +80,31 @@ def ensure_wmt_exists():
         os.remove("data/mt-metrics-eval-v2.tgz")
 
     
-def load_data_bio_mqm(
+def load_data_biomqm(
     split: Literal["dev", "test"]="dev",
     normalize: bool=False,
 ):
     import json
     import os
     import collections
+    import contextlib
     assert split in {"dev", "test"}, "split must be either 'dev' or 'test'"
 
-    # ensure BioMQM exists
-    if not os.path.exists(f"data/bio-mqm/{split}"):
-        import requests
-        print(f"Downloading {split} BioMQM data because data/bio-mqm/{split} does not exist..")
-        os.makedirs("data/bio-mqm", exist_ok=True)
-        
-        r = requests.get(f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
-        with open(f"data/bio-mqm/{split}.jsonl", "wb") as f:
-            f.write(r.content)
 
-    with open(f"data/bio-mqm/{split}.jsonl", "r") as f:
-        lines = [json.loads(line) for line in f]
+    # temporarily change to the root directory, this requires Python 3.11
+    with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+        # ensure BioMQM exists
+        if not os.path.exists(f"data/biomqm/{split}.jsonl"):
+            import requests
+            print(f"Downloading {split} BioMQM data because data/biomqm/{split} does not exist..")
+            os.makedirs("data/biomqm", exist_ok=True)
+            
+            r = requests.get(f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
+            with open(f"data/biomqm/{split}.jsonl", "wb") as f:
+                f.write(r.content)
+
+        with open(f"data/biomqm/{split}.jsonl", "r") as f:
+            lines = [json.loads(line) for line in f]
 
     grouped = {}
     for item in lines:
@@ -153,7 +157,7 @@ def load_data_bio_mqm(
             "domain": item["domain"],
             "cost": cost,
         }
-        data[("bio-mqm", item["langs"])].append(entry)
+        data[("biomqm", item["langs"])].append(entry)
 
     if normalize:
         for data_per_lang in data.values():
@@ -766,6 +770,8 @@ def load_data(data: Union[List, str], **kwargs):
             data = load_data_wmt(year=data_year, langs=data_lang, **kwargs)
     elif data == "summeval":
         return load_data_summeval(**kwargs)
+    elif data == "biomqm":
+        return load_data_biomqm(**kwargs)
     else:
         raise Exception("Could not parse data")
 

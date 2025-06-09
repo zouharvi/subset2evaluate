@@ -8,6 +8,22 @@ import subset2evaluate.evaluate
 
 # %%
 
+def test_biomqm_loader():
+    data = subset2evaluate.utils.load_data_biomqm(split="test")
+    assert isinstance(data, dict)
+    assert len(data) == 15
+    assert len(data[("biomqm", "en-de")]) == 757
+    assert "i" in data[("biomqm", "en-de")][0]
+    assert "src" in data[("biomqm", "en-de")][0]
+    assert "tgt" in data[("biomqm", "en-de")][0]
+    assert "ref" in data[("biomqm", "en-de")][0]
+    assert "scores" in data[("biomqm", "en-de")][0]
+
+    data = subset2evaluate.utils.load_data_biomqm(split="dev")
+    assert len(data) == 10
+    assert len(data[("biomqm", "en-de")]) == 255
+
+
 def test_wmt_loader():
     data = subset2evaluate.utils.load_data("wmt/all", min_items=400)
     assert isinstance(data, dict)
