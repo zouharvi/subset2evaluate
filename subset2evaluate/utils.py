@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Literal
 import numpy as np
 from subset2evaluate.reference_info import year2std_refs
 
@@ -79,7 +79,108 @@ def ensure_wmt_exists():
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
 
+    
+def load_data_bio_mqm(
+    split: Literal["dev", "test"]="dev",
+    normalize: bool=False,
+):
+    import json
+    import os
+    import collections
+    assert split in {"dev", "test"}, "split must be either 'dev' or 'test'"
 
+    # ensure BioMQM exists
+    if not os.path.exists(f"data/bio-mqm/{split}"):
+        import requests
+        print(f"Downloading {split} BioMQM data because data/bio-mqm/{split} does not exist..")
+        os.makedirs("data/bio-mqm", exist_ok=True)
+        
+        r = requests.get(f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
+        with open(f"data/bio-mqm/{split}.jsonl", "wb") as f:
+            f.write(r.content)
+
+    with open(f"data/bio-mqm/{split}.jsonl", "r") as f:
+        lines = [json.loads(line) for line in f]
+
+    grouped = {}
+    for item in lines:
+        src = item["src"]
+        ref = item["ref"][0].strip() if len(item["ref"]) > 0 else None  # for compatibility with WMT loader
+        doc = item.get("doc_id", "bio-doc")
+        domain = "bio"
+        langs = f"{item['lang_src']}-{item['lang_tgt']}"
+
+        model = item["system"]
+        tgt = item["tgt"].strip()
+
+        # compute score
+        score = 0
+        for err in item["errors_tgt"]:
+            severity = err.get("severity", "").lower()
+            if severity == "minor":
+                score -= 1
+            elif severity == "major":
+                score -= 5
+
+        key = (src, ref, doc)
+        if key not in grouped:
+            grouped[key] = {
+                "src": src,
+                "ref": ref,
+                "doc": doc,
+                "domain": domain,
+                "langs": langs,
+                "tgt": {},
+                "scores": {},
+            }
+
+        grouped[key]["tgt"][model] = tgt
+        grouped[key]["scores"][model] = {"human": float(score)}
+
+    # convert to list
+    data = collections.defaultdict(list)
+    for i, item in enumerate(grouped.values()):
+        # calculate word count
+        word_count = len(item["src"].split())
+        cost = 0.15 * word_count + 33.7
+        entry = {
+            "i": i,
+            "src": item["src"],
+            "ref": item["ref"],
+            "tgt": item["tgt"],
+            "scores": item["scores"],
+            "doc": item["doc"],
+            "domain": item["domain"],
+            "cost": cost,
+        }
+        data[("bio-mqm", item["langs"])].append(entry)
+
+    if normalize:
+        for data_per_lang in data.values():
+            # Normalize cost
+            costs = np.array([x["cost"] for x in data_per_lang])
+            cost_norm = (costs - costs.mean()) / costs.std() + 1
+            cost_norm = (cost_norm - cost_norm.min()) / (1 - cost_norm.min())
+            for i, x in enumerate(data_per_lang):
+                x["cost"] = float(cost_norm[i])
+
+            # Normalize scores to 0–100 if requested
+            all_scores = [
+                score["human"]
+                for item in data_per_lang
+                for score in item["scores"].values()
+            ]
+            smin, smax = min(all_scores), max(all_scores)
+            for item in data_per_lang:
+                for model in item["scores"]:
+                    raw = item["scores"][model]["human"]
+                    scaled = 100 * (raw - smin) / (smax - smin) if smax > smin else 0
+                    item["scores"][model]["human"] = float(scaled)
+
+    return data
+
+
+    
 def load_data_wmt(  # noqa: C901
     year: str = "wmt23",
     langs: str = "en-cs",
