@@ -8,7 +8,7 @@ def eval_spa(
         data_old: List[Dict],
         metric="human",
         props: List[float] = utils.PROPS
-) -> Tuple[float, float]:
+) -> List[float]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
@@ -26,7 +26,7 @@ def eval_clucor(
         data_old: List[Dict],
         metric="human",
         props: List[float] = utils.PROPS
-) -> Tuple[float, float]:
+) -> Tuple[List[float], List[float]]:
     # both list or descriptor is fine
     data_new = utils.load_data(data_new)
     data_old = utils.load_data(data_old)
@@ -49,7 +49,7 @@ def eval_clucor_par(
     metric="human",
     props: List[float] = utils.PROPS,
     workers=10,
-) -> Tuple[float, float]:
+) -> Tuple[List[float], List[float]]:
     """
     Evaluates the proportion of data that is needed to achieve parity with target.
     """
@@ -576,7 +576,7 @@ def compute_clusters(data: List[Dict], metric="human"):
             else:
                 clusters[-1].append((model, model_scores))
 
-    return [[model for model, model_score in clusetr] for clusetr in clusters]
+    return [[model for model, model_score in cluster] for cluster in clusters]
 
 
 def get_model_absolute(data_new, metric="human") -> Dict[str, float]:

@@ -27,8 +27,10 @@ def _data_minmax_normalize(data):
         for model, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
                 # (x-min)/(max-min) normalize
-                line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (data_flat[met_k][1] - data_flat[met_k][0])
-
+                line["scores"][model][met_k] = (
+                    (met_v - data_flat[met_k][0]) /
+                    (data_flat[met_k][1] - data_flat[met_k][0])
+                )
 
 
 def confidence_interval(data, confidence=0.95):
@@ -72,17 +74,19 @@ def ensure_wmt_exists():
     if not os.path.exists("data/mt-metrics-eval-v2/"):
         print("Downloading WMT data because data/mt-metrics-eval-v2/ does not exist..")
         os.makedirs("data/", exist_ok=True)
-        r = requests.get("https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz")
+        r = requests.get(
+            "https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz"
+        )
         with open("data/mt-metrics-eval-v2.tgz", "wb") as f:
             f.write(r.content)
         with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
 
-    
+
 def load_data_biomqm(
-    split: Literal["dev", "test"]="dev",
-    normalize: bool=False,
+    split: Literal["dev", "test"] = "dev",
+    normalize: bool = False,
 ):
     import json
     import os
@@ -90,16 +94,18 @@ def load_data_biomqm(
     import contextlib
     assert split in {"dev", "test"}, "split must be either 'dev' or 'test'"
 
-
     # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
         # ensure BioMQM exists
         if not os.path.exists(f"data/biomqm/{split}.jsonl"):
             import requests
-            print(f"Downloading {split} BioMQM data because data/biomqm/{split} does not exist..")
+            print(
+                f"Downloading {split} BioMQM data because data/biomqm/{split} does not exist.."
+            )
             os.makedirs("data/biomqm", exist_ok=True)
-            
-            r = requests.get(f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
+
+            r = requests.get(
+                f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
             with open(f"data/biomqm/{split}.jsonl", "wb") as f:
                 f.write(r.content)
 
@@ -109,7 +115,8 @@ def load_data_biomqm(
     grouped = {}
     for item in lines:
         src = item["src"]
-        ref = item["ref"][0].strip() if len(item["ref"]) > 0 else None  # for compatibility with WMT loader
+        # for compatibility with WMT loader
+        ref = item["ref"][0].strip() if len(item["ref"]) > 0 else None
         doc = item.get("doc_id", "bio-doc")
         domain = "bio"
         langs = f"{item['lang_src']}-{item['lang_tgt']}"
@@ -178,13 +185,15 @@ def load_data_biomqm(
             for item in data_per_lang:
                 for model in item["scores"]:
                     raw = item["scores"][model]["human"]
-                    scaled = 100 * (raw - smin) / (smax - smin) if smax > smin else 0
+                    scaled = (
+                        100 * (raw - smin) /
+                        (smax - smin) if smax > smin else 0
+                    )
                     item["scores"][model]["human"] = float(scaled)
 
     return data
 
 
-    
 def load_data_wmt(  # noqa: C901
     year: str = "wmt23",
     langs: str = "en-cs",
@@ -218,14 +227,19 @@ def load_data_wmt(  # noqa: C901
                 # only load data if they come from the same version
                 if isinstance(cache, dict) and "version" in cache.keys() and cache["version"] == importlib.metadata.version("subset2evaluate"):
                     return cache["data"]
-        
 
-        lines_src = open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r").readlines()
-        lines_doc = open(f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r").readlines()
+        lines_src = open(
+            f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r"
+        ).readlines()
+        lines_doc = open(
+            f"data/mt-metrics-eval-v2/{year}/documents/{langs}.docs", "r"
+        ).readlines()
         lines_ref = None
 
         refs_dir = f"data/mt-metrics-eval-v2/{year}/references"
-        selected_human_ref = file_reference if file_reference is not None else year2std_refs[year][langs]
+        selected_human_ref = (
+            file_reference if file_reference is not None else year2std_refs[year][langs]
+        )
         file_reference_path = f"{refs_dir}/{langs}.{selected_human_ref}.txt"
 
         if not os.path.exists(file_reference_path):
@@ -250,7 +264,6 @@ def load_data_wmt(  # noqa: C901
             lines_src.pop(0)
             lines_doc.pop(0)
             lines_ref.pop(0)
-
 
         line_model = {}
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
@@ -302,13 +315,17 @@ def load_data_wmt(  # noqa: C901
         total_n_srcs = len(lines_src)
         if contain_canary_line:
             total_n_srcs += 1
-        
+
         for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"):
             # among ref-based metrics, load only the scores for the selected human ref
             if not f.endswith(f"-{selected_human_ref}.seg.score") and not f.endswith("-src.seg.score"):
                 continue
             # remove suffix for both ref-based and ref-less metrics
-            metric = f.split("/")[-1].removesuffix(f"-{selected_human_ref}.seg.score").removesuffix("-src.seg.score")
+            metric = (
+                f.split("/")[-1]
+                .removesuffix(f"-{selected_human_ref}.seg.score")
+                .removesuffix("-src.seg.score")
+            )
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
                 model, score = line_raw.strip().split("\t")
                 # for refA, refB, synthetic_ref, and other "modeltems" not evaluated
@@ -397,9 +414,13 @@ def load_data_wmt(  # noqa: C901
 
         # save cache
         with open(cache_f, "wb") as f:
-            pickle.dump({"version": importlib.metadata.version("subset2evaluate"), "data": data}, f)
+            pickle.dump({
+                "version": importlib.metadata.version("subset2evaluate"),
+                "data": data
+            }, f)
 
     return data
+
 
 def load_data_wmt_test(**kwargs):
     data = {
@@ -417,6 +438,7 @@ def load_data_wmt_test(**kwargs):
         ]
     }
     return data
+
 
 def load_data_wmt_all(min_items=500, **kwargs):
     data = {
@@ -590,7 +612,8 @@ def load_data_summeval(  # noqa: C901
             "scores": {
                 # rouge is nested for some reason
                 line["model_id"]: (
-                    line["metric_scores_1"] | line["metric_scores_1"]["rouge"] | avg_human_annotations(line["expert_annotations"])
+                    line["metric_scores_1"] | line["metric_scores_1"]["rouge"] | avg_human_annotations(
+                        line["expert_annotations"])
                 )
                 for line in v
             },
@@ -617,7 +640,8 @@ def load_data_summeval(  # noqa: C901
         # temporarily change to the root directory, this requires Python 3.11
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
-            data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_gpt.jsonl")
+            data_metrics = load_data(
+                "../subset2evaluate-tmp/data_other/summeval_gpt.jsonl")
 
         data_metrics_i = {
             x["i"]: x
@@ -641,7 +665,8 @@ def load_data_summeval(  # noqa: C901
         # temporarily change to the root directory, this requires Python 3.11
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
-            data_metrics = load_data("../subset2evaluate-tmp/data_other/summeval_unieval.jsonl")
+            data_metrics = load_data(
+                "../subset2evaluate-tmp/data_other/summeval_unieval.jsonl")
 
         data_metrics_i = {
             x["i"]: x
@@ -657,10 +682,12 @@ def load_data_summeval(  # noqa: C901
             x["scores"] = {
                 sys: v | {
                     "unieval_sum": (
-                        v["unieval_relevance"] + v["unieval_coherence"] + v["unieval_consistency"] + v["unieval_fluency"]
+                        v["unieval_relevance"] + v["unieval_coherence"] +
+                        v["unieval_consistency"] + v["unieval_fluency"]
                     ),
                     "unieval_mul": (
-                        v["unieval_relevance"] * v["unieval_coherence"] * v["unieval_consistency"] * v["unieval_fluency"]
+                        v["unieval_relevance"] * v["unieval_coherence"] *
+                        v["unieval_consistency"] * v["unieval_fluency"]
                     ),
                 }
                 for sys, v in x["scores"].items()
@@ -776,3 +803,95 @@ def load_data(data: Union[List, str], **kwargs):
         raise Exception("Could not parse data")
 
     return data
+
+
+def load_data_iwslt(compute_automated_metrics=False):
+    import json
+    import os
+    import collections
+
+    data_all = {}
+
+    for langs in ["en-ar", "en-de", "en-zh"]:
+        with open(os.path.dirname(os.path.realpath(__file__)) + f"/../data/iwslt/iwslt2025.{langs.replace('-', '')}.shuffled.jsonl", "r") as f:
+            lines = [json.loads(line) for line in f]
+            lines_meta = {line["id"]: line["meta"] for line in lines}
+            lines_prev = {
+                line["id"]: line["previous_context"]
+                for line in lines
+            }
+
+        with open(os.path.dirname(os.path.realpath(__file__)) + f"/../data/iwslt/Final-iwslt2025.{langs.replace('-', '')}.shuffled.jsonl", "r") as f:
+            lines = [json.loads(line) for line in f]
+            data = collections.defaultdict(list)
+            import collections
+            tmp_prevcontext = collections.Counter()
+
+            for line in lines:
+                line["meta"] = lines_meta[int(line["id"])]
+                tmp = lines_prev[int(line["id"])]
+                if tmp is None:
+                    tmp_prevcontext["None"] += 1
+                elif tmp.strip() == "":
+                    tmp_prevcontext["Empty"] += 1
+                else:
+                    tmp_prevcontext["OK"] += 1
+                model = ".".join(line["meta"].split(".")[:-1])
+                segment_id = int(
+                    line["meta"].split(".")[-1].removeprefix("seg_")
+                )
+                score = line["annotations"][0]["quality_rating"]
+
+                data[segment_id].append({
+                    "model": model,
+                    "score": score,
+                    "tgt": line["target"],
+                    "doc": line["meta"].split(".")[2],
+                    "src": line["source"] if langs in {"en-zh", "en-de"} else "",
+                })
+            print(langs, "prevcontext", tmp_prevcontext)
+
+            data_all[("iwslt25", langs)] = [
+                {
+                    "i": segment_id,
+                    "doc": items[0]["doc"],
+                    "src": items[0]["src"],
+                    "tgt": {item["model"]: item["tgt"] for item in items},
+                    "scores": {item["model"]: {"human": item["score"]} for item in items},
+                }
+                for segment_id, items in data.items()
+            ]
+
+    if compute_automated_metrics:
+        import comet
+        for metric_name in ["Unbabel/wmt22-cometkiwi-da", "zouharvi/COMET-partial"]:
+            model = comet.load_from_checkpoint(
+                comet.download_model(metric_name)
+            )
+
+            for langs in ["en-zh", "en-de"]:
+                srctgt_unique = list({
+                    (line["src"], tgt)
+                    for line in data_all[("iwslt25", langs)]
+                    for tgt in line["tgt"].values()
+                })
+                srctgt_to_score = {
+                    srctgt: score
+                    for srctgt, score in zip(
+                        srctgt_unique,
+                        model.predict(
+                            [
+                                {"src": src, "mt": tgt}
+                                for src, tgt in srctgt_unique
+                            ],
+                            batch_size=64
+                        ).scores
+                    )
+                }
+                for line in data_all[("iwslt25", langs)]:
+                    for model, tgt in line["tgt"].items():
+                        line["scores"][model][metric_name] = (
+                            srctgt_to_score[(line["src"], tgt)]
+                        )
+
+    return data_all
