@@ -8,6 +8,35 @@ import subset2evaluate.evaluate
 
 # %%
 
+def test_qe4pe_loader():
+    data = subset2evaluate.utils.load_data_qe4pe(task="main")
+    assert isinstance(data, dict)
+    assert len(data) == 2
+    assert len(data[("qe4pe", "eng-ita")]) == 324
+    assert "i" in data[("qe4pe", "eng-ita")][0]
+    assert "src" in data[("qe4pe", "eng-ita")][0]
+    assert "tgt" in data[("qe4pe", "eng-ita")][0]
+    assert "ref" in data[("qe4pe", "eng-ita")][0]
+    assert "cost" in data[("qe4pe", "eng-ita")][0]
+    assert "scores" in data[("qe4pe", "eng-ita")][0]
+    assert len(data[("qe4pe", "eng-ita")][0]['scores']) == 12
+    assert len(data[("qe4pe", "eng-nld")][0]['scores']) == 13
+
+    data = subset2evaluate.utils.load_data_qe4pe(task="pretask")
+    assert len(data) == 2
+    assert len(data[("qe4pe", "eng-nld")]) == 38
+    assert "scores" in data[("qe4pe", "eng-nld")][0]
+    assert len(data[("qe4pe", "eng-ita")][0]['scores']) == 12
+    assert len(data[("qe4pe", "eng-nld")][0]['scores']) == 13
+
+    data = subset2evaluate.utils.load_data_qe4pe(task="posttask")
+    assert len(data) == 2
+    assert len(data[("qe4pe", "eng-ita")]) == 50
+    assert "scores" in data[("qe4pe", "eng-ita")][0]
+    assert len(data[("qe4pe", "eng-ita")][0]['scores']) == 11
+    assert len(data[("qe4pe", "eng-nld")][0]['scores']) == 13
+
+
 def test_biomqm_loader():
     data = subset2evaluate.utils.load_data_biomqm(split="test")
     assert isinstance(data, dict)
@@ -42,7 +71,7 @@ def test_wmt_loader_mqm():
     assert len(data) == 622
 
 
-def test_wmt_method_random():    
+def test_wmt_method_random():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-cs", method="random", seed=0)
     spa_new = subset2evaluate.evaluate.eval_spa(data_new, "wmt23/en-cs", metric="human")
     # random is usually random but we fix the seed

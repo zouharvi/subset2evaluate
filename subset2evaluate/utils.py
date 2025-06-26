@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union, Literal
+from typing import Any, Callable, Dict, List, Optional, Union, Literal
 import numpy as np
 from subset2evaluate.reference_info import year2std_refs
 
@@ -66,6 +66,63 @@ def _data_median_binarize(data):
                 line["scores"][model][met_k] = 1 * (met_v >= data_flat[met_k])
 
 
+def mt_esa_eval_cost(src_text: str, langs: str) -> float:
+    """
+    Returns the cost of the MT ESA evaluation.
+    The cost is calculated as 0.15 * word_count + 33.7.
+    It's just a very rough estimate, and values should be normalized for cost-aware selection.
+    """
+    # TODO: Add ref to the paper/dataset
+
+    # for CJK languages, we need to count characters
+    if any(cjk in langs for cjk in ("ja", "zh", "ko", "th")):
+        word_count = len(src_text.strip())
+    else:
+        word_count = len(src_text.strip().split())
+
+    # the coefficients don't matter because it should be normalized before use in cost-aware selection
+    return 0.15 * word_count + 33.7
+
+
+def mqm_score(severities, weights: Dict[str, int] = None) -> int:
+    """
+    Calculate the MQM score based on the errors.
+
+    Args:
+        errors (list): List of error dictionaries.
+
+    Returns:
+        int: The calculated MQM score.
+    """
+    if weights is None:
+        weights = {
+            "neutral": 0,
+            "minor": -1,
+            "major": -5,
+            "critical": -25,
+        }
+    score = 0
+    for severity in severities:
+        score += weights.get(severity, 0)
+    return score
+
+
+def get_errors_severities(errors: List[Dict[str, Any]], sev_attr_name="severity") -> List[str]:
+    """
+    Extract the severity levels from the errors.
+
+    Args:
+        errors (list): List of error dictionaries.
+        sev_attr_name (str): The attribute name for severity in the error dictionaries. Default is "severity".
+
+    Returns:
+        list: List of severity levels.
+    """
+    if not errors:
+        return []
+    return [err.get(sev_attr_name, "").lower() for err in errors]
+
+
 def ensure_wmt_exists():
     import requests
     import os
@@ -82,6 +139,323 @@ def ensure_wmt_exists():
         with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
+
+
+
+def load_data_hf(
+    dataset: Any,
+    loader: Callable = None,
+    loader_kwargs: Optional[dict] = None,
+    cache_fname: Optional[str] = None,
+    converter: Optional[Callable] = None,
+    converter_kwargs: Optional[dict] = None,
+):
+    """Load a dataset from Hugging Face, with optional caching and conversion.
+    This function loads a dataset using the provided loader function
+    by default `datasets.load_dataset` from the Hugging Face library.
+    It also allows for a custom converter function to be applied to the
+    dataset after loading.
+    It supports caching the loaded and processed dataset to a pickle file to speed up subsequent loads.
+    Args:
+        dataset (Any): The name of the Hugging Face Dataset to load or the first positional
+            argument of the `loader` function.
+            This is typically in the format 'username/dataset_name' or just 'dataset_name'.
+        loader (Callable, optional): A callable function to load the dataset.
+            If None, by default, it uses `datasets.load_dataset` from the Hugging Face library.
+            This function should accept the `dataset` as its first argument.
+            If you want to use a different loader, you can pass it here.
+            Some alternative loaders could be found in:
+            https://huggingface.co/docs/datasets/package_reference/loading_methods
+            https://huggingface.co/docs/datasets/loading
+        loader_kwargs (Optional[dict], optional): Additional keyword arguments to pass
+            directly to the `loader` function. Defaults to None.
+        cache (Optional[str], optional): Path to a pickle file where the loaded
+            and potentially converted dataset will be cached.
+            If a string path is provided, it's used for loading from and saving to the cache.
+            Defaults to None, meaning no caching is performed.
+        converter (Optional[Callable], optional): A callable function that takes
+            the loaded Hugging Face dataset as input and transforms it into a
+            format suitable for further processing by 'subset2eval'.
+            Defaults to None, meaning no conversion is applied.
+        converter_kwargs (Optional[dict], optional): Additional keyword arguments
+            to pass to the `converter` function if one is provided. Defaults to None.
+    Returns:
+        Any: The loaded dataset. If a converter is provided, this will be the
+             result of the converter. Otherwise, it's the raw dataset loaded
+             from Hugging Face.
+    """
+    import datasets
+
+    if loader is None:
+        loader = datasets.load_dataset
+
+    if cache_fname:
+        import contextlib
+        import importlib
+        import os
+        import pickle
+
+        # temporarily change to the root directory, this requires Python 3.11
+        with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
+            os.makedirs("data/cache/", exist_ok=True)
+            cache_f = f"data/cache/{cache_fname}.pkl"
+
+            # load cache if exists
+            if os.path.exists(cache_f):
+                with open(cache_f, "rb") as f:
+                    cache = pickle.load(f)
+                    # only load data if they come from the same version
+                    if (
+                        isinstance(cache, dict)
+                        and "version" in cache.keys()
+                        and cache["version"]
+                        == importlib.metadata.version("subset2evaluate")
+                    ):
+                        return cache["data"]
+
+    raw_data = loader(dataset, **(loader_kwargs or {}))
+
+    if converter:
+        data = converter(raw_data, **(converter_kwargs or {}))
+    else:
+        data = raw_data
+
+    if cache_fname:
+        # save cache
+        with open(cache_f, "wb") as f:
+            pickle.dump(
+                {
+                    "version": importlib.metadata.version("subset2evaluate"),
+                    "data": data,
+                },
+                f,
+            )
+
+    return data
+
+
+
+def load_data_qe4pe(
+    task: Literal["pretask", "main", "posttask"] = "main",
+    normalize: bool = False,
+    cache_fname: str = None,
+    dataset: str = "gsarti/qe4pe",
+    mqm_weights: Dict[str, int] = None,
+    skip_has_issue: bool = False,
+    skip_has_added_critical_error: bool = False,
+    score_attrs: List[str] = None,
+    mqm_attrs: List[str] = None,
+    normalize_attrs: List[str] = None,
+    hf_loader_kwargs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Load the QE4PE dataset for the specified task.
+
+    Args:
+        task (str): The task to load data for. Options are 'pretask', 'main', or 'posttask'.
+        dataset (str): The name of the dataset to load. Default is "gsarti/qe4pe".
+        normalize (bool): Whether to normalize the scores (normalize_attrs and mqm_attrs).
+        cache_fname (str): The name of the cache file to use for storing the loaded dataset.
+        mqm_weights (Dict[str, int]): Weights for MQM error severities.
+        skip_has_issue (bool): Whether to skip entries with issues.
+        skip_has_added_critical_error (bool): Whether to skip entries with added critical errors.
+        score_attrs (List[str]): Attributes to consider for scores. If None, uses all boolean and numeric attributes
+        from the dataset from the 11th column (has_issues) and forward, except those in `mqm_scores`, strings and ids.
+        mqm_attrs (List[str]): Attributes to consider for MQM scores, which are used to compute the MQM score from the errors.
+        If None, uses the default attributes for MQM scores, which are "mt_xcomet_errors", "pe_xcomet_errors", "highlights",
+        "qa_mt_mqm_errors" and "qa_pe_mqm_errors" attributes from the dataset.
+        normalize_attrs (List[str]): Attributes to normalize. If None, uses all attributes from score_attrs and mqm_attrs.
+        hf_loader_kwargs (Optional[Dict[str, Any]]): Additional keyword arguments to pass to the Hugging Face loader.
+
+    Returns:
+        Dataset: The loaded dataset in the required format for subset2eval.
+        ('qe4pe', 'src_lang-tgt_lang'): List[Dict[str, Any]]
+    """
+    assert task in ["pretask", "main", "posttask"], "Task must be one of 'pretask', 'main', or 'posttask'."
+
+    if any(attr in (hf_loader_kwargs or {}) for attr in ("name", "split")):
+        print(
+            f"WARNING: Be aware that passing 'name' or 'split' in hf_loader_kwargs will override QE4PE values ('name'={task}, 'split'=train)."
+        )
+
+    import datasets
+
+    def qe4pe_converter(
+        hf_dataset: datasets.Dataset,
+        normalize: bool = False,
+        mqm_weights: Dict[str, int] = None,
+        skip_has_issue: bool = False,
+        skip_has_added_critical_error: bool = False,
+        score_attrs: List[str] = None,
+        mqm_attrs: List[str] = None,
+        normalize_attrs: List[str] = None,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Convert the Hugging Face dataset to the required format for subset2eval.
+
+        Args:
+            hf_dataset (Dataset): The Hugging Face dataset to convert.
+            normalize (bool): Whether to normalize the costs and mqm scores.
+            mqm_weights (Dict[str, int]): Weights for MQM error severities.
+            skip_has_issue (bool): Whether to skip entries with issues.
+            skip_has_added_critical_error (bool): Whether to skip entries with added critical errors.
+            score_attrs (List[str]): Attributes to consider for scores. If None, uses all boolean and numeric attributes from the dataset from the 11th column (has_issues) and forward, except those in `mqm_scores`, strings and ids.
+            mqm_attrs (List[str]): Attributes to consider for MQM scores, which are used to compute the MQM score from the errors. If None, uses the default attributes for MQM scores, which are "mt_xcomet_errors", "pe_xcomet_errors", "highlights", "qa_mt_mqm_errors" and "qa_pe_mqm_errors" attributes from the dataset
+
+        Returns:
+            Dict[str, List[Dict[str, Any]]]: The converted dataset.
+        """
+
+        import ast
+        import collections
+        import unicodedata
+
+        attrs_to_ignore = [
+            "unit_id",
+            "wmt_id",
+            "wmt_category",
+            "doc_id",
+            "segment_in_doc_id",
+            "segment_id",
+            "translator_pretask_id",
+            "translator_main_id",
+            "src_lang",
+            "tgt_lang",
+            "highlight_modality",
+            "issue_description",
+            "critical_error_description",
+            "mt_xcomet_errors",
+            "pe_xcomet_errors",
+            "src_text",
+            "mt_text",
+            "mt_text_highlighted",
+            "pe_text",
+            "mt_pe_word_aligned",
+            "mt_pe_char_aligned",
+            "highlights",
+            "qa_mt_annotator_id",
+            "qa_pe_annotator_id",
+            "qa_mt_annotated_text",
+            "qa_pe_annotated_text",
+            "qa_mt_fixed_text",
+            "qa_pe_fixed_text",
+            "qa_mt_mqm_errors",
+            "qa_pe_mqm_errors",
+        ]
+        mqm_attrs = mqm_attrs or (
+            "mt_xcomet_errors",
+            "pe_xcomet_errors",
+            "highlights",
+            "qa_mt_mqm_errors",
+            "qa_pe_mqm_errors",
+        )
+        score_attrs = score_attrs or [
+            col_name for col_name in hf_dataset.column_names if col_name not in [*attrs_to_ignore, *mqm_attrs]
+        ]
+
+        grouped = {}
+        for item in hf_dataset:
+            if skip_has_issue and item.get("has_issue", False):
+                continue
+            if skip_has_added_critical_error and item.get("has_added_critical_error", False):
+                continue
+            src = unicodedata.normalize("NFKC", item["src_text"].strip())
+            ref = unicodedata.normalize("NFKC", item["mt_text"].strip())
+            doc = item['doc_id']
+            seg = item['segment_in_doc_id']
+            domain = item["wmt_category"]
+            langs = f"{item['src_lang']}-{item['tgt_lang']}"
+
+            model = item["translator_main_id"]
+            tgt = unicodedata.normalize("NFKC", item["pe_text"].strip())
+
+            scores = {
+                score: float(item[score]) if item[score] is not None else 0.0 for score in score_attrs if score in item
+            }
+            # compute score for MQM errors
+            for score in mqm_attrs:
+                if score in item:
+                    scores[score] = (
+                        mqm_score(get_errors_severities(ast.literal_eval(item[score])), weights=mqm_weights)
+                        if item[score] is not None
+                        else 0.0
+                    )
+
+            key = (langs, doc, seg)
+            if key not in grouped:
+                grouped[key] = {
+                    "src": src,
+                    "ref": ref,
+                    "doc": doc,
+                    "domain": domain,
+                    "langs": langs,
+                    "tgt": {},
+                    "scores": {},
+                }
+
+            grouped[key]["tgt"][model] = tgt
+            grouped[key]["scores"][model] = scores
+
+        # convert to final format
+        data = collections.defaultdict(list)
+        for item in grouped.values():
+            cost = mt_esa_eval_cost(item["src"], item["langs"])
+            entry = {
+                "src": item["src"],
+                "ref": item["ref"],
+                "tgt": item["tgt"],
+                "scores": item["scores"],
+                "doc": item["doc"],
+                "domain": item["domain"],
+                "cost": cost,
+            }
+            data[("qe4pe", item["langs"])].append(entry)
+
+        # always normalize costs
+        if data:
+            for data_per_lang in data.values():
+                costs = np.array([x["cost"] for x in data_per_lang])
+                cost_norm = (costs - costs.mean()) / costs.std() + 1
+                cost_norm = (cost_norm - cost_norm.min()) / (1 - cost_norm.min())
+                for i, x in enumerate(data_per_lang):
+                    x["cost"] = float(cost_norm[i])
+                    # also set a 0 based index for each item of each language pair
+                    x["i"] = i
+
+            if normalize:
+                for data_per_lang in data.values():
+                    # Normalize scores to 0–100 if requested
+                    for attr in normalize_attrs or [*score_attrs, *mqm_attrs]:
+                        all_scores = [
+                            score[attr] for item in data_per_lang for score in item["scores"].values() if attr in score
+                        ]
+                        if not all_scores:
+                            continue
+                        smin, smax = min(all_scores), max(all_scores)
+                        for item in data_per_lang:
+                            for model in item["scores"]:
+                                raw = item["scores"][model][attr]
+                                scaled = 100 * (raw - smin) / (smax - smin) if smax > smin else 0
+                                item["scores"][model][attr] = float(scaled)
+
+        return dict(data)  # Convert defaultdict to dict
+
+    # split is always "train" for QE4PE
+    return load_data_hf(
+        dataset,
+        loader_kwargs={"name": task, "split": "train"} | (hf_loader_kwargs or {}),
+        cache_fname=cache_fname,
+        converter=qe4pe_converter,
+        converter_kwargs={
+            "normalize": normalize,
+            "mqm_weights": mqm_weights,
+            "skip_has_issue": skip_has_issue,
+            "skip_has_added_critical_error": skip_has_added_critical_error,
+            "score_attrs": score_attrs,
+            "mqm_attrs": mqm_attrs,
+            "normalize_attrs": normalize_attrs,
+        },
+    )
 
 
 def load_data_biomqm(
