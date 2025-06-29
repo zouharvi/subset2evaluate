@@ -241,6 +241,14 @@ subset2evaluate.evaluate.eval_subset_correlation(data_costaware, data_full)
 > 0.9107142857142855
 ```
 
+## Loaders
+
+Among other things, the respository contains unified data loaders for many datasets:
+- WMT in the form of `wmtYY/L1-L2`, such as `wmt24/en-cs`
+- Summarization `summeval`
+- Translation `biomqm`
+- Translation post-editing `qe4pe`
+
 ## Contact & Contributions
 
 We are look forward to contributions, especially (1) using subset2evaluate for other tasks, (2) adding new methods, (3) finding bugs and increasing package usability.

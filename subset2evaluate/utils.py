@@ -499,7 +499,7 @@ def load_data_biomqm(
         tgt = item["tgt"].strip()
 
         # compute score
-        score = 0
+        score = 100
         for err in item["errors_tgt"]:
             severity = err.get("severity", "").lower()
             if severity == "minor":
@@ -525,9 +525,6 @@ def load_data_biomqm(
     # convert to list
     data = collections.defaultdict(list)
     for i, item in enumerate(grouped.values()):
-        # calculate word count
-        word_count = len(item["src"].split())
-        cost = 0.15 * word_count + 33.7
         entry = {
             "i": i,
             "src": item["src"],
@@ -536,7 +533,7 @@ def load_data_biomqm(
             "scores": item["scores"],
             "doc": item["doc"],
             "domain": item["domain"],
-            "cost": cost,
+            "cost": mt_esa_eval_cost(item["src"], item["langs"]),
         }
         data[("biomqm", item["langs"])].append(entry)
 
@@ -745,19 +742,13 @@ def load_data_wmt(  # noqa: C901
             #     continue
 
             line_domain, line_doc = line_doc.strip().split("\t")
-            # for CJK languages, we need to count characters
-            if "ja" in langs or "zh" in langs or "ko" in langs or "th" in langs:
-                word_count = len(line_src.strip())
-            else:
-                word_count = len(line_src.strip().split())
-
             data.append({
                 "i": line_id_true,
                 "src": line_src.strip(),
                 "ref": line_ref.strip(),
                 "tgt": {model: line_model[model][line_i].strip() for model in models},
                 # just a very rough estimate, the coefficients don't matter because it'll be normalized later anyway
-                "cost": 0.15 * word_count + 33.7,
+                "cost": mt_esa_eval_cost(line_src.strip(), langs),
                 "domain": line_domain,
                 "doc": line_doc,
                 "scores": {model: {metric: float(v) for metric, v in lines_score[model][line_i].items()} for model in models},
@@ -1173,6 +1164,8 @@ def load_data(data: Union[List, str], **kwargs):
         return load_data_summeval(**kwargs)
     elif data == "biomqm":
         return load_data_biomqm(**kwargs)
+    elif data == "qe4pe":
+        return load_data_qe4pe(**kwargs)
     else:
         raise Exception("Could not parse data")
 
