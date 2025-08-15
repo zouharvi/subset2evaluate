@@ -36,7 +36,8 @@ def eval_clucor(
     for prop in props:
         k = int(len(data_old) * prop)
         clu_new.append(eval_subset_clusters(data_new[:k], metric=metric))
-        cor_new.append(eval_subset_correlation(data_new[:k], data_old, metric=metric))
+        cor_new.append(eval_subset_correlation(
+            data_new[:k], data_old, metric=metric))
 
     return clu_new, cor_new
 
@@ -76,15 +77,19 @@ def eval_clucor_par(
     with multiprocessing.pool.ThreadPool(min(workers, len(props))) as pool:
         ks_clu_par = pool.starmap(
             _par_clu,
-            [(data_new, clu_tgt, metric) for prop, clu_tgt in zip(props, clus_tgt)]
+            [(data_new, clu_tgt, metric)
+             for prop, clu_tgt in zip(props, clus_tgt)]
         )
-        ks_clu_par = [k / (len(data_old) * prop) for k, prop in zip(ks_clu_par, props)]
+        ks_clu_par = [k / (len(data_old) * prop)
+                      for k, prop in zip(ks_clu_par, props)]
 
         ks_cor_par = pool.starmap(
             _par_cor,
-            [(data_new, data_old, clu_tgt, metric) for prop, clu_tgt in zip(props, cors_tgt)]
+            [(data_new, data_old, clu_tgt, metric)
+             for prop, clu_tgt in zip(props, cors_tgt)]
         )
-        ks_cor_par = [k / (len(data_old) * prop) for k, prop in zip(ks_cor_par, props)]
+        ks_cor_par = [k / (len(data_old) * prop)
+                      for k, prop in zip(ks_cor_par, props)]
 
     return np.average(ks_clu_par), np.average(ks_cor_par)
 
@@ -117,9 +122,11 @@ def eval_spa_par(
     with multiprocessing.pool.ThreadPool(min(workers, len(props))) as pool:
         ks_spa_par = pool.starmap(
             _par_spa,
-            [(data_new, clu_tgt, metric) for prop, clu_tgt in zip(props, spas_tgt)]
+            [(data_new, clu_tgt, metric)
+             for prop, clu_tgt in zip(props, spas_tgt)]
         )
-        ks_spa_par = [k / (len(data_old) * prop) for k, prop in zip(ks_spa_par, props)]
+        ks_spa_par = [k / (len(data_old) * prop)
+                      for k, prop in zip(ks_spa_par, props)]
 
     return np.average(ks_spa_par)
 
@@ -137,7 +144,8 @@ def precompute_clucor_randnorm(
     cor_random = []
     for seed in range(random_seeds):
         clu_new, cor_new = eval_clucor(
-            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(
+                data_old, method="random", seed=seed),
             data_old,
             metric=metric,
             props=props
@@ -152,7 +160,8 @@ def precompute_clucor_randnorm(
 
     for seed in range(random_seeds, 2*random_seeds):
         par_clu_rand, par_cor_rand = eval_clucor_par(
-            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(
+                data_old, method="random", seed=seed),
             data_old,
             clu_random,
             cor_random,
@@ -176,7 +185,8 @@ def eval_clucor_par_randnorm(
 ) -> Tuple[float, float]:
 
     if clucor_precomputed is not None:
-        (clu_random, cor_random), (clu_random_norm, cor_random_norm) = clucor_precomputed
+        (clu_random, cor_random), (clu_random_norm,
+                                   cor_random_norm) = clucor_precomputed
     else:
         (clu_random, cor_random), (clu_random_norm, cor_random_norm) = precompute_clucor_randnorm(
             data_old, random_seeds=random_seeds, metric=metric, props=props,
@@ -205,7 +215,8 @@ def precompute_spa_randnorm(
     spa_random = []
     for seed in range(random_seeds):
         spa_new = eval_spa(
-            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(
+                data_old, method="random", seed=seed),
             data_old,
             metric=metric,
             props=props
@@ -217,7 +228,8 @@ def precompute_spa_randnorm(
 
     for seed in range(random_seeds, 2*random_seeds):
         par_spa_rand = eval_spa_par(
-            subset2evaluate.select_subset.basic(data_old, method="random", seed=seed),
+            subset2evaluate.select_subset.basic(
+                data_old, method="random", seed=seed),
             data_old,
             spa_random,
             metric=metric,
@@ -273,7 +285,8 @@ def eval_subset_pairwise_accuracy(data_new: List[Dict], data_old: List[Dict], me
 
     result = []
     for model1, model2 in itertools.combinations(models, 2):
-        result.append((scores_old[model1] < scores_old[model2]) == (scores_new[model1] < scores_new[model2]))
+        result.append((scores_old[model1] < scores_old[model2]) == (
+            scores_new[model1] < scores_new[model2]))
 
     return np.average(result)
 
@@ -360,26 +373,31 @@ def compute_pairwise_p_values(seg_scores, num_permutations=1000):
 
     rng = np.random.default_rng()
     # initialize in range [0, 1)
-    two_m_minus_one = rng.random(size=(num_permutations, num_segments), dtype=np.float32)
+    two_m_minus_one = rng.random(
+        size=(num_permutations, num_segments), dtype=np.float32)
     # quantize to 0 or 1, in place
     np.rint(two_m_minus_one, out=two_m_minus_one, casting='same_kind')
     # scale and shift to get -1.0 and +1.0, in place
     two_m_minus_one *= 2.0
     two_m_minus_one -= 1.0
 
-    seg_scores = seg_scores.astype(np.float32)  # shape: (num_systems, num_segments)
+    # shape: (num_systems, num_segments)
+    seg_scores = seg_scores.astype(np.float32)
     sys_scores = np.sum(seg_scores, axis=1)  # shape: (num_systems, )
 
-    partial = np.matmul(two_m_minus_one, seg_scores.T)  # shape: (num_permutations, num_systems)
+    # shape: (num_permutations, num_systems)
+    partial = np.matmul(two_m_minus_one, seg_scores.T)
 
     # initialize p value matrix to NaN
     p_vals = np.empty((num_systems, num_systems,)) * np.nan
     # populate upper triangle
     for ii in range(num_systems):
         for jj in range(ii + 1, num_systems):
-            null_delta = partial[:, ii] - partial[:, jj]  # shape: (num_permutations, )
+            # shape: (num_permutations, )
+            null_delta = partial[:, ii] - partial[:, jj]
             test_delta = sys_scores[ii] - sys_scores[jj]  # float
-            p_vals[ii, jj] = np.sum(null_delta >= test_delta) / num_permutations
+            p_vals[ii, jj] = np.sum(
+                null_delta >= test_delta) / num_permutations
 
     return p_vals
 
@@ -421,8 +439,10 @@ def eval_subset_spa(data_new: List[Dict], data_old: List[Dict], metric="human"):
         metric1 = metric
         metric2 = metric
 
-    values_new = [[line["scores"][model][metric1] for model in models] for line in data_new]
-    values_old = [[line["scores"][model][metric2] for model in models] for line in data_old]
+    values_new = [[line["scores"][model][metric1]
+                   for model in models] for line in data_new]
+    values_old = [[line["scores"][model][metric2]
+                   for model in models] for line in data_old]
 
     # transpose to be in (n_models, n_samples) format
     values_old = np.array(values_old).T
@@ -446,19 +466,20 @@ def eval_subset_top(data_new: List[Dict], data_old: List[Dict], metric="human"):
     # compute name of top system in scores_new
     top_new = max(scores_new, key=scores_new.get)
     # compute rank of top_new in scores_old
-    scores_old_sorted = sorted(scores_old.keys(), key=scores_old.get, reverse=True)
+    scores_old_sorted = sorted(
+        scores_old.keys(), key=scores_old.get, reverse=True)
     rank_top_new = scores_old_sorted.index(top_new)
 
     # turn into percentile rank
-    return 1- (rank_top_new / (len(scores_old) - 1))
+    return 1 - (rank_top_new / (len(scores_old) - 1))
 
 
 def eval_subset_correlation(
-        data_new: List[Dict],
-        data_old: List[Dict],
-        metric="human",
-        correlation: Literal["kendall", "spearman", "pearson"] = "kendall",
-    ):
+    data_new: List[Dict],
+    data_old: List[Dict],
+    metric="human",
+    correlation: Literal["kendall", "spearman", "pearson"] = "kendall",
+):
     # evaluates spearman correlation of systems
     import scipy.stats
     import warnings
@@ -493,11 +514,11 @@ def eval_subset_correlation(
 
 
 def eval_subset_error(
-        data_new: List[Dict],
-        data_old: List[Dict],
-        metric="human",
-        error: Literal["absolute", "squared", "root_squared"] = "absolute",
-    ):
+    data_new: List[Dict],
+    data_old: List[Dict],
+    metric="human",
+    error: Literal["absolute", "squared", "root_squared"] = "absolute",
+):
     models = list(data_old[0]["scores"].keys())
 
     if type(metric) is tuple:
@@ -527,11 +548,11 @@ def eval_subset_clusters(data: List[Dict], metric="human"):
 
 
 def eval_subset_clusters_top(
-        data_new: List[Dict],
-        data_old: List[Dict],
-        clusters_old: Union[None, List[List[str]]] = None,
-        metric="human"
-    ):
+    data_new: List[Dict],
+    data_old: List[Dict],
+    clusters_old: Union[None, List[List[str]]] = None,
+    metric="human"
+):
     clusters_new = compute_clusters(data_new, metric=metric)
     if clusters_old is None:
         clusters_old = compute_clusters(data_old, metric=metric)
@@ -542,7 +563,6 @@ def eval_subset_clusters_top(
 def compute_clusters(data: List[Dict], metric="human"):
     from scipy.stats import wilcoxon
     import warnings
-
 
     # for compatibility with the rest of the code, but use metric1 anyway
     if type(metric) is tuple:
@@ -571,12 +591,106 @@ def compute_clusters(data: List[Dict], metric="human"):
         diffs = [x - y for x, y in zip(model_scores, clusters[-1][-1][1])]
 
         with warnings.catch_warnings(action="ignore"):
+            # TODO: is the diff clause correct?
             if all([d == 0 for d in diffs]) or wilcoxon(diffs, alternative="less").pvalue < 0.05:
                 clusters.append([(model, model_scores)])
             else:
                 clusters[-1].append((model, model_scores))
 
     return [[model for model, model_score in cluster] for cluster in clusters]
+
+
+def compute_clusters_pvalues(data: List[Dict], metric="human") -> List[float]:
+    # TODO: merge with compute_clusters to provide both at the same time
+    from scipy.stats import wilcoxon
+    import warnings
+
+    # for compatibility with the rest of the code, but use metric1 anyway
+    if type(metric) is tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
+
+    # sort from top
+    model_ord = list(get_model_absolute(data, metric=metric1).items())
+    model_ord.sort(key=lambda x: x[1], reverse=True)
+    model_ord = [model for model, _ in model_ord]
+
+    # if we have just 3 samples, we can't say that there are clusters, so everything is in one cluster
+    if len(data) < 3:
+        return []
+
+    def get_scores(model):
+        return [line["scores"][model][metric1] for line in data]
+
+    model_first = model_ord.pop(0)
+    clusters = [[(model_first, get_scores(model_first))]]
+    pvalues = []
+    while model_ord:
+        model = model_ord.pop(0)
+        model_scores = get_scores(model)
+        diffs = [x - y for x, y in zip(model_scores, clusters[-1][-1][1])]
+
+        with warnings.catch_warnings(action="ignore"):
+            if all([d == 0 for d in diffs]):
+                pvalue = 1
+            else:
+                pvalue = wilcoxon(diffs, alternative="less").pvalue
+            pvalues.append(pvalue)
+
+            if pvalue < 0.05:
+                clusters.append([(model, model_scores)])
+            else:
+                clusters[-1].append((model, model_scores))
+
+    return pvalues
+
+
+def compute_clusters_soft(data: List[Dict], metric="human"):
+    from scipy.stats import wilcoxon
+    import warnings
+
+    # for compatibility with the rest of the code, but use metric1 anyway
+    if type(metric) is tuple:
+        metric1, metric2 = metric
+    else:
+        metric1 = metric
+        metric2 = metric
+
+    # sort from top
+    model_ord = list(get_model_absolute(data, metric=metric1).items())
+    model_ord.sort(key=lambda x: x[1], reverse=True)
+    model_ord = [model for model, _ in model_ord]
+
+    # if we have just 3 samples, we can't say that there are clusters, so everything is in one cluster
+    if len(data) < 3:
+        return [model_ord]
+
+    def get_scores(model):
+        return [line["scores"][model][metric1] for line in data]
+
+    model_first = model_ord.pop(0)
+    clusters = [[(model_first, get_scores(model_first))]]
+    pvalues = []
+    while model_ord:
+        model = model_ord.pop(0)
+        model_scores = get_scores(model)
+        diffs = [x - y for x, y in zip(model_scores, clusters[-1][-1][1])]
+
+        with warnings.catch_warnings(action="ignore"):
+            if all([d == 0 for d in diffs]):
+                pvalue = 1
+            else:
+                pvalue = wilcoxon(diffs, alternative="less").pvalue
+            pvalues.append(pvalue)
+
+            if pvalue < 0.05:
+                clusters.append([(model, model_scores)])
+            else:
+                clusters[-1].append((model, model_scores))
+
+    return pvalues
 
 
 def get_model_absolute(data_new, metric="human") -> Dict[str, float]:
@@ -623,7 +737,8 @@ def eval_order_accuracy(scores_new: Dict[str, float], scores_old: Dict[str, floa
 
     result = []
     for model1, model2 in itertools.combinations(models, 2):
-        result.append((scores_old[model1] < scores_old[model2]) == (scores_new[model1] < scores_new[model2]))
+        result.append((scores_old[model1] < scores_old[model2]) == (
+            scores_new[model1] < scores_new[model2]))
 
     return np.average(result)
 
