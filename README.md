@@ -29,7 +29,10 @@ It is based on work of Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zü
 > We demonstrate the efficacy of our selectors in two common NLG tasks, machine translation and summarization, and show that up to only ~50% of the test data is needed to produce the same evaluation result as the entire data.
 > Our implementations are published in the [subset2evaluate](https://pypi.org/project/subset2evaluate/) package.
 
-<img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em">
+
+<img width="1000vw" src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/poster.svg">
+
+<!-- <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em"> -->
 
 ## Usage
 
