@@ -1,6 +1,8 @@
 # subset2evaluate
 
-[![Paper](https://img.shields.io/badge/📜%20paper-481.svg)](https://arxiv.org/abs/2501.18251)
+[![Paper](https://img.shields.io/badge/📜%20TACL%20paper-481.svg)](https://arxiv.org/abs/2501.18251)
+&nbsp;
+[![YouTube video](https://img.shields.io/badge/🎥%20video-F00.svg)](https://www.youtube.com/watch?v=vRvVFPS0ccg)
 &nbsp;
 [![PyPi version](https://badgen.net/pypi/v/subset2evaluate/)](https://pypi.org/project/subset2evaluate)
 &nbsp;
