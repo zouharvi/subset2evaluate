@@ -32,7 +32,7 @@ It is based on work of Vilém Zouhar, Peng Cui, and Mrinmaya Sachan from ETH Zü
 > Our implementations are published in the [subset2evaluate](https://pypi.org/project/subset2evaluate/) package.
 
 
-<img width="1000vw" src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/poster.svg">
+<img width="1000vw" src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/poster_nofont.svg">
 
 <!-- <img src="https://raw.githubusercontent.com/zouharvi/subset2evaluate/refs/heads/main/misc/highlevel_subset_selection.svg" width="1000em"> -->
 
