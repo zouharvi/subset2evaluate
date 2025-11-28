@@ -660,6 +660,8 @@ def load_data_wmt(  # noqa: C901
             ]
         else:
             f_protocols = [
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa-merged.seg.score",
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
                 f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
@@ -805,10 +807,27 @@ def load_data_wmt_test(**kwargs):
     return data
 
 
-def load_data_wmt_all(min_items=500, **kwargs):
+def load_data_wmt_all(min_items=150, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
+            ("wmt25", "cs-de_DE"),
+            ("wmt25", "cs-uk_UA"),
+            ("wmt25", "en-ar_EG"),
+            ("wmt25", "en-bho_IN"),
+            ("wmt25", "en-cs_CZ"),
+            ("wmt25", "en-et_EE"),
+            ("wmt25", "en-is_IS"),
+            ("wmt25", "en-it_IT"),
+            ("wmt25", "en-ja_JP"),
+            ("wmt25", "en-ko_KR"),
+            ("wmt25", "en-mas_KE"),
+            ("wmt25", "en-ru_RU"),
+            ("wmt25", "en-sr_Cyrl_RS"),
+            ("wmt25", "en-uk_UA"),
+            ("wmt25", "en-zh_CN"),
+            ("wmt25", "ja-zh_CN"),
+
             ("wmt24", "cs-uk"),
             ("wmt24", "en-cs"),
             ("wmt24", "en-de"),

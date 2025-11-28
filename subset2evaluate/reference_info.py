@@ -1,6 +1,25 @@
 """Information about the standard human references selected for various WMT test sets."""
 
 year2std_refs = {
+
+    "wmt25": {
+        "cs-de_DE": "refA",
+        "cs-uk_UA": "refA",
+        "en-ar_EG": "refA",
+        "en-bho_IN": "refA",
+        "en-cs_CZ": "refA",
+        "en-et_EE": "refA",
+        "en-is_IS": "refA",
+        "en-it_IT": "refA",
+        "en-ja_JP": "refA",
+        "en-ko_KR": "refA",
+        "en-mas_KE": "refA",
+        "en-ru_RU": "refA",
+        "en-sr_Cyrl_RS": "refA",
+        "en-uk_UA": "refA",
+        "en-zh_CN": "refA",
+        "ja-zh_CN": "refA",
+    },
     "wmt24": {
         "en-de": "refB",
         "en-es": "refA",
