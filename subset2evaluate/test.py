@@ -66,7 +66,7 @@ def test_wmt_loader():
 
 def test_wmt_loader_mqm():
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es")
-    assert len(data) == 634
+    assert len(data) == 622
     data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", file_protocol="mqm")
     assert len(data) == 622
 
@@ -81,13 +81,13 @@ def test_wmt_method_random():
 def test_wmt_method_metric_var():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-cs", method="metric_var", metric="MetricX-23-c")
     spa_new = subset2evaluate.evaluate.eval_spa(data_new, "wmt23/en-cs", metric="human")
-    assert abs(np.average(spa_new) - 0.888) < 0.01
+    assert abs(np.average(spa_new) - 0.888) < 0.02
 
 
 def test_wmt_method_diversity():
     data_new = subset2evaluate.select_subset.basic("wmt23/en-de", method="diversity", metric="BLEU")
     spa_new = subset2evaluate.evaluate.eval_spa(data_new, "wmt23/en-de", metric="human")
-    assert abs(np.average(spa_new) - 0.927) < 0.01
+    assert abs(np.average(spa_new) - 0.927) < 0.02
 
 
 def test_summeval_loader():

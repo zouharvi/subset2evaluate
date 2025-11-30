@@ -137,7 +137,7 @@ def ensure_wmt_exists():
         with open("data/mt-metrics-eval-v2.tgz", "wb") as f:
             f.write(r.content)
         with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
-            f.extractall("data/")
+            f.extractall("data/", filter=lambda x: x)
         os.remove("data/mt-metrics-eval-v2.tgz")
 
 
