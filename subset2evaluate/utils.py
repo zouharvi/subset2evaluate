@@ -807,7 +807,7 @@ def load_data_wmt_test(**kwargs):
     return data
 
 
-def load_data_wmt_all(min_items=150, **kwargs):
+def load_data_wmt_all(min_items=100, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
