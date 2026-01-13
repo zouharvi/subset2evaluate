@@ -54,7 +54,7 @@ def test_biomqm_loader():
 
 
 def test_wmt_loader():
-    data = subset2evaluate.utils.load_data("wmt/all", min_items=400)
+    data = subset2evaluate.utils.load_data("wmt/all", min_items=400, normalize=True)
     assert isinstance(data, dict)
     assert len(data) == 58
     assert len(data[("wmt23", "en-cs")]) == 1098
@@ -65,9 +65,9 @@ def test_wmt_loader():
 
 
 def test_wmt_loader_mqm():
-    data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es")
+    data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", normalize=True)
     assert len(data) == 622
-    data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", file_protocol="mqm")
+    data = subset2evaluate.utils.load_data_wmt(year="wmt24", langs="en-es", file_protocol="mqm", normalize=True)
     assert len(data) == 622
 
 

@@ -376,7 +376,7 @@ def load_data_qe4pe(
             for score in mqm_attrs:
                 if score in item:
                     scores[score] = (
-                        mqm_score(get_errors_severities(ast.literal_eval(item[score])), weights=mqm_weights)
+                        100+mqm_score(get_errors_severities(ast.literal_eval(item[score])), weights=mqm_weights)
                         if item[score] is not None
                         else 0.0
                     )
@@ -568,7 +568,7 @@ def load_data_biomqm(
 def load_data_wmt(  # noqa: C901
     year: str = "wmt23",
     langs: str = "en-cs",
-    normalize: bool = True,
+    normalize: bool = False,
     binarize: bool = False,
     file_protocol: Optional[str] = None,
     file_reference: Optional[str] = None,
