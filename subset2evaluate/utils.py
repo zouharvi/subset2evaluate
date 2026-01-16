@@ -10,6 +10,7 @@ def _data_minmax_normalize(data):
     In-place min-max normalization of all scores
     """
     import collections
+
     # if we are binarizing, none of this matters
     data_flat = collections.defaultdict(list)
     for line in data:
@@ -18,28 +19,22 @@ def _data_minmax_normalize(data):
                 data_flat[met_k].append(met_v)
 
     # normalize
-    data_flat = {
-        k: (min(v), max(v))
-        for k, v in data_flat.items()
-    }
+    data_flat = {k: (min(v), max(v)) for k, v in data_flat.items()}
 
     for line in data:
         for model, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
                 # (x-min)/(max-min) normalize
-                line["scores"][model][met_k] = (
-                    (met_v - data_flat[met_k][0]) /
-                    (data_flat[met_k][1] - data_flat[met_k][0])
+                line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (
+                    data_flat[met_k][1] - data_flat[met_k][0]
                 )
 
 
 def confidence_interval(data, confidence=0.95):
     import scipy.stats
+
     return scipy.stats.t.interval(
-        confidence=confidence,
-        df=len(data)-1,
-        loc=np.mean(data),
-        scale=np.std(data)
+        confidence=confidence, df=len(data) - 1, loc=np.mean(data), scale=np.std(data)
     )
 
 
@@ -48,6 +43,7 @@ def _data_median_binarize(data):
     In-place median binarization of all scores
     """
     import collections
+
     data_flat = collections.defaultdict(list)
     for line in data:
         for met_all in line["scores"].values():
@@ -55,10 +51,7 @@ def _data_median_binarize(data):
                 data_flat[met_k].append(met_v)
 
     # normalize
-    data_flat = {
-        k: np.median(v)
-        for k, v in data_flat.items()
-    }
+    data_flat = {k: np.median(v) for k, v in data_flat.items()}
 
     for line in data:
         for model, met_all in line["scores"].items():
@@ -107,7 +100,9 @@ def mqm_score(severities, weights: Dict[str, int] = None) -> int:
     return score
 
 
-def get_errors_severities(errors: List[Dict[str, Any]], sev_attr_name="severity") -> List[str]:
+def get_errors_severities(
+    errors: List[Dict[str, Any]], sev_attr_name="severity"
+) -> List[str]:
     """
     Extract the severity levels from the errors.
 
@@ -139,7 +134,6 @@ def ensure_wmt_exists():
         with tarfile.open("data/mt-metrics-eval-v2.tgz", "r:gz") as f:
             f.extractall("data/")
         os.remove("data/mt-metrics-eval-v2.tgz")
-
 
 
 def load_data_hf(
@@ -234,7 +228,6 @@ def load_data_hf(
     return data
 
 
-
 def load_data_qe4pe(
     task: Literal["pretask", "main", "posttask"] = "main",
     normalize: bool = False,
@@ -271,7 +264,9 @@ def load_data_qe4pe(
         Dataset: The loaded dataset in the required format for subset2eval.
         ('qe4pe', 'src_lang-tgt_lang'): List[Dict[str, Any]]
     """
-    assert task in ["pretask", "main", "posttask"], "Task must be one of 'pretask', 'main', or 'posttask'."
+    assert task in ["pretask", "main", "posttask"], (
+        "Task must be one of 'pretask', 'main', or 'posttask'."
+    )
 
     if any(attr in (hf_loader_kwargs or {}) for attr in ("name", "split")):
         print(
@@ -350,19 +345,23 @@ def load_data_qe4pe(
             "qa_pe_mqm_errors",
         )
         score_attrs = score_attrs or [
-            col_name for col_name in hf_dataset.column_names if col_name not in [*attrs_to_ignore, *mqm_attrs]
+            col_name
+            for col_name in hf_dataset.column_names
+            if col_name not in [*attrs_to_ignore, *mqm_attrs]
         ]
 
         grouped = {}
         for item in hf_dataset:
             if skip_has_issue and item.get("has_issue", False):
                 continue
-            if skip_has_added_critical_error and item.get("has_added_critical_error", False):
+            if skip_has_added_critical_error and item.get(
+                "has_added_critical_error", False
+            ):
                 continue
             src = unicodedata.normalize("NFKC", item["src_text"].strip())
             ref = unicodedata.normalize("NFKC", item["mt_text"].strip())
-            doc = item['doc_id']
-            seg = item['segment_in_doc_id']
+            doc = item["doc_id"]
+            seg = item["segment_in_doc_id"]
             domain = item["wmt_category"]
             langs = f"{item['src_lang']}-{item['tgt_lang']}"
 
@@ -370,13 +369,19 @@ def load_data_qe4pe(
             tgt = unicodedata.normalize("NFKC", item["pe_text"].strip())
 
             scores = {
-                score: float(item[score]) if item[score] is not None else 0.0 for score in score_attrs if score in item
+                score: float(item[score]) if item[score] is not None else 0.0
+                for score in score_attrs
+                if score in item
             }
             # compute score for MQM errors
             for score in mqm_attrs:
                 if score in item:
                     scores[score] = (
-                        100+mqm_score(get_errors_severities(ast.literal_eval(item[score])), weights=mqm_weights)
+                        100
+                        + mqm_score(
+                            get_errors_severities(ast.literal_eval(item[score])),
+                            weights=mqm_weights,
+                        )
                         if item[score] is not None
                         else 0.0
                     )
@@ -427,7 +432,10 @@ def load_data_qe4pe(
                     # Normalize scores to 0–100 if requested
                     for attr in normalize_attrs or [*score_attrs, *mqm_attrs]:
                         all_scores = [
-                            score[attr] for item in data_per_lang for score in item["scores"].values() if attr in score
+                            score[attr]
+                            for item in data_per_lang
+                            for score in item["scores"].values()
+                            if attr in score
                         ]
                         if not all_scores:
                             continue
@@ -435,7 +443,11 @@ def load_data_qe4pe(
                         for item in data_per_lang:
                             for model in item["scores"]:
                                 raw = item["scores"][model][attr]
-                                scaled = 100 * (raw - smin) / (smax - smin) if smax > smin else 0
+                                scaled = (
+                                    100 * (raw - smin) / (smax - smin)
+                                    if smax > smin
+                                    else 0
+                                )
                                 item["scores"][model][attr] = float(scaled)
 
         return dict(data)  # Convert defaultdict to dict
@@ -466,6 +478,7 @@ def load_data_biomqm(
     import os
     import collections
     import contextlib
+
     assert split in {"dev", "test"}, "split must be either 'dev' or 'test'"
 
     # temporarily change to the root directory, this requires Python 3.11
@@ -473,13 +486,15 @@ def load_data_biomqm(
         # ensure BioMQM exists
         if not os.path.exists(f"data/biomqm/{split}.jsonl"):
             import requests
+
             print(
                 f"Downloading {split} BioMQM data because data/biomqm/{split} does not exist.."
             )
             os.makedirs("data/biomqm", exist_ok=True)
 
             r = requests.get(
-                f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true")
+                f"https://huggingface.co/datasets/zouharvi/bio-mqm-dataset/resolve/main/{split}.jsonl?download=true"
+            )
             with open(f"data/biomqm/{split}.jsonl", "wb") as f:
                 f.write(r.content)
 
@@ -556,10 +571,7 @@ def load_data_biomqm(
             for item in data_per_lang:
                 for model in item["scores"]:
                     raw = item["scores"][model]["human"]
-                    scaled = (
-                        100 * (raw - smin) /
-                        (smax - smin) if smax > smin else 0
-                    )
+                    scaled = 100 * (raw - smin) / (smax - smin) if smax > smin else 0
                     item["scores"][model]["human"] = float(scaled)
 
     return data
@@ -574,8 +586,29 @@ def load_data_wmt(  # noqa: C901
     file_reference: Optional[str] = None,
     zero_bad: bool = False,
     include_ref: bool = False,
-    include_human: bool = False,
+    require_human: bool = True,
 ):
+    """
+    Load WMT data for a specific year and language pair.
+
+    Args:
+        year (str): WMT year (e.g. "wmt23").
+        langs (str): Language pair (e.g. "en-cs").
+        normalize (bool): Whether to min-max normalize scores of the systems.
+        binarize (bool): Whether to binarize scores of the systems (median split).
+        file_protocol (Optional[str]): Specific human score file protocol to use (e.g. "mqm", "wmt").
+            If None, tries a list of defaults.
+        file_reference (Optional[str]): Specific reference identifier to use (e.g. "refA").
+            If None, uses the standard reference for that year/lang.
+        zero_bad (bool): If True, exclude systems where the human score is "0" (in addition to "None").
+        include_ref (bool): Whether to include human references (if found in system outputs) as systems.
+        require_human (bool): If True, return empty list if no human scores file found, and filter out lines/models with no human score.
+            If False, human scores are optional (defaulting to 0).
+
+    Returns:
+        List[Dict[str, Any]]: A list of segments, where each segment is a dict containing
+            src, ref, tgt (dict of model outputs), scores (dict of scores), etc.
+    """
     import glob
     import collections
     import numpy as np
@@ -589,14 +622,19 @@ def load_data_wmt(  # noqa: C901
         ensure_wmt_exists()
 
         os.makedirs("data/cache/", exist_ok=True)
-        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_fp{file_protocol}_fr{file_reference}_zb{int(zero_bad)}_ir{int(include_ref)}_ih{include_human}.pkl"
+        cache_f = f"data/cache/{year}_{langs}_n{int(normalize)}_b{int(binarize)}_fp{file_protocol}_fr{file_reference}_zb{int(zero_bad)}_ir{int(include_ref)}_rh{int(require_human)}.pkl"
 
         # load cache if exists
         if os.path.exists(cache_f):
             with open(cache_f, "rb") as f:
                 cache = pickle.load(f)
                 # only load data if they come from the same version
-                if isinstance(cache, dict) and "version" in cache.keys() and cache["version"] == importlib.metadata.version("subset2evaluate"):
+                if (
+                    isinstance(cache, dict)
+                    and "version" in cache.keys()
+                    and cache["version"]
+                    == importlib.metadata.version("subset2evaluate")
+                ):
                     return cache["data"]
 
         lines_src = open(
@@ -619,7 +657,7 @@ def load_data_wmt(  # noqa: C901
 
         lines_ref = open(file_reference_path, "r").readlines()
 
-        # collect all human reference names (used for filtering in case include_human is True)
+        # collect all human reference names (used for filtering in case include_ref is True)
         pattern = f"{langs}.*.txt"
         ref_files = glob.glob(os.path.join(refs_dir, pattern))
         human_refs = set()
@@ -637,13 +675,13 @@ def load_data_wmt(  # noqa: C901
             lines_ref.pop(0)
 
         line_model = {}
-        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"):
+        for f in glob.glob(
+            f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"
+        ):
             model = f.split("/")[-1].removesuffix(".txt")
-            if model == selected_human_ref and not include_ref:
-                continue
             if model in {"synthetic_ref", "chrf_bestmbr"}:
                 continue
-            if model in human_refs and not include_human:
+            if model in human_refs and not include_ref:
                 continue
 
             line_model[model] = open(f, "r").readlines()
@@ -675,12 +713,17 @@ def load_data_wmt(  # noqa: C901
                 break
 
         if not fname:
-            # did not find human scores
-            return []
-
-        for line_raw in open(fname, "r").readlines():
-            model, score = line_raw.strip().split()
-            lines_score[model].append({"human": score})
+            if require_human:
+                # did not find human scores
+                return []
+            else:
+                # fill with dummy data because we want to load metric scores
+                for model in models:
+                    lines_score[model] = [{"human": "None"}] * len(lines_src)
+        else:
+            for line_raw in open(fname, "r").readlines():
+                model, score = line_raw.strip().split()
+                lines_score[model].append({"human": score})
         if contain_canary_line:
             for model in lines_score:
                 lines_score[model].pop(0)
@@ -689,9 +732,13 @@ def load_data_wmt(  # noqa: C901
         if contain_canary_line:
             total_n_srcs += 1
 
-        for f in glob.glob(f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"):
+        for f in glob.glob(
+            f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"
+        ):
             # among ref-based metrics, load only the scores for the selected human ref
-            if not f.endswith(f"-{selected_human_ref}.seg.score") and not f.endswith("-src.seg.score"):
+            if not f.endswith(f"-{selected_human_ref}.seg.score") and not f.endswith(
+                "-src.seg.score"
+            ):
                 continue
             # remove suffix for both ref-based and ref-less metrics
             metric = (
@@ -704,7 +751,10 @@ def load_data_wmt(  # noqa: C901
                 # for refA, refB, synthetic_ref, and other "modeltems" not evaluated
                 # NOTE: another option is remove the *models*
                 if model not in lines_score:
-                    continue
+                    if require_human:
+                        continue
+                    else:
+                        lines_score[model] = [{"human": None}] * (len(lines_src))
 
                 model_line_i = line_i % total_n_srcs
                 if contain_canary_line:
@@ -725,18 +775,26 @@ def load_data_wmt(  # noqa: C901
         line_id_true = 0
 
         # remove models that have no outputs
-        ANNOTATION_BAD = {"None"}
+        bad_annotation = {"None"}
         if zero_bad:
-            ANNOTATION_BAD |= {"0"}
+            bad_annotation |= {"0"}
         models_bad = set()
-        for model, scores in lines_score.items():
-            if all([x["human"] in ANNOTATION_BAD for x in scores]):
-                models_bad.add(model)
+        if require_human:
+            for model, scores in lines_score.items():
+                if all([x["human"] in bad_annotation for x in scores]):
+                    models_bad.add(model)
         models = [model for model in models if model not in models_bad]
 
-        for line_i, (line_src, line_ref, line_doc) in enumerate(zip(lines_src, lines_ref, lines_doc)):
+        for line_i, (line_src, line_ref, line_doc) in enumerate(
+            zip(lines_src, lines_ref, lines_doc)
+        ):
             # filter None on the whole row
-            if any([lines_score[model][line_i]["human"] in ANNOTATION_BAD for model in models]):
+            if require_human and any(
+                [
+                    lines_score[model][line_i]["human"] in bad_annotation
+                    for model in models
+                ]
+            ):
                 continue
             # metrics = set(lines_score[models[0]][line_i].keys())
             # # if we're missing some metric, skip the line
@@ -744,17 +802,27 @@ def load_data_wmt(  # noqa: C901
             #     continue
 
             line_domain, line_doc = line_doc.strip().split("\t")
-            data.append({
-                "i": line_id_true,
-                "src": line_src.strip(),
-                "ref": line_ref.strip(),
-                "tgt": {model: line_model[model][line_i].strip() for model in models},
-                # just a very rough estimate, the coefficients don't matter because it'll be normalized later anyway
-                "cost": mt_esa_eval_cost(line_src.strip(), langs),
-                "domain": line_domain,
-                "doc": line_doc,
-                "scores": {model: {metric: float(v) for metric, v in lines_score[model][line_i].items()} for model in models},
-            })
+            data.append(
+                {
+                    "i": line_id_true,
+                    "src": line_src.strip(),
+                    "ref": line_ref.strip(),
+                    "tgt": {
+                        model: line_model[model][line_i].strip() for model in models
+                    },
+                    # just a very rough estimate, the coefficients don't matter because it'll be normalized later anyway
+                    "cost": mt_esa_eval_cost(line_src.strip(), langs),
+                    "domain": line_domain,
+                    "doc": line_doc,
+                    "scores": {
+                        model: {
+                            metric: float(v) if v is not None and v != "None" else None
+                            for metric, v in lines_score[model][line_i].items()
+                        }
+                        for model in models
+                    },
+                }
+            )
             line_id_true += 1
 
         # normalize times
@@ -781,10 +849,13 @@ def load_data_wmt(  # noqa: C901
 
         # save cache
         with open(cache_f, "wb") as f:
-            pickle.dump({
-                "version": importlib.metadata.version("subset2evaluate"),
-                "data": data
-            }, f)
+            pickle.dump(
+                {
+                    "version": importlib.metadata.version("subset2evaluate"),
+                    "data": data,
+                },
+                f,
+            )
 
     return data
 
@@ -827,7 +898,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt25", "en-uk_UA"),
             ("wmt25", "en-zh_CN"),
             ("wmt25", "ja-zh_CN"),
-
             ("wmt24", "cs-uk"),
             ("wmt24", "en-cs"),
             ("wmt24", "en-de"),
@@ -839,7 +909,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt24", "en-uk"),
             ("wmt24", "en-zh"),
             ("wmt24", "ja-zh"),
-
             ("wmt23.sent", "en-de"),
             ("wmt23", "cs-uk"),
             ("wmt23", "de-en"),
@@ -855,7 +924,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt23", "ru-en"),
             ("wmt23", "uk-en"),
             ("wmt23", "zh-en"),
-
             ("wmt22", "cs-en"),
             ("wmt22", "cs-uk"),
             ("wmt22", "de-en"),
@@ -877,7 +945,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt22", "uk-cs"),
             ("wmt22", "uk-en"),
             ("wmt22", "zh-en"),
-
             ("wmt21.tedtalks", "en-de"),
             ("wmt21.tedtalks", "en-ru"),
             ("wmt21.tedtalks", "zh-en"),
@@ -901,7 +968,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt21.flores", "hi-bn"),
             ("wmt21.flores", "xh-zu"),
             ("wmt21.flores", "zu-xh"),
-
             ("wmt20", "km-en"),
             ("wmt20", "en-zh"),
             ("wmt20", "ps-en"),
@@ -920,7 +986,6 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt20", "en-ru"),
             ("wmt20", "en-iu"),
             ("wmt20", "ja-en"),
-
             ("wmt19", "en-zh"),
             ("wmt19", "en-lt"),
             ("wmt19", "en-gu"),
@@ -973,7 +1038,9 @@ def load_data_summeval(  # noqa: C901
     for line in data_raw:
         data_by_id[line["id"]].append(line)
 
-    def avg_human_annotations(expert_annotations: List[Dict[str, float]]) -> Dict[str, float]:
+    def avg_human_annotations(
+        expert_annotations: List[Dict[str, float]],
+    ) -> Dict[str, float]:
         scores = collections.defaultdict(list)
         for line in expert_annotations:
             for k, v in line.items():
@@ -988,20 +1055,23 @@ def load_data_summeval(  # noqa: C901
 
     data = []
     for i, v in data_by_id.items():
-        data.append({
-            "i": i,
-            "src": v[0]["text"],
-            "ref": None,
-            "tgt": {line["model_id"]: line["decoded"] for line in v},
-            "scores": {
-                # rouge is nested for some reason
-                line["model_id"]: (
-                    line["metric_scores_1"] | line["metric_scores_1"]["rouge"] | avg_human_annotations(
-                        line["expert_annotations"])
-                )
-                for line in v
-            },
-        })
+        data.append(
+            {
+                "i": i,
+                "src": v[0]["text"],
+                "ref": None,
+                "tgt": {line["model_id"]: line["decoded"] for line in v},
+                "scores": {
+                    # rouge is nested for some reason
+                    line["model_id"]: (
+                        line["metric_scores_1"]
+                        | line["metric_scores_1"]["rouge"]
+                        | avg_human_annotations(line["expert_annotations"])
+                    )
+                    for line in v
+                },
+            }
+        )
 
     # remove rouge from scores and fix supert
     data = [
@@ -1009,13 +1079,12 @@ def load_data_summeval(  # noqa: C901
             **line,
             "scores": {
                 model: {
-                    metric:
-                    score if metric != "supert" else score[0]
+                    metric: score if metric != "supert" else score[0]
                     for metric, score in metrics.items()
                     if metric != "rouge"
                 }
                 for model, metrics in line["scores"].items()
-            }
+            },
         }
         for line in data
     ]
@@ -1025,12 +1094,10 @@ def load_data_summeval(  # noqa: C901
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
             data_metrics = load_data(
-                "../subset2evaluate-tmp/data_other/summeval_gpt.jsonl")
+                "../subset2evaluate-tmp/data_other/summeval_gpt.jsonl"
+            )
 
-        data_metrics_i = {
-            x["i"]: x
-            for x in data_metrics
-        }
+        data_metrics_i = {x["i"]: x for x in data_metrics}
         assert all(x["i"] in data_metrics_i for x in data)
         for x in data:
             x["scores"] = {
@@ -1039,9 +1106,16 @@ def load_data_summeval(  # noqa: C901
                 if sys in data_metrics_i[x["i"]]["scores"]
             }
             x["scores"] = {
-                sys: v | {
-                    "gpt_sum": v["gpt_relevance"] + v["gpt_coherence"] + v["gpt_consistency"] + v["gpt_fluency"],
-                    "gpt_mul": v["gpt_relevance"] * v["gpt_coherence"] * v["gpt_consistency"] * v["gpt_fluency"],
+                sys: v
+                | {
+                    "gpt_sum": v["gpt_relevance"]
+                    + v["gpt_coherence"]
+                    + v["gpt_consistency"]
+                    + v["gpt_fluency"],
+                    "gpt_mul": v["gpt_relevance"]
+                    * v["gpt_coherence"]
+                    * v["gpt_consistency"]
+                    * v["gpt_fluency"],
                 }
                 for sys, v in x["scores"].items()
             }
@@ -1050,12 +1124,10 @@ def load_data_summeval(  # noqa: C901
         with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
             # TODO: in the future these files need to be stored somewhere statically
             data_metrics = load_data(
-                "../subset2evaluate-tmp/data_other/summeval_unieval.jsonl")
+                "../subset2evaluate-tmp/data_other/summeval_unieval.jsonl"
+            )
 
-        data_metrics_i = {
-            x["i"]: x
-            for x in data_metrics
-        }
+        data_metrics_i = {x["i"]: x for x in data_metrics}
         assert all(x["i"] in data_metrics_i for x in data)
         for x in data:
             x["scores"] = {
@@ -1064,14 +1136,19 @@ def load_data_summeval(  # noqa: C901
                 if sys in data_metrics_i[x["i"]]["scores"]
             }
             x["scores"] = {
-                sys: v | {
+                sys: v
+                | {
                     "unieval_sum": (
-                        v["unieval_relevance"] + v["unieval_coherence"] +
-                        v["unieval_consistency"] + v["unieval_fluency"]
+                        v["unieval_relevance"]
+                        + v["unieval_coherence"]
+                        + v["unieval_consistency"]
+                        + v["unieval_fluency"]
                     ),
                     "unieval_mul": (
-                        v["unieval_relevance"] * v["unieval_coherence"] *
-                        v["unieval_consistency"] * v["unieval_fluency"]
+                        v["unieval_relevance"]
+                        * v["unieval_coherence"]
+                        * v["unieval_consistency"]
+                        * v["unieval_fluency"]
                     ),
                 }
                 for sys, v in x["scores"].items()
@@ -1091,26 +1168,32 @@ def load_data_summeval(  # noqa: C901
 
 def load_data_rose():
     import datasets
+
     data_raw = datasets.load_dataset("Salesforce/rose", "cnndm_protocol")
     data_raw = list(data_raw.values())[0]
     data = []
     for line in data_raw:
-        data.append({
-            "i": line["example_id"],
-            "src": line["source"],
-            "ref": line["reference"],
-            "tgt": line["model_outputs"],
-            # NOTE: no metrics!
-            "scores": line["annotations"],
-        })
+        data.append(
+            {
+                "i": line["example_id"],
+                "src": line["source"],
+                "ref": line["reference"],
+                "tgt": line["model_outputs"],
+                # NOTE: no metrics!
+                "scores": line["annotations"],
+            }
+        )
 
 
 def pred_irt(model_theta, item):
     import numpy as np
+
     if "feas" in item:
         # NOTE: true for 4PL, not for 3PL
         # return  item["feas"] / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
-        return item["feas"] + (1 - item["feas"]) / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
+        return item["feas"] + (1 - item["feas"]) / (
+            1 + np.exp(-item["disc"] * (model_theta - item["diff"]))
+        )
     if "disc" in item:
         return 1 / (1 + np.exp(-item["disc"] * (model_theta - item["diff"])))
     if "diff" in item:
@@ -1133,10 +1216,11 @@ def sanitize_data(data: List[Dict], top_systems=5):
 
     # filter items that don't have these systems
     data = [
-        line for line in data
+        line
+        for line in data
         if (
-            all(system in line["scores"] for system in systems) and
-            all(system in line["tgt"] for system in systems)
+            all(system in line["scores"] for system in systems)
+            and all(system in line["tgt"] for system in systems)
         )
     ]
 
@@ -1155,10 +1239,8 @@ def sanitize_data(data: List[Dict], top_systems=5):
                 if system in systems
             },
             "tgt": {
-                system: tgt
-                for system, tgt in line["tgt"].items()
-                if system in systems
-            }
+                system: tgt for system, tgt in line["tgt"].items() if system in systems
+            },
         }
         for line in data
     ]
@@ -1199,18 +1281,24 @@ def load_data_iwslt(compute_automated_metrics=False):
     data_all = {}
 
     for langs in ["en-ar", "en-de", "en-zh"]:
-        with open(os.path.dirname(os.path.realpath(__file__)) + f"/../data/iwslt/iwslt2025.{langs.replace('-', '')}.shuffled.jsonl", "r") as f:
+        with open(
+            os.path.dirname(os.path.realpath(__file__))
+            + f"/../data/iwslt/iwslt2025.{langs.replace('-', '')}.shuffled.jsonl",
+            "r",
+        ) as f:
             lines = [json.loads(line) for line in f]
             lines_meta = {line["id"]: line["meta"] for line in lines}
-            lines_prev = {
-                line["id"]: line["previous_context"]
-                for line in lines
-            }
+            lines_prev = {line["id"]: line["previous_context"] for line in lines}
 
-        with open(os.path.dirname(os.path.realpath(__file__)) + f"/../data/iwslt/Final-iwslt2025.{langs.replace('-', '')}.shuffled.jsonl", "r") as f:
+        with open(
+            os.path.dirname(os.path.realpath(__file__))
+            + f"/../data/iwslt/Final-iwslt2025.{langs.replace('-', '')}.shuffled.jsonl",
+            "r",
+        ) as f:
             lines = [json.loads(line) for line in f]
             data = collections.defaultdict(list)
             import collections
+
             tmp_prevcontext = collections.Counter()
 
             for line in lines:
@@ -1223,18 +1311,18 @@ def load_data_iwslt(compute_automated_metrics=False):
                 else:
                     tmp_prevcontext["OK"] += 1
                 model = ".".join(line["meta"].split(".")[:-1])
-                segment_id = int(
-                    line["meta"].split(".")[-1].removeprefix("seg_")
-                )
+                segment_id = int(line["meta"].split(".")[-1].removeprefix("seg_"))
                 score = line["annotations"][0]["quality_rating"]
 
-                data[segment_id].append({
-                    "model": model,
-                    "score": score,
-                    "tgt": line["target"],
-                    "doc": line["meta"].split(".")[2],
-                    "src": line["source"] if langs in {"en-zh", "en-de"} else "",
-                })
+                data[segment_id].append(
+                    {
+                        "model": model,
+                        "score": score,
+                        "tgt": line["target"],
+                        "doc": line["meta"].split(".")[2],
+                        "src": line["source"] if langs in {"en-zh", "en-de"} else "",
+                    }
+                )
             print(langs, "prevcontext", tmp_prevcontext)
 
             data_all[("iwslt25", langs)] = [
@@ -1243,41 +1331,41 @@ def load_data_iwslt(compute_automated_metrics=False):
                     "doc": items[0]["doc"],
                     "src": items[0]["src"],
                     "tgt": {item["model"]: item["tgt"] for item in items},
-                    "scores": {item["model"]: {"human": item["score"]} for item in items},
+                    "scores": {
+                        item["model"]: {"human": item["score"]} for item in items
+                    },
                 }
                 for segment_id, items in data.items()
             ]
 
     if compute_automated_metrics:
         import comet
+
         for metric_name in ["Unbabel/wmt22-cometkiwi-da", "zouharvi/COMET-partial"]:
-            model = comet.load_from_checkpoint(
-                comet.download_model(metric_name)
-            )
+            model = comet.load_from_checkpoint(comet.download_model(metric_name))
 
             for langs in ["en-zh", "en-de"]:
-                srctgt_unique = list({
-                    (line["src"], tgt)
-                    for line in data_all[("iwslt25", langs)]
-                    for tgt in line["tgt"].values()
-                })
+                srctgt_unique = list(
+                    {
+                        (line["src"], tgt)
+                        for line in data_all[("iwslt25", langs)]
+                        for tgt in line["tgt"].values()
+                    }
+                )
                 srctgt_to_score = {
                     srctgt: score
                     for srctgt, score in zip(
                         srctgt_unique,
                         model.predict(
-                            [
-                                {"src": src, "mt": tgt}
-                                for src, tgt in srctgt_unique
-                            ],
-                            batch_size=64
-                        ).scores
+                            [{"src": src, "mt": tgt} for src, tgt in srctgt_unique],
+                            batch_size=64,
+                        ).scores,
                     )
                 }
                 for line in data_all[("iwslt25", langs)]:
                     for model, tgt in line["tgt"].items():
-                        line["scores"][model][metric_name] = (
-                            srctgt_to_score[(line["src"], tgt)]
-                        )
+                        line["scores"][model][metric_name] = srctgt_to_score[
+                            (line["src"], tgt)
+                        ]
 
     return data_all

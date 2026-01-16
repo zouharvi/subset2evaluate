@@ -266,13 +266,17 @@ The repository is structured as follows:
 
 Cite as:
 ```
-@misc{zouhar2025selectdatapointsefficienthuman,
-    title={How to Select Datapoints for Efficient Human Evaluation of NLG Models?}, 
-    author={Vilém Zouhar and Peng Cui and Mrinmaya Sachan},
-    year={2025},
-    eprint={2501.18251},
-    archivePrefix={arXiv},
-    primaryClass={cs.CL},
-    url={https://arxiv.org/abs/2501.18251}, 
+@article{subset2evaluate,
+    author = {Zouhar, Vilém and Cui, Peng and Sachan, Mrinmaya},
+    title = {How to Select Datapoints for Efficient Human Evaluation of NLG Models?},
+    journal = {Transactions of the Association for Computational Linguistics},
+    volume = {13},
+    pages = {1789-1811},
+    year = {2025},
+    month = {12},
+    issn = {2307-387X},
+    doi = {10.1162/TACL.a.60},
+    url = {https://doi.org/10.1162/TACL.a.60},
+    eprint = {https://direct.mit.edu/tacl/article-pdf/doi/10.1162/TACL.a.60/2571151/tacl.a.60.pdf},
 }
 ```
