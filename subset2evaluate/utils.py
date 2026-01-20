@@ -840,6 +840,23 @@ def load_data_wmt(  # noqa: C901
                 # make sure it's positive
                 line["cost"] = (line["cost"] - cost_min) / (1 - cost_min)
 
+        # collect all humeval scores and try to deduce what happened there
+        humscores = [
+            model_v["human"] for line in data for model_v in line["scores"].values()
+        ]
+        if all(x <= 0 for x in humscores):
+            for line in data:
+                for model_v in line["scores"].values():
+                    model_v["human"] = max(0, min(100, 100 - 4 * model_v["human"]))
+        elif all(x >= 0 and x <= 1 for x in humscores):
+            for line in data:
+                for model_v in line["scores"].values():
+                    model_v["human"] = max(0, min(100, model_v["human"] * 100))
+        else:
+            for line in data:
+                for model_v in line["scores"].values():
+                    model_v["human"] = max(0, min(100, model_v["human"]))
+
         # this is min-max normalization
         if normalize and not binarize:
             _data_minmax_normalize(data)
