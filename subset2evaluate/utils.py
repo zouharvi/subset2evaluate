@@ -16,6 +16,8 @@ def _data_minmax_normalize(data):
     for line in data:
         for met_all in line["scores"].values():
             for met_k, met_v in met_all.items():
+                if met_v is None:
+                    continue
                 data_flat[met_k].append(met_v)
 
     # normalize
@@ -24,10 +26,15 @@ def _data_minmax_normalize(data):
     for line in data:
         for model, met_all in line["scores"].items():
             for met_k, met_v in met_all.items():
-                # (x-min)/(max-min) normalize
-                line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (
-                    data_flat[met_k][1] - data_flat[met_k][0]
-                )
+                if met_v is None:
+                    continue
+                if data_flat[met_k][1] - data_flat[met_k][0] == 0:
+                    line["scores"][model][met_k] = 0
+                else:
+                    # (x-min)/(max-min) normalize
+                    line["scores"][model][met_k] = (met_v - data_flat[met_k][0]) / (
+                        data_flat[met_k][1] - data_flat[met_k][0]
+                    )
 
 
 def confidence_interval(data, confidence=0.95):
@@ -844,18 +851,21 @@ def load_data_wmt(  # noqa: C901
         humscores = [
             model_v["human"] for line in data for model_v in line["scores"].values()
         ]
-        if all(x <= 0 for x in humscores):
+        if all(x <= 0 for x in humscores if x is not None):
             for line in data:
                 for model_v in line["scores"].values():
-                    model_v["human"] = max(0, min(100, 100 + 4 * model_v["human"]))
-        elif all(x >= 0 and x <= 1 for x in humscores):
+                    if model_v["human"] is not None:
+                        model_v["human"] = max(0, min(100, 100 + 4 * model_v["human"]))
+        elif all(x >= 0 and x <= 1 for x in humscores if x is not None):
             for line in data:
                 for model_v in line["scores"].values():
-                    model_v["human"] = max(0, min(100, model_v["human"] * 100))
+                    if model_v["human"] is not None:
+                        model_v["human"] = max(0, min(100, model_v["human"] * 100))
         else:
             for line in data:
                 for model_v in line["scores"].values():
-                    model_v["human"] = max(0, min(100, model_v["human"]))
+                    if model_v["human"] is not None:
+                        model_v["human"] = max(0, min(100, model_v["human"]))
 
         # this is min-max normalization
         if normalize and not binarize:
