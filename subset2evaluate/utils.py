@@ -847,7 +847,7 @@ def load_data_wmt(  # noqa: C901
         if all(x <= 0 for x in humscores):
             for line in data:
                 for model_v in line["scores"].values():
-                    model_v["human"] = max(0, min(100, 100 - 4 * model_v["human"]))
+                    model_v["human"] = max(0, min(100, 100 + 4 * model_v["human"]))
         elif all(x >= 0 and x <= 1 for x in humscores):
             for line in data:
                 for model_v in line["scores"].values():
