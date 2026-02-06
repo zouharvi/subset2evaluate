@@ -712,23 +712,33 @@ def load_data_wmt(  # noqa: C901
                 human_refs.add(parts[1])
 
         # do not consider canary line
-        contain_canary_line = lines_src[0].lower().startswith("canary")
+        # for WTM24++ it's part of the translation dataset
+        contain_canary_line = (
+            lines_src[0].lower().startswith("canary") and year != "wmt24pp"
+        )
         if contain_canary_line:
             lines_src.pop(0)
             lines_doc.pop(0)
             lines_ref.pop(0)
 
         line_model = {}
-        for f in glob.glob(
-            f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt"
+        for f in list(
+            glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.txt")
+        ) + list(
+            glob.glob(f"data/mt-metrics-eval-v2/{year}/system-outputs/{langs}/*.jsonl")
         ):
-            model = f.split("/")[-1].removesuffix(".txt")
+            if f.endswith(".jsonl"):
+                model = f.split("/")[-1].removesuffix(".jsonl")
+                lines = [json.loads(line)["hypothesis"] for line in open(f, "r")]
+            else:
+                model = f.split("/")[-1].removesuffix(".txt")
+                lines = open(f, "r").readlines()
             if model in {"synthetic_ref", "chrf_bestmbr"}:
                 continue
             if model in human_refs and not include_ref:
                 continue
 
-            line_model[model] = open(f, "r").readlines()
+            line_model[model] = lines
             if contain_canary_line:
                 line_model[model].pop(0)
 
@@ -736,22 +746,18 @@ def load_data_wmt(  # noqa: C901
 
         lines_score = collections.defaultdict(list)
 
-        if file_protocol is not None:
-            f_protocols = [
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.{file_protocol}.seg.score",
-            ]
-        else:
-            f_protocols = [
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa-merged.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
-                f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
-            ]
+        f_protocols = [
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.{file_protocol}.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa-merged.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.esa.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.da-sqm.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.mqm.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.appraise.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-raw.seg.score",
+            f"data/mt-metrics-eval-v2/{year}/human-scores/{langs}.wmt-appraise.seg.score",
+        ]
         for fname in [*f_protocols, False]:
             if fname and os.path.exists(fname):
                 break
@@ -808,6 +814,8 @@ def load_data_wmt(  # noqa: C901
 
                     model_line_i -= 1
 
+                if model_line_i >= len(lines_score[model]):
+                    print(year, langs, model_line_i, metric, model, contain_canary_line)
                 lines_score[model][model_line_i][metric] = float(score)
 
         # filter out lines that have no human score
