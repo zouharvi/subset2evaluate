@@ -1,6 +1,5 @@
 from typing import Any, Callable, Dict, List, Optional, Union, Literal
 import numpy as np
-from subset2evaluate.reference_info import year2std_refs
 
 PROPS = np.linspace(0.05, 0.5, 10)
 
@@ -623,6 +622,7 @@ def load_data_wmt(  # noqa: C901
     import pickle
     import contextlib
     import importlib.metadata
+    import json
 
     # temporarily change to the root directory, this requires Python 3.11
     with contextlib.chdir(os.path.dirname(os.path.realpath(__file__)) + "/../"):
@@ -644,6 +644,44 @@ def load_data_wmt(  # noqa: C901
                 ):
                     return cache["data"]
 
+        # special handling for WMT24++
+        if os.path.exists(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.jsonl"):
+            with open(
+                f"data/mt-metrics-eval-v2/{year}/sources/{langs}.jsonl", "r"
+            ) as f:
+                data_tmp = f.readlines()
+            lines_src = [json.loads(line)["source"] for line in data_tmp]
+            with open(f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "w") as f:
+                for line in lines_src:
+                    f.write(line + "\n")
+        if os.path.exists(
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.jsonl"
+        ):
+            with open(
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.jsonl", "r"
+            ) as f:
+                data_tmp = f.readlines()
+            lines_ref = [json.loads(line)["target"] for line in data_tmp]
+            with open(
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.refA.txt", "w"
+            ) as f:
+                for line in lines_ref:
+                    f.write(line + "\n")
+        if os.path.exists(
+            f"data/mt-metrics-eval-v2/{year}/references/{langs}.posteditA.jsonl"
+        ):
+            with open(
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.posteditA.jsonl",
+                "r",
+            ) as f:
+                data_tmp = f.readlines()
+            lines_ref = [json.loads(line)["target"] for line in data_tmp]
+            with open(
+                f"data/mt-metrics-eval-v2/{year}/references/{langs}.posteditA.txt", "w"
+            ) as f:
+                for line in lines_ref:
+                    f.write(line + "\n")
+
         lines_src = open(
             f"data/mt-metrics-eval-v2/{year}/sources/{langs}.txt", "r"
         ).readlines()
@@ -653,14 +691,13 @@ def load_data_wmt(  # noqa: C901
         lines_ref = None
 
         refs_dir = f"data/mt-metrics-eval-v2/{year}/references"
-        selected_human_ref = (
-            file_reference if file_reference is not None else year2std_refs[year][langs]
-        )
-        file_reference_path = f"{refs_dir}/{langs}.{selected_human_ref}.txt"
-
-        if not os.path.exists(file_reference_path):
+        for file_reference in [file_reference, "refA", "refB", "refC", "ref"]:
+            if os.path.exists(f"{refs_dir}/{langs}.{file_reference}.txt"):
+                break
+        else:
             # did not find reference
             return []
+        file_reference_path = f"{refs_dir}/{langs}.{file_reference}.txt"
 
         lines_ref = open(file_reference_path, "r").readlines()
 
@@ -743,14 +780,14 @@ def load_data_wmt(  # noqa: C901
             f"data/mt-metrics-eval-v2/{year}/metric-scores/{langs}/*.seg.score"
         ):
             # among ref-based metrics, load only the scores for the selected human ref
-            if not f.endswith(f"-{selected_human_ref}.seg.score") and not f.endswith(
+            if not f.endswith(f"-{file_reference}.seg.score") and not f.endswith(
                 "-src.seg.score"
             ):
                 continue
             # remove suffix for both ref-based and ref-less metrics
             metric = (
                 f.split("/")[-1]
-                .removesuffix(f"-{selected_human_ref}.seg.score")
+                .removesuffix(f"-{file_reference}.seg.score")
                 .removesuffix("-src.seg.score")
             )
             for line_i, line_raw in enumerate(open(f, "r").readlines()):
@@ -905,7 +942,7 @@ def load_data_wmt_test(**kwargs):
     return data
 
 
-def load_data_wmt_all(min_items=100, **kwargs):
+def load_data_wmt_all(min_items=100, name_filter=lambda x: True, **kwargs):
     data = {
         args: load_data_wmt(*args, **kwargs)
         for args in [
@@ -925,6 +962,61 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt25", "en-uk_UA"),
             ("wmt25", "en-zh_CN"),
             ("wmt25", "ja-zh_CN"),
+            ("wmt24pp", "en-ar_EG"),
+            ("wmt24pp", "en-bn_IN"),
+            ("wmt24pp", "en-da_DK"),
+            ("wmt24pp", "en-es_MX"),
+            ("wmt24pp", "en-fi_FI"),
+            ("wmt24pp", "en-fr_FR"),
+            ("wmt24pp", "en-hi_IN"),
+            ("wmt24pp", "en-id_ID"),
+            ("wmt24pp", "en-ja_JP"),
+            ("wmt24pp", "en-lt_LT"),
+            ("wmt24pp", "en-mr_IN"),
+            ("wmt24pp", "en-pa_IN"),
+            ("wmt24pp", "en-pt_PT"),
+            ("wmt24pp", "en-sk_SK"),
+            ("wmt24pp", "en-sv_SE"),
+            ("wmt24pp", "en-ta_IN"),
+            ("wmt24pp", "en-tr_TR"),
+            ("wmt24pp", "en-vi_VN"),
+            ("wmt24pp", "en-zu_ZA"),
+            ("wmt24pp", "en-ar_SA"),
+            ("wmt24pp", "en-ca_ES"),
+            ("wmt24pp", "en-de_DE"),
+            ("wmt24pp", "en-et_EE"),
+            ("wmt24pp", "en-fil_PH"),
+            ("wmt24pp", "en-gu_IN"),
+            ("wmt24pp", "en-hr_HR"),
+            ("wmt24pp", "en-is_IS"),
+            ("wmt24pp", "en-kn_IN"),
+            ("wmt24pp", "en-lv_LV"),
+            ("wmt24pp", "en-nl_NL"),
+            ("wmt24pp", "en-pl_PL"),
+            ("wmt24pp", "en-ro_RO"),
+            ("wmt24pp", "en-sl_SI"),
+            ("wmt24pp", "en-sw_KE"),
+            ("wmt24pp", "en-te_IN"),
+            ("wmt24pp", "en-uk_UA"),
+            ("wmt24pp", "en-zh_CN"),
+            ("wmt24pp", "en-bg_BG"),
+            ("wmt24pp", "en-cs_CZ"),
+            ("wmt24pp", "en-el_GR"),
+            ("wmt24pp", "en-fa_IR"),
+            ("wmt24pp", "en-fr_CA"),
+            ("wmt24pp", "en-he_IL"),
+            ("wmt24pp", "en-hu_HU"),
+            ("wmt24pp", "en-it_IT"),
+            ("wmt24pp", "en-ko_KR"),
+            ("wmt24pp", "en-ml_IN"),
+            ("wmt24pp", "en-no_NO"),
+            ("wmt24pp", "en-pt_BR"),
+            ("wmt24pp", "en-ru_RU"),
+            ("wmt24pp", "en-sr_RS"),
+            ("wmt24pp", "en-sw_TZ"),
+            ("wmt24pp", "en-th_TH"),
+            ("wmt24pp", "en-ur_PK"),
+            ("wmt24pp", "en-zh_TW"),
             ("wmt24", "cs-uk"),
             ("wmt24", "en-cs"),
             ("wmt24", "en-de"),
@@ -1032,6 +1124,7 @@ def load_data_wmt_all(min_items=100, **kwargs):
             ("wmt19", "en-de"),
             ("wmt19", "de-cs"),
         ]
+        if name_filter(args)
     }
     # filter out empty datasets
     # some years/langs have issues with human annotations coverage
