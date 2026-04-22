@@ -133,7 +133,7 @@ def ensure_wmt_exists():
         print("Downloading WMT data because data/mt-metrics-eval-v2/ does not exist..")
         os.makedirs("data/", exist_ok=True)
         r = requests.get(
-            "https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz"
+            "https://data.statmt.org/wmt26/mt-metrics-eval-v2.tgz"
         )
         with open("data/mt-metrics-eval-v2.tgz", "wb") as f:
             f.write(r.content)
